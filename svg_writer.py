@@ -64,7 +64,7 @@ class FlexParse(object):
             assert False,"kicad_pcb: Not a kicad_pcb"
 
         base.svg.append(BeautifulSoup('<kicad />', 'html.parser'))
-        base.svg.append(BeautifulSoup('<g inkscape:label="Vias" inkscape:groupmode="layer" id="layervia"user="True" />', 'html.parser'))
+        base.svg.append(BeautifulSoup('<g inkscape:label="Vias" inkscape:groupmode="layer" id="layervia" user="True" />', 'html.parser'))
         
         i = 0
         for item in items:
@@ -84,10 +84,7 @@ class FlexParse(object):
                     base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
 
                 elif item[0] == 'module':
-                    a = self.Convert_Module_To_SVG(item, i)
-                    # print(a)
-                    #tag = BeautifulSoup(a, 'html.parser')
-                    base.svg.append(a)
+                    base.svg.append(self.Convert_Module_To_SVG(item, i))
 
                 elif item[0] == 'gr_line':
                     tag = BeautifulSoup(self.Convert_Gr_Line_To_SVG(item, i), 'html.parser')
@@ -279,7 +276,8 @@ class FlexParse(object):
         #....
 
         at = []
-        svg = BeautifulSoup('<g inkscape:groupmode="layer" type="module" inkscape:label="module' + str(id) + '" id="module' + str(id) + '">', 'html.parser')
+        # svg = BeautifulSoup('<g inkscape:groupmode="layer" type="module" inkscape:label="module' + str(id) + '" id="module' + str(id) + '">', 'html.parser')
+        svg = BeautifulSoup('<g type="module" inkscape:label="module' + str(id) + '" id="module' + str(id) + '">', 'html.parser')
         
         if input[0] != 'module':
             assert False,"Module: Not a module"
@@ -304,14 +302,6 @@ class FlexParse(object):
                 svg.g.append(tag)
 
             a += 1
-
-        
-
-        # kicad = BeautifulSoup('<kicad />', 'html.parser')
-        # kicad.kicad.append(json.dumps(input))
-        # svg.g.append(kicad)
-
-        # print(svg)
 
         return svg
 
@@ -472,24 +462,24 @@ class FlexParse(object):
             'In1.Cu': 'C2C200',
             'In2.Cu': 'C200C2',
             'B.Cu': '008400',
-            'B.Adhes': '8080ff',
-            'F.Adhes': '8080ff',
-            'B.Paste': '8080ff',
-            'F.Paste': '8080ff',
-            'B.SilkS': '8080ff',
-            'F.SilkS': '8080ff',
-            'B.Mask': '8080ff',
-            'F.Mask': 'F8080ffF',
-            'Dwgs.User': '8080ff',
-            'Cmts.User': '8080ff',
-            'Eco1.User': '8080ff',
-            'Eco2.User': '8080ff',
+            'B.Adhes': '840084',
+            'F.Adhes': '000084',
+            'B.Paste': '000084',
+            'F.Paste': '840000',
+            'B.SilkS': '840084',
+            'F.SilkS': '008484',
+            'B.Mask': '848400',
+            'F.Mask': '840084',
+            'Dwgs.User': 'c2c2c2',
+            'Cmts.User': '000084',
+            'Eco1.User': '008400',
+            'Eco2.User': 'c2c200',
             'Edge.Cuts': 'C2C200',
-            'Margin': '8080ff',
-            'B.CrtYd': '8080ff',
-            'F.CrtYd': '8080ff',
-            'B.Fab': '8080ff',
-            'F.Fab': '8080ff',
+            'Margin': 'c200c2',
+            'B.CrtYd': '848484',
+            'F.CrtYd': 'c2c2c2',
+            'B.Fab': '000084',
+            'F.Fab': '848484',
             'Default': 'FFFF00'
         }
 
