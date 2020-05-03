@@ -28,7 +28,7 @@ pxToMM = 26.458
 
 class FlexParse(object):
     def __init__(self):
-        self.filename_in = "example/complex.kicad_pcb"
+        self.filename_in = "example/simple.kicad_pcb"
         self.filename_json = "example/out.json"
         self.filename_svg = "example/out.svg"
         self.filename_base = "example/base.svg"
@@ -61,6 +61,8 @@ class FlexParse(object):
         if items[0] != 'kicad_pcb':
             assert "kicad_pcb: Not a kicad_pcb"
 
+        base.svg.append(BeautifulSoup('<kicad />', 'html.parser'))
+        
         i = 0
         for item in items:
             if type(item) is str:
@@ -73,16 +75,18 @@ class FlexParse(object):
                         tag = BeautifulSoup(layer, 'html.parser')
                         base.svg.append(tag)
 
-                    # dic.append(self.Convert_Layers_To_SVG(item))
                 elif item[0] == 'segment':
-                    #svg += self.Convert_Segment_To_SVG(item, i)
-                    # segments.append(self.Convert_Segment_To_SVG(item, i))
                     tag = BeautifulSoup(self.Convert_Segment_To_SVG(item, i), 'html.parser')
                     layer = tag.path['layer']
                     base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
+
+                elif item[0] == 'gr_line':
+                    tag = BeautifulSoup(self.Convert_Gr_Line_To_SVG(item, i), 'html.parser')
+                    layer = tag.path['layer']
+                    base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
                 else:
-                    # svg += self.Convert_Metadata_To_SVG(item)
-                    dic.append(self.Convert_Metadata_To_SVG(item))
+                    svg = self.Convert_Metadata_To_SVG(item)
+                    base.svg.kicad.append(BeautifulSoup(svg, 'html.parser'))
             i = i + 1
         dic.append({'segment': segments})
 
@@ -107,10 +111,8 @@ class FlexParse(object):
         svg = '<' + tag + '>'
         svg += body
         svg += '</' + tag + '>'
-        
-        meta = { tag: input}
 
-        return meta
+        return svg
 
 
     def Convert_Layers_To_SVG(self, input):
@@ -153,7 +155,6 @@ class FlexParse(object):
             parameters += hide
             parameters += '/>'
 
-            # print(parameters)
             layers.append(parameters)
             i = i + 1
         
@@ -221,7 +222,7 @@ class FlexParse(object):
         net = input[5][1]
 
         parameters = '<path style="fill:none;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1'
-        parameters += ';stroke:#000000'
+        parameters += ';stroke:#' + self.Assign_Layer_Colour(layer)
         parameters += ';stroke-width:' + width + 'mm'
         parameters += '" '
         parameters += 'd="M ' + str(float(start[0]) * pxToMM) + ',' + str(float(start[1]) * pxToMM) + ' ' + str(float(end[0]) * pxToMM) + ',' + str(float(end[1]) * pxToMM) + '" '
@@ -234,15 +235,109 @@ class FlexParse(object):
         # print(parameters)
         return parameters
 
-    def Merge_Svg(self, tags):
+    def Convert_Gr_Line_To_SVG(self, input, id):
+        # 0 gr_line
+        # 1
+        #   0 start
+        #   1 66.66
+        #   2 99.99
+        # 2
+        #   0 end
+        #   1 66.66
+        #   2 99.99
+        # 3
+        #   0 layer
+        #   1 Edge.Cuts
+        # 4
+        #   0 width
+        #   1 0.05
+        # 5
+        #   0 tstamp
+        #   1 5E451B20
 
-        # May or may not need to actually use an XML parser instead of HTML!
-        #self.soup = BeautifulSoup(svg, 'lxml-xml')
+        start = []
+        end = []
 
-        with open(self.filename_base, "r") as f:
-    
-            contents = f.read()
-            base = BeautifulSoup(contents, 'html.parser')
+        if input[0] != 'gr_line':
+            assert "Gr_line: Not a gr_line"
+            return None
+
+        if input[1][0] != 'start':
+            assert "Gr_line: Start out of order"
+            return None
+
+        start.append(input[1][1])
+        start.append(input[1][2])
+
+        if input[2][0] != 'end':
+            assert "Gr_line: End out of order"
+            return None
+
+        end.append(input[2][1])
+        end.append(input[2][2])
+
+        if input[3][0] != 'layer':
+            assert "Gr_line: Layer out of order"
+            return None
+
+        layer = input[3][1]
+
+        if input[4][0] != 'width':
+            assert "Gr_line: Width out of order"
+            return None
+
+        width = input[4][1]
+
+
+        if input[5][0] != 'tstamp':
+            assert "Gr_line: tstamp out of order"
+            return None
+
+        tstamp = input[5][1]
+
+        parameters = '<path style="fill:none;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1'
+        parameters += ';stroke:#' + self.Assign_Layer_Colour(layer)
+        parameters += ';stroke-width:' + width + 'mm'
+        parameters += '" '
+        parameters += 'd="M ' + str(float(start[0]) * pxToMM) + ',' + str(float(start[1]) * pxToMM) + ' ' + str(float(end[0]) * pxToMM) + ',' + str(float(end[1]) * pxToMM) + '" '
+        parameters += 'id="path' + str(id) + '" '
+        parameters += 'layer="' + layer + '" '
+        parameters += 'tstamp="' + tstamp + '" '
+        parameters += '/>'
+
+        return parameters
+
+    def Assign_Layer_Colour(self, layername):
+        colours = {
+            'F.Cu': '840000',
+            'In1.Cu': 'C2C200',
+            'In2.Cu': 'C200C2',
+            'B.Cu': '008400',
+            'B.Adhes': 'FF',
+            'F.Adhes': 'FF',
+            'B.Paste': 'FF',
+            'F.Paste': 'FF',
+            'B.SilkS': 'FF',
+            'F.SilkS': 'FF',
+            'B.Mask': 'FF',
+            'F.Mask': 'FF',
+            'Dwgs.User': 'FF',
+            'Cmts.User': 'FF',
+            'Eco1.User': 'FF',
+            'Eco2.User': 'FF',
+            'Edge.Cuts': 'C2C200',
+            'Margin': 'FF',
+            'B.CrtYd': 'FF',
+            'F.CrtYd': 'FF',
+            'B.Fab': 'FF',
+            'F.Fab': 'FF',
+            'Default': 'FFFF00'
+        }
+
+        if layername in colours:
+            return colours[layername]
+        else:
+            return colours['Default']
         
         
 
