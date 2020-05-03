@@ -1,11 +1,12 @@
 import io
+from bs4 import BeautifulSoup
+import json
 
 from parser_base import ParserBase
 from sexpressions_parser import parse_sexpression
 from sexpressions_writer import SexpressionWriter
-from svg_writer import SvgWriter
 
-import json
+pxToMM = 26.458
 
 
 # kicad_pcb
@@ -27,9 +28,10 @@ import json
 
 class FlexParse(object):
     def __init__(self):
-        self.filename_in = "example/simple.kicad_pcb"
+        self.filename_in = "example/complex.kicad_pcb"
         self.filename_json = "example/out.json"
         self.filename_svg = "example/out.svg"
+        self.filename_base = "example/base.svg"
 
 
     def Load(self):
@@ -52,8 +54,8 @@ class FlexParse(object):
             else:
                 print(item[0])
 
-    def Handle_Headings(self, items):
-        svg = ''
+    def Handle_Headings(self, items, base):
+        # svg = ''
         dic = []
         segments = []
         if items[0] != 'kicad_pcb':
@@ -65,16 +67,28 @@ class FlexParse(object):
                 print(item)
             else:
                 if item[0] == 'layers':
-                    dic.append(self.Convert_Layers_To_SVG(item))
+                    layers = self.Convert_Layers_To_SVG(item)
+                   
+                    for layer in layers:
+                        tag = BeautifulSoup(layer, 'html.parser')
+                        base.svg.append(tag)
+
+                    # dic.append(self.Convert_Layers_To_SVG(item))
                 elif item[0] == 'segment':
                     #svg += self.Convert_Segment_To_SVG(item, i)
-                    segments.append(self.Convert_Segment_To_SVG(item, i))
+                    # segments.append(self.Convert_Segment_To_SVG(item, i))
+                    tag = BeautifulSoup(self.Convert_Segment_To_SVG(item, i), 'html.parser')
+                    layer = tag.path['layer']
+                    base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
                 else:
                     # svg += self.Convert_Metadata_To_SVG(item)
                     dic.append(self.Convert_Metadata_To_SVG(item))
             i = i + 1
         dic.append({'segment': segments})
 
+        svg = base.prettify("utf-8")
+        with open(self.filename_svg, "wb") as file:
+            file.write(svg)
 
         return dic
 
@@ -134,16 +148,17 @@ class FlexParse(object):
             parameters = '<g '
             parameters += 'inkscape:label="' + layername + '" '
             parameters += 'inkscape:groupmode="layer" '
-            parameters += 'id=layer"' + layerid + '" '
+            parameters += 'id="layer' + layerid + '"'
             parameters += user
             parameters += hide
             parameters += '/>'
 
-            #print(parameters)
+            # print(parameters)
             layers.append(parameters)
             i = i + 1
         
-        return {'layers': layers }
+        # return {'layers': layers }
+        return layers
 
 
     def Convert_Segment_To_SVG(self, input, id):
@@ -207,16 +222,29 @@ class FlexParse(object):
 
         parameters = '<path style="fill:none;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1'
         parameters += ';stroke:#000000'
-        parameters += ';stroke-width:' + width
+        parameters += ';stroke-width:' + width + 'mm'
         parameters += '" '
-        parameters += 'd="M ' + start[0] + ',' + start[1] + ' ' + end[0] + ',' + end[1] + '" '
+        parameters += 'd="M ' + str(float(start[0]) * pxToMM) + ',' + str(float(start[1]) * pxToMM) + ' ' + str(float(end[0]) * pxToMM) + ',' + str(float(end[1]) * pxToMM) + '" '
+        # parameters += 'd="M ' + start[0] + ',' + start[1] + ' ' + end[0] + ',' + end[1] + '" '
         parameters += 'id="path' + str(id) + '" '
         parameters += 'layer="' + layer + '" '
         parameters += 'net="' + net + '" '
         parameters += '/>'
 
-        #print(parameters)
+        # print(parameters)
         return parameters
+
+    def Merge_Svg(self, tags):
+
+        # May or may not need to actually use an XML parser instead of HTML!
+        #self.soup = BeautifulSoup(svg, 'lxml-xml')
+
+        with open(self.filename_base, "r") as f:
+    
+            contents = f.read()
+            base = BeautifulSoup(contents, 'html.parser')
+        
+        
 
 
     def Run(self):
@@ -224,12 +252,18 @@ class FlexParse(object):
         # self.Print_Headings(dic)
         #js = self.Convert(dic)
         #self.Save(js)
+        
+        with open(self.filename_base, "r") as f:
+    
+            contents = f.read()
+            base = BeautifulSoup(contents, 'html.parser')
+        
 
-        tags = self.Handle_Headings(dic)
+        tags = self.Handle_Headings(dic, base)
 
-        writer = SvgWriter(tags)
+        # writer = SvgWriter(tags)
 
-        writer.Display()
+        # writer.Display()
 
 
 if __name__ == '__main__':
