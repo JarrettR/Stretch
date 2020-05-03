@@ -6,7 +6,7 @@ from parser_base import ParserBase
 from sexpressions_parser import parse_sexpression
 from sexpressions_writer import SexpressionWriter
 
-pxToMM = 26.458
+pxToMM = 3.779528
 
 
 # kicad_pcb
@@ -61,7 +61,7 @@ class FlexParse(object):
         dic = []
         segments = []
         if items[0] != 'kicad_pcb':
-            assert "kicad_pcb: Not a kicad_pcb"
+            assert False,"kicad_pcb: Not a kicad_pcb"
 
         base.svg.append(BeautifulSoup('<kicad />', 'html.parser'))
         base.svg.append(BeautifulSoup('<g inkscape:label="Vias" inkscape:groupmode="layer" id="layervia"user="True" />', 'html.parser'))
@@ -82,6 +82,12 @@ class FlexParse(object):
                     tag = BeautifulSoup(self.Convert_Segment_To_SVG(item, i), 'html.parser')
                     layer = tag.path['layer']
                     base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
+
+                elif item[0] == 'module':
+                    a = self.Convert_Module_To_SVG(item, i)
+                    # print(a)
+                    #tag = BeautifulSoup(a, 'html.parser')
+                    base.svg.append(a)
 
                 elif item[0] == 'gr_line':
                     tag = BeautifulSoup(self.Convert_Gr_Line_To_SVG(item, i), 'html.parser')
@@ -112,7 +118,7 @@ class FlexParse(object):
 
        
         tag = input[0]
-        input = input[1:]
+        #input = input[1:]
         
         body = json.dumps(input)
         
@@ -120,8 +126,7 @@ class FlexParse(object):
         svg += body
         svg += '</' + tag + '>'
 
-        return svg
-
+        return body + ','
 
     def Convert_Layers_To_SVG(self, input):
         # 0 layers
@@ -136,7 +141,7 @@ class FlexParse(object):
         layers = []
     
         if input[0] != 'layers':
-            assert "Layers: Not a layer"
+            assert False,"Layers: Not a layer"
             return None
 
         for item in input:
@@ -169,7 +174,6 @@ class FlexParse(object):
         # return {'layers': layers }
         return layers
 
-
     def Convert_Segment_To_SVG(self, input, id):
         # 0 segment
         # 1
@@ -194,37 +198,37 @@ class FlexParse(object):
         end = []
 
         if input[0] != 'segment':
-            assert "Segment: Not a segment"
+            assert False,"Segment: Not a segment"
             return None
 
         if input[1][0] != 'start':
-            assert "Segment: Start out of order"
+            assert False,"Segment: Start out of order"
             return None
 
         start.append(input[1][1])
         start.append(input[1][2])
 
         if input[2][0] != 'end':
-            assert "Segment: End out of order"
+            assert False,"Segment: End out of order"
             return None
 
         end.append(input[2][1])
         end.append(input[2][2])
 
         if input[3][0] != 'width':
-            assert "Segment: Width out of order"
+            assert False,"Segment: Width out of order"
             return None
 
         width = input[3][1]
 
         if input[4][0] != 'layer':
-            assert "Segment: Layer out of order"
+            assert False,"Segment: Layer out of order"
             return None
 
         layer = input[4][1]
 
         if input[5][0] != 'net':
-            assert "Segment: Net out of order"
+            assert False,"Segment: Net out of order"
             return None
 
         net = input[5][1]
@@ -242,6 +246,74 @@ class FlexParse(object):
 
         # print(parameters)
         return parameters
+
+    def Convert_Module_To_SVG(self, input, id):
+        # 0 module
+        # 1 Diode_SMD:D_SMD_SOD123
+        # 2
+        #   0 layer
+        #   1 B.Cu
+        # 3
+        #   0 tstamp
+        #   1 0DF
+        # 4
+        #   0 at
+        #   1 66.66
+        #   2 99.99
+        # 3
+        #   0 descr
+        #   1 0.25
+        # 4
+        #   0 tags
+        #   1 B.Cu
+        # 5
+        #   0 path
+        #   1 1
+        # 5
+        #   0 attr
+        #   1 1
+        # 5
+        #   0 fp_text / fp_line / fp_text / pad
+        #   1 1
+        #....
+        #....
+
+        at = []
+        svg = BeautifulSoup('<g inkscape:groupmode="layer" type="module" inkscape:label="module' + str(id) + '" id="module' + str(id) + '">', 'html.parser')
+        
+        if input[0] != 'module':
+            assert False,"Module: Not a module"
+            return None
+
+        a = 0
+        for item in input:
+
+
+            if item[0] == 'at':
+
+                at.append(item[1])
+                at.append(item[2])
+                svg.g['transform'] = 'translate(' + str(float(item[1]) * pxToMM) + ',' + str(float(item[2]) * pxToMM) + ')'
+
+            if item[0] == 'layer':
+
+                svg.g['layer'] = item[1]
+
+            if item[0] == 'fp_line':
+                tag = BeautifulSoup(self.Convert_Gr_Line_To_SVG(item, str(id) + '-' + str(a)), 'html.parser')
+                svg.g.append(tag)
+
+            a += 1
+
+        
+
+        # kicad = BeautifulSoup('<kicad />', 'html.parser')
+        # kicad.kicad.append(json.dumps(input))
+        # svg.g.append(kicad)
+
+        # print(svg)
+
+        return svg
 
     def Convert_Gr_Line_To_SVG(self, input, id):
         # 0 gr_line
@@ -266,32 +338,32 @@ class FlexParse(object):
         start = []
         end = []
 
-        if input[0] != 'gr_line':
-            assert "Gr_line: Not a gr_line"
+        if input[0] != 'gr_line' and input[0] != 'fp_line':
+            assert False,"Gr_line: Not a gr_line"
             return None
 
         if input[1][0] != 'start':
-            assert "Gr_line: Start out of order"
+            assert False,"Gr_line: Start out of order"
             return None
 
         start.append(input[1][1])
         start.append(input[1][2])
 
         if input[2][0] != 'end':
-            assert "Gr_line: End out of order"
+            assert False,"Gr_line: End out of order"
             return None
 
         end.append(input[2][1])
         end.append(input[2][2])
 
         if input[3][0] != 'layer':
-            assert "Gr_line: Layer out of order"
+            assert False,"Gr_line: Layer out of order"
             return None
 
         layer = input[3][1]
 
         if input[4][0] != 'width':
-            assert "Gr_line: Width out of order"
+            assert False,"Gr_line: Width out of order"
             return None
 
         width = input[4][1]
@@ -299,7 +371,7 @@ class FlexParse(object):
         tstamp = ''
         if(len(input) > 5):
             if input[5][0] != 'tstamp':
-                assert "Gr_line: tstamp out of order"
+                assert False,"Gr_line: tstamp out of order"
                 return None
 
             tstamp = 'tstamp="' + input[5][1] + '" '
@@ -340,50 +412,49 @@ class FlexParse(object):
         layers = []
 
         if input[0] != 'via':
-            assert "Via: Not a via"
+            assert False,"Via: Not a via"
             return None
 
         if input[1][0] != 'at':
-            assert "Via: At out of order"
+            assert False,"Via: At out of order"
             return None
 
         at.append(input[1][1])
         at.append(input[1][2])
 
         if input[2][0] != 'size':
-            assert "Via: Size out of order"
+            assert False,"Via: Size out of order"
             return None
 
         size = input[2][1]
 
         if input[3][0] != 'drill':
-            assert "Via: Layer out of order"
+            assert False,"Via: Layer out of order"
             return None
 
         drill = input[3][1]
 
         if input[4][0] != 'layers':
-            assert "Via: Layers out of order"
+            assert False,"Via: Layers out of order"
             return None
 
         layers.append(input[4][1])
         layers.append(input[4][2])
 
         if input[5][0] != 'net':
-            assert "Via: Net out of order"
+            assert False,"Via: Net out of order"
             return None
 
         net = input[4][1]
 
 
-
-        parameters = '<circle style="fill:none;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1'
-        parameters += ';stroke:#' + self.Assign_Layer_Colour('Edge.Cuts')
+        parameters = '<circle style="stroke:none;stroke-linecap:round;stroke-linejoin:miter;fill-opacity:1'
+        parameters += ';fill:#' + self.Assign_Layer_Colour('Edge.Cuts')
         parameters += '" '
         parameters += 'cx="' + str(float(at[0]) * pxToMM) + '" '
         parameters += 'cy="' + str(float(at[1]) * pxToMM) + '" '
         parameters += 'id="path' + str(id) + '" '
-        parameters += 'r="' + str(float(size)  * (pxToMM/ 2)) + '" '
+        parameters += 'r="' + str(float(size)  * (pxToMM / 2)) + '" '
         parameters += 'layers="' + layers[0] + ',' + layers[1] + '" '
         parameters += 'atx="' + at[0] + '" '
         parameters += 'atx="' + at[1] + '" '
@@ -392,7 +463,7 @@ class FlexParse(object):
         parameters += 'net="' + net + '" '
         parameters += '/>'
 
-        # print(parameters)
+        #print(parameters)
         return parameters
 
     def Assign_Layer_Colour(self, layername):
@@ -401,24 +472,24 @@ class FlexParse(object):
             'In1.Cu': 'C2C200',
             'In2.Cu': 'C200C2',
             'B.Cu': '008400',
-            'B.Adhes': 'FF',
-            'F.Adhes': 'FF',
-            'B.Paste': 'FF',
-            'F.Paste': 'FF',
-            'B.SilkS': 'FF',
-            'F.SilkS': 'FF',
-            'B.Mask': 'FF',
-            'F.Mask': 'FF',
-            'Dwgs.User': 'FF',
-            'Cmts.User': 'FF',
-            'Eco1.User': 'FF',
-            'Eco2.User': 'FF',
+            'B.Adhes': '8080ff',
+            'F.Adhes': '8080ff',
+            'B.Paste': '8080ff',
+            'F.Paste': '8080ff',
+            'B.SilkS': '8080ff',
+            'F.SilkS': '8080ff',
+            'B.Mask': '8080ff',
+            'F.Mask': 'F8080ffF',
+            'Dwgs.User': '8080ff',
+            'Cmts.User': '8080ff',
+            'Eco1.User': '8080ff',
+            'Eco2.User': '8080ff',
             'Edge.Cuts': 'C2C200',
-            'Margin': 'FF',
-            'B.CrtYd': 'FF',
-            'F.CrtYd': 'FF',
-            'B.Fab': 'FF',
-            'F.Fab': 'FF',
+            'Margin': '8080ff',
+            'B.CrtYd': '8080ff',
+            'F.CrtYd': '8080ff',
+            'B.Fab': '8080ff',
+            'F.Fab': '8080ff',
             'Default': 'FFFF00'
         }
 
