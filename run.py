@@ -6,6 +6,24 @@ from sexpressions_writer import SexpressionWriter
 
 import json
 
+
+# kicad_pcb
+# version
+# host
+# general
+# page
+# title_block
+# layers
+# setup
+# net
+# net_class
+# module
+# dimension
+# gr_line
+# gr_arc
+# gr_text
+# segment
+
 class FlexParse(object):
     def __init__(self):
         self.filename_in = "example/simple.kicad_pcb"
@@ -22,25 +40,56 @@ class FlexParse(object):
         js = json.dumps(obj)
         return js
 
+    def Save(self, xml):
+        with open(self.filename_json, 'w') as f:
+            f.write(xml)
+
     def Print_Headings(self, dic):
-        svg = ''
-        i = 0
         for item in dic:
             if type(item) is str:
                 print(item)
             else:
                 print(item[0])
+
+    def Handle_Headings(self, dic):
+        svg = ''
+
+        if dic[0] != 'kicad_pcb':
+            assert "kicad_pcb: Not a kicad_pcb"
+
+        i = 0
+        for item in dic:
+            if type(item) is str:
+                print(item)
+            else:
                 if item[0] == 'layers':
                     self.Convert_Layers_To_SVG(item)
-                if item[0] == 'segment':
+                elif item[0] == 'segment':
                     svg += self.Convert_Segment_To_SVG(item, i)
+                else:
+                    svg = self.Convert_Metadata_To_SVG(item)
             i = i + 1
         # a = SexpressionWriter(svg)
         # a.display()
 
-    def Save(self, xml):
-        with open(self.filename_json, 'w') as f:
-            f.write(xml)
+
+
+    def Convert_Metadata_To_SVG(self, input):
+        # This will just take whatever data and store it in an XML tag as JSON
+        # Hacky, but we don't care about it other than to be able to load it back in later
+
+       
+        tag = input[0]
+        input = input[1:]
+        
+        body = json.dumps(input)
+        
+        svg = '<' + tag + '>'
+        svg += body
+        svg += '</' + tag + '>'
+        
+        return svg
+
 
     def Convert_Layers_To_SVG(self, input):
         # 0 layers
@@ -164,10 +213,11 @@ class FlexParse(object):
 
     def Run(self):
         dic = self.Load()
-        self.Print_Headings(dic)
-        js = self.Convert(dic)
-        
+        # self.Print_Headings(dic)
+        #js = self.Convert(dic)
         #self.Save(js)
+
+        self.Handle_Headings(dic)
 
 
 if __name__ == '__main__':
