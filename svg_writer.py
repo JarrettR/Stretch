@@ -25,10 +25,12 @@ pxToMM = 26.458
 # gr_arc
 # gr_text
 # segment
+# via
+# zone
 
 class FlexParse(object):
     def __init__(self):
-        self.filename_in = "example/simple.kicad_pcb"
+        self.filename_in = "example/complex.kicad_pcb"
         self.filename_json = "example/out.json"
         self.filename_svg = "example/out.svg"
         self.filename_base = "example/base.svg"
@@ -62,6 +64,7 @@ class FlexParse(object):
             assert "kicad_pcb: Not a kicad_pcb"
 
         base.svg.append(BeautifulSoup('<kicad />', 'html.parser'))
+        base.svg.append(BeautifulSoup('<g inkscape:label="Vias" inkscape:groupmode="layer" id="layervia"user="True" />', 'html.parser'))
         
         i = 0
         for item in items:
@@ -84,7 +87,12 @@ class FlexParse(object):
                     tag = BeautifulSoup(self.Convert_Gr_Line_To_SVG(item, i), 'html.parser')
                     layer = tag.path['layer']
                     base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
+
+                elif item[0] == 'via':
+                    tag = BeautifulSoup(self.Convert_Via_To_SVG(item, i), 'html.parser')
+                    base.svg.find('g', {'inkscape:label': 'Vias'}, recursive=False).append(tag)
                 else:
+                    # print(item[0])
                     svg = self.Convert_Metadata_To_SVG(item)
                     base.svg.kicad.append(BeautifulSoup(svg, 'html.parser'))
             i = i + 1
@@ -288,12 +296,13 @@ class FlexParse(object):
 
         width = input[4][1]
 
+        tstamp = ''
+        if(len(input) > 5):
+            if input[5][0] != 'tstamp':
+                assert "Gr_line: tstamp out of order"
+                return None
 
-        if input[5][0] != 'tstamp':
-            assert "Gr_line: tstamp out of order"
-            return None
-
-        tstamp = input[5][1]
+            tstamp = 'tstamp="' + input[5][1] + '" '
 
         parameters = '<path style="fill:none;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1'
         parameters += ';stroke:#' + self.Assign_Layer_Colour(layer)
@@ -302,9 +311,88 @@ class FlexParse(object):
         parameters += 'd="M ' + str(float(start[0]) * pxToMM) + ',' + str(float(start[1]) * pxToMM) + ' ' + str(float(end[0]) * pxToMM) + ',' + str(float(end[1]) * pxToMM) + '" '
         parameters += 'id="path' + str(id) + '" '
         parameters += 'layer="' + layer + '" '
-        parameters += 'tstamp="' + tstamp + '" '
+        parameters += tstamp
         parameters += '/>'
 
+        return parameters
+
+    def Convert_Via_To_SVG(self, input, id):
+        # 0 via
+        # 1
+        #   0 at
+        #   1 66.66
+        #   2 99.99
+        # 2
+        #   0 size
+        #   1 0.6
+        # 3
+        #   0 drill
+        #   1 0.3
+        # 4
+        #   0 layers
+        #   1 F.Cu
+        #   2 B.Cu
+        # 5
+        #   0 net
+        #   1 16
+
+        at = []
+        layers = []
+
+        if input[0] != 'via':
+            assert "Via: Not a via"
+            return None
+
+        if input[1][0] != 'at':
+            assert "Via: At out of order"
+            return None
+
+        at.append(input[1][1])
+        at.append(input[1][2])
+
+        if input[2][0] != 'size':
+            assert "Via: Size out of order"
+            return None
+
+        size = input[2][1]
+
+        if input[3][0] != 'drill':
+            assert "Via: Layer out of order"
+            return None
+
+        drill = input[3][1]
+
+        if input[4][0] != 'layers':
+            assert "Via: Layers out of order"
+            return None
+
+        layers.append(input[4][1])
+        layers.append(input[4][2])
+
+        if input[5][0] != 'net':
+            assert "Via: Net out of order"
+            return None
+
+        net = input[4][1]
+
+
+
+        parameters = '<circle style="fill:none;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1'
+        parameters += ';stroke:#' + self.Assign_Layer_Colour('Edge.Cuts')
+        parameters += '" '
+        parameters += 'cx="' + str(float(at[0]) * pxToMM) + '" '
+        parameters += 'cy="' + str(float(at[1]) * pxToMM) + '" '
+        parameters += 'id="path' + str(id) + '" '
+        parameters += 'r="' + str(float(size)  * (pxToMM/ 2)) + '" '
+        parameters += 'layers="' + layers[0] + ',' + layers[1] + '" '
+        parameters += 'atx="' + at[0] + '" '
+        parameters += 'atx="' + at[1] + '" '
+        parameters += 'size="' + size + '" '
+        parameters += 'drill="' + drill + '" '
+        parameters += 'net="' + net + '" '
+        parameters += '/>'
+
+        # print(parameters)
         return parameters
 
     def Assign_Layer_Colour(self, layername):
