@@ -284,6 +284,10 @@ class FlexParse(object):
             return None
 
         a = 0
+
+        # if id == 158:
+        #     print(input)
+
         for item in input:
 
 
@@ -291,7 +295,13 @@ class FlexParse(object):
 
                 at.append(item[1])
                 at.append(item[2])
-                svg.g['transform'] = 'translate(' + str(float(item[1]) * pxToMM) + ',' + str(float(item[2]) * pxToMM) + ')'
+                transform = 'translate(' + str(float(item[1]) * pxToMM) + ',' + str(float(item[2]) * pxToMM) + ')'
+
+                if len(item) > 3:
+                    rotate = str(-1 * float(item[3]))
+                    transform += ' rotate(' + rotate + ')'
+
+                svg.g['transform'] = transform
 
             if item[0] == 'layer':
 
@@ -299,6 +309,9 @@ class FlexParse(object):
 
             if item[0] == 'fp_line':
                 tag = BeautifulSoup(self.Convert_Gr_Line_To_SVG(item, str(id) + '-' + str(a)), 'html.parser')
+                svg.g.append(tag)
+            elif item[0] == 'pad':
+                tag = BeautifulSoup(self.Convert_Pad_To_SVG(item, str(id) + '-' + str(a)), 'html.parser')
                 svg.g.append(tag)
 
             a += 1
@@ -455,6 +468,121 @@ class FlexParse(object):
 
         #print(parameters)
         return parameters
+
+    def Convert_Pad_To_SVG(self, input, id):
+        # 0 pad
+        # 1 1/2/3
+        # 2 smd
+        # 3 rect
+        # 4
+        #   0 at
+        #   1 66.66
+        #   2 99.99
+        #   2 180
+        # 5
+        #   0 size
+        #   1 0.9
+        #   2 1.2
+        # 6
+        #   0 layers
+        #   1 F.Cu
+        #   2 F.Paste
+        #   3 F.Mask
+        # 7
+        #   0 net
+        #   1 16
+        #   2 Net-(D4-Pad1)
+
+        at = []
+        size = []
+        layers = []
+
+        if input[0] != 'pad':
+            assert False,"Pad: Not a pad"
+            return None
+
+        for row in input:
+            if len(row) > 1:
+                if row[0] == 'at':
+                    at.append(float(row[1]))
+                    at.append(float(row[2]))
+
+                    if len(row) > 3:
+                        rotate = row[3]
+
+                if row[0] == 'size':
+                    size.append(row[1])
+                    size.append(row[2])
+
+                if row[0] == 'roundrect_rratio':
+                    ratio = row[1]
+
+                if row[0] == 'layers':
+                    row = row[1:]
+
+                    for layer in row:
+                        layers.append(layer)
+
+
+        shape = input[3]
+
+        svg = ''
+        svgsize = ''
+        roundcorners = ''
+
+        for layer in layers:
+            parameters = ''
+            if shape == 'rect':
+
+                # Corner coordinates to centre coordinate system
+                x = at[0] - float(size[0]) / 2
+                y = at[1] - float(size[1]) / 2
+
+                parameters += '<rect style="stroke:none;stroke-linecap:round;stroke-linejoin:miter;fill-opacity:1'
+                svgsize += 'x="' + str(x * pxToMM) + '" '
+                svgsize += 'y="' + str(y * pxToMM) + '" '
+                svgsize += 'width="' + str(float(size[0])  * pxToMM) + '" '
+                svgsize += 'height="' + str(float(size[1])  * pxToMM) + '" '
+            elif shape == 'roundrect':
+                
+                # Corner coordinates to centre coordinate system
+                x = at[0] - float(size[0]) / 2
+                y = at[1] - float(size[1]) / 2
+
+                parameters += '<rect style="stroke:none;stroke-linecap:round;stroke-linejoin:miter;fill-opacity:1'
+                roundcorners += 'rx="' + str(float(size[0]) * float(ratio)  * pxToMM) + '" '
+                roundcorners += 'ry="' + str(float(size[1]) * float(ratio)  * pxToMM) + '" '
+                svgsize += 'x="' + str(x * pxToMM) + '" '
+                svgsize += 'y="' + str(y * pxToMM) + '" '
+                svgsize += 'width="' + str(float(size[0])  * pxToMM) + '" '
+                svgsize += 'height="' + str(float(size[1])  * pxToMM) + '" '
+            elif shape == 'circle':
+                parameters += '<circle style="stroke:none;stroke-linecap:round;stroke-linejoin:miter;fill-opacity:1'
+                svgsize += 'cx="' + str(at[0] * pxToMM) + '" '
+                svgsize += 'cy="' + str(at[1] * pxToMM) + '" '
+                svgsize += 'r="' + str(float(size[0])  * (pxToMM / 2)) + '" '
+                svgsize += 'height="' + str(float(size[1])  * pxToMM) + '" '
+            elif shape == 'oval':
+                parameters += '<circle style="stroke:none;stroke-linecap:round;stroke-linejoin:miter;fill-opacity:1'
+                svgsize += 'cx="' + str(at[0] * pxToMM) + '" '
+                svgsize += 'cy="' + str(at[1] * pxToMM) + '" '
+                svgsize += 'r="' + str(float(size[0])  * (pxToMM / 2)) + '" '
+                svgsize += 'height="' + str(float(size[1])  * pxToMM) + '" '
+            else:
+                assert False,"Pad: Unfamiliar shape: " + shape
+                return None
+
+            parameters += ';fill:#' + self.Assign_Layer_Colour(layer)
+            parameters += '" '
+            parameters += 'id="path-' + layer + '-' + str(id) + '" '
+            parameters += svgsize
+            parameters += roundcorners
+            parameters += '/>'
+
+            svg += parameters
+
+        #print(parameters)
+        return svg
 
     def Assign_Layer_Colour(self, layername):
         colours = {
