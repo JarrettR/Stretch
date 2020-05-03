@@ -2,6 +2,7 @@ import io
 
 from parser_base import ParserBase
 from sexpressions_parser import parse_sexpression
+from sexpressions_writer import SexpressionWriter
 
 import json
 
@@ -22,19 +23,71 @@ class FlexParse(object):
         return js
 
     def Print_Headings(self, dic):
+        svg = ''
         i = 0
         for item in dic:
             if type(item) is str:
                 print(item)
             else:
-                #print(item[0])
+                print(item[0])
+                if item[0] == 'layers':
+                    self.Convert_Layers_To_SVG(item)
                 if item[0] == 'segment':
-                    self.Convert_Segment_To_SVG(item, i)
+                    svg += self.Convert_Segment_To_SVG(item, i)
             i = i + 1
+        # a = SexpressionWriter(svg)
+        # a.display()
 
     def Save(self, xml):
         with open(self.filename_json, 'w') as f:
             f.write(xml)
+
+    def Convert_Layers_To_SVG(self, input):
+        # 0 layers
+        # 1
+        #   0 1-whatever layerid
+        #   1 F.Cu
+        #   2/3 user/hide(optional)
+        # 2 ...
+        # 3 ...
+
+        i = 0
+        layers = []
+    
+        if input[0] != 'layers':
+            assert "Layers: Not a layer"
+            return None
+
+        for item in input:
+            i = i + 1
+            if i == 1:
+                continue
+
+            layerid = item[0]
+            layername = item[1]
+
+            user = ''
+            hide = ''
+            if 'user' in item:
+                user = 'user="True" '
+            if 'hide' in item:
+                hide = 'hide="True" '
+
+
+            parameters = '<g '
+            parameters += 'inkscape:label="' + layername + '" '
+            parameters += 'inkscape:groupmode="layer" '
+            parameters += 'id=layer"' + layerid + '" '
+            parameters += user
+            parameters += hide
+            parameters += '>'
+
+            #print(parameters)
+            layers.append(parameters)
+            i = i + 1
+        
+        return layers
+
 
     def Convert_Segment_To_SVG(self, input, id):
         # 0 segment
@@ -105,7 +158,8 @@ class FlexParse(object):
         parameters += 'net="' + net + '" '
         parameters += '/>'
 
-        print(parameters)
+        #print(parameters)
+        return parameters
 
 
     def Run(self):
@@ -113,7 +167,7 @@ class FlexParse(object):
         self.Print_Headings(dic)
         js = self.Convert(dic)
         
-        self.Save(js)
+        #self.Save(js)
 
 
 if __name__ == '__main__':
