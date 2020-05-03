@@ -285,9 +285,6 @@ class FlexParse(object):
 
         a = 0
 
-        # if id == 158:
-        #     print(input)
-
         for item in input:
 
 
