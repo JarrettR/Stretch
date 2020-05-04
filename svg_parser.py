@@ -37,10 +37,11 @@ class SvgParser(object):
 
         lst = meta
 
-        layers, modules, segments, gr_lines = self.Parse_Layers_Segments(base)
+        layers, modules, segments, gr_lines, vias = self.Parse_Layers_Segments(base)
         # print(layers_segments)
 
         lst.append(layers)
+        lst = lst + vias
         lst = lst + modules
         lst = lst + segments
         lst = lst + gr_lines
@@ -85,14 +86,14 @@ class SvgParser(object):
 
         # layers.append(vias)
         # layers.append(segments)
-        return layers, modules, segments, gr_lines
+        return layers, modules, segments, gr_lines, vias
 
     def Parse_Module(self, tag):
         # print(tag['id'])
         module = ['module', tag['name'], ['layer', tag['layer']]]
         segments = []
         gr_lines = []
-
+        pads = []
         transform = tag['transform']
         
         translate = transform[transform.find('translate(') + 10:]
@@ -116,12 +117,49 @@ class SvgParser(object):
             gr_line[0][0] = 'fp_line'
             gr_lines = gr_lines + gr_line
 
+        for rect in tag.find_all('rect'):
+            pad = self.Parse_Pad(rect, 'rect')
+            if pad != None:
+                # pads = pads + pad
+                pads.append(pad)
+
         if len(segments) > 0:
             module.append(segments)
+        if len(pads) > 0:
+            module = module + pads
 
         module = module + gr_lines
         return module
 
+
+    def Parse_Pad(self, tag, padtype):
+        # print(tag['id'])
+
+        if tag.has_attr('first') == False:
+            return None
+
+        pin = tag['pin']
+        process = tag['process']
+
+        width = str(float(tag['width']) / pxToMM)
+        height = str(float(tag['height']) / pxToMM)
+        x = str(float(tag['x']) / pxToMM)
+        y = str(float(tag['y']) / pxToMM)
+
+        at = ['at', x, y]
+        size = ['size', width, height]
+        layers = ['layers'] + tag['layers'].split(',')
+
+        pad = ['pad', pin, process, padtype, at, size, layers]
+
+        if tag.has_attr('roundrect_rratio'):
+            pad.append(['roundrect_rratio',tag['roundrect_rratio']])
+
+        if tag.has_attr('net'):
+            pad.append(['net',tag['net'],tag['netname']])
+
+
+        return pad
 
     def Parse_Segment(self, tag):
         # print(tag['id'])
@@ -145,9 +183,9 @@ class SvgParser(object):
 
             segment = [ start, end, width, name]
 
-            if 'net' in tag:
+            if tag.has_attr('net'):
                 segment.append(['net', tag['net']])
-            if 'tstamp' in tag:
+            if tag.has_attr('tstamp'):
                 segment.append(['tstamp', tag['tstamp']])
 
             if tag['type'] == 'gr_line':
@@ -162,8 +200,29 @@ class SvgParser(object):
         return segments, gr_lines
 
     def Parse_Vias(self, tag):
-        # for tag in base.svg.find_all('g'):
-        print(tag['id'])
+        # (via (at 205.486 133.731) (size 0.6) (drill 0.3) (layers F.Cu B.Cu) (net 0) (tstamp 5EA04144) (status 30))
+        vias = []
+        for circle in tag.find_all('circle'):
+            x = circle['cx']
+            y = circle['cy']
+            at = ['at', str(float(x) / pxToMM), str(float(y) / pxToMM)]
+
+            via = [ 'via', at, ['size', circle['size']], ['drill', circle['drill']]]
+
+            layers = circle['layers'].split(',')
+            layers = ['layers'] + layers
+
+            via.append(layers)
+
+            via.append(['net', circle['net']])
+
+            if circle.has_attr('tstamp'):
+                via.append(['tstamp', circle['tstamp']])
+            if circle.has_attr('status'):
+                via.append(['status', circle['status']])
+
+            vias.append(via)
+        return vias
 
 
     def Run(self):

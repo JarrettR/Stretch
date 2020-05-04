@@ -456,7 +456,21 @@ class FlexParse(object):
             assert False,"Via: Net out of order"
             return None
 
-        net = input[4][1]
+        net = input[5][1]
+
+        status = ''
+        tstamp = ''
+        if len(input) > 6:
+            if input[6][0] == 'tstamp':
+                tstamp = 'tstamp="' + input[6][1] + '" '
+            elif input[6][0] == 'status':
+                status = 'status="' + input[6][1] + '" '
+            
+        if len(input) > 7:
+            if input[7][0] == 'tstamp':
+                tstamp = 'tstamp="' + input[7][1] + '" '
+            elif input[7][0] == 'status':
+                status = 'status="' + input[7][1] + '" '
 
 
         parameters = '<circle style="stroke:none;stroke-linecap:round;stroke-linejoin:miter;fill-opacity:1'
@@ -467,11 +481,11 @@ class FlexParse(object):
         parameters += 'id="path' + str(id) + '" '
         parameters += 'r="' + str(float(size)  * (pxToMM / 2)) + '" '
         parameters += 'layers="' + layers[0] + ',' + layers[1] + '" '
-        parameters += 'atx="' + at[0] + '" '
-        parameters += 'atx="' + at[1] + '" '
         parameters += 'size="' + size + '" '
         parameters += 'drill="' + drill + '" '
         parameters += 'net="' + net + '" '
+        parameters += tstamp
+        parameters += status
         parameters += '/>'
 
         #print(parameters)
@@ -504,10 +518,16 @@ class FlexParse(object):
         at = []
         size = []
         layers = []
+        roundrect_rratio = ''
+        net = ''
 
         if input[0] != 'pad':
             assert False,"Pad: Not a pad"
             return None
+
+        pin = input[1]
+
+        process = input[2]
 
         for row in input:
             if len(row) > 1:
@@ -524,6 +544,11 @@ class FlexParse(object):
 
                 if row[0] == 'roundrect_rratio':
                     ratio = row[1]
+                    roundrect_rratio = 'roundrect_rratio="' + row[1] + '"'
+
+                if row[0] == 'net':
+                    net = 'net="' + row[1] + '" '
+                    net += 'netname="' + row[2] + '"'
 
                 if row[0] == 'layers':
                     row = row[1:]
@@ -537,6 +562,7 @@ class FlexParse(object):
         svg = ''
         svgsize = ''
         roundcorners = ''
+        first = True
 
         for layer in layers:
             parameters = ''
@@ -582,12 +608,20 @@ class FlexParse(object):
 
             parameters += ';fill:#' + self.Assign_Layer_Colour(layer)
             parameters += '" '
-            parameters += 'id="path-' + layer + '-' + str(id) + '" '
+            parameters += 'id="path-' + str(id) + '-' + layer + '" '
             parameters += svgsize
             parameters += roundcorners
+            parameters += roundrect_rratio
+            parameters += net
+            parameters += 'process="' + process + '"'
+            parameters += 'pin="' + pin + '"'
+            if first == True:
+                parameters += 'first="True"'
+                parameters += 'layers="' + ','.join(layers) + '"'
             parameters += '/>'
 
             svg += parameters
+            first = False
 
         #print(parameters)
         return svg
