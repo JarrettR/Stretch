@@ -30,7 +30,7 @@ pxToMM = 3.779528
 
 class FlexParse(object):
     def __init__(self):
-        self.filename_in = "example/complex.kicad_pcb"
+        self.filename_in = "example/simple.kicad_pcb"
         self.filename_json = "example/out.json"
         self.filename_svg = "example/out.svg"
         self.filename_base = "example/base.svg"

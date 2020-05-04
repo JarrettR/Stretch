@@ -11,7 +11,7 @@ class SexpressionWriter(object):
     def __init__(self):
         self.filename_in = "example/out.svg"
         self.filename_out = "example/out.kicad_pcb"
-        self.filename_sexpression = "example/simple.kicad_pcb"
+        self.filename_sexpression = "example/complex.kicad_pcb"
 
     def Load(self):
         with open(self.filename_in, "r") as f:
