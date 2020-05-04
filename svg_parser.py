@@ -68,10 +68,12 @@ class SvgParser(object):
 
                 if tag.has_attr('user'):
                     layer.append('user')
-                if tag.has_attr('hide'):
-                    layer.append('hide')
                 if tag.has_attr('signal'):
                     layer.append('signal')
+                if tag.has_attr('power'):
+                    layer.append('power')
+                if tag.has_attr('hide'):
+                    layer.append('hide')
 
                 layers.append(layer)
 
@@ -86,7 +88,7 @@ class SvgParser(object):
         return layers, modules, segments, gr_lines
 
     def Parse_Module(self, tag):
-        print(tag['id'])
+        # print(tag['id'])
         module = ['module', tag['name'], ['layer', tag['layer']]]
         segments = []
         gr_lines = []
@@ -97,11 +99,13 @@ class SvgParser(object):
         translate = translate[0:translate.find(')')]
         x = translate[0:translate.find(',')]
         y = translate[len(x) + 1:]
+        x = float(x) / pxToMM
+        y = float(y) / pxToMM
 
         rotate = 0
-        if(transform.find('rotate(')):
+        if 'rotate(' in transform:
             rotate = transform[transform.find('rotate(') + 7:]
-            rotate = (float(rotate[0:-1]) * -1) / pxToMM
+            rotate = float(rotate[0:-1]) * -1
 
         at = ['at', str(x), str(y), str(rotate)]
         module.append(at)
@@ -120,7 +124,7 @@ class SvgParser(object):
 
 
     def Parse_Segment(self, tag):
-        print(tag['id'])
+        # print(tag['id'])
 
         style = tag['style']
 

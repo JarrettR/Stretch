@@ -30,7 +30,7 @@ pxToMM = 3.779528
 
 class FlexParse(object):
     def __init__(self):
-        self.filename_in = "example/simple.kicad_pcb"
+        self.filename_in = "example/complex.kicad_pcb"
         self.filename_json = "example/out.json"
         self.filename_svg = "example/out.svg"
         self.filename_base = "example/base.svg"
@@ -152,12 +152,15 @@ class FlexParse(object):
             user = ''
             hide = ''
             signal = ''
+            power = ''
             if 'user' in item:
                 user = 'user="True" '
             if 'hide' in item:
                 hide = 'hide="True" '
             if 'signal' in item:
                 signal = 'signal="True" '
+            if 'power' in item:
+                power = 'power="True" '
 
 
             parameters = '<g '
@@ -168,6 +171,7 @@ class FlexParse(object):
             parameters += user
             parameters += hide
             parameters += signal
+            parameters += power
             parameters += '/>'
 
             layers.append(parameters)
