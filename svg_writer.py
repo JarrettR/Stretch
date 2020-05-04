@@ -520,6 +520,7 @@ class FlexParse(object):
         layers = []
         roundrect_rratio = ''
         net = ''
+        rotate = ''
 
         if input[0] != 'pad':
             assert False,"Pad: Not a pad"
@@ -536,7 +537,7 @@ class FlexParse(object):
                     at.append(float(row[2]))
 
                     if len(row) > 3:
-                        rotate = row[3]
+                        rotate = 'rotate="' + row[3] + '"'
 
                 if row[0] == 'size':
                     size.append(row[1])
@@ -613,6 +614,7 @@ class FlexParse(object):
             parameters += roundcorners
             parameters += roundrect_rratio
             parameters += net
+            parameters += rotate
             parameters += 'process="' + process + '"'
             parameters += 'pin="' + pin + '"'
             if first == True:

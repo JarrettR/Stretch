@@ -120,7 +120,10 @@ class SvgParser(object):
         for rect in tag.find_all('rect'):
             pad = self.Parse_Pad(rect, 'rect')
             if pad != None:
-                # pads = pads + pad
+                pads.append(pad)
+        for circle in tag.find_all('circle'):
+            pad = self.Parse_Pad(circle, 'circle')
+            if pad != None:
                 pads.append(pad)
 
         if len(segments) > 0:
@@ -141,19 +144,34 @@ class SvgParser(object):
         pin = tag['pin']
         process = tag['process']
 
-        width = str(float(tag['width']) / pxToMM)
-        height = str(float(tag['height']) / pxToMM)
-        x = str(float(tag['x']) / pxToMM)
-        y = str(float(tag['y']) / pxToMM)
+        if padtype == 'rect':
+
+            width = float(tag['width']) / pxToMM
+            height = float(tag['height']) / pxToMM
+            x = str((float(tag['x']) / pxToMM) + (width / 2))
+            y = str((float(tag['y']) / pxToMM) + (height / 2))
+            width = str(width)
+            height = str(height)
+
+            size = ['size', width, height]
+
+        elif padtype == 'circle':
+            r = str((float(tag['r']) * 2) / pxToMM)
+            size = ['size', r, r]
+            x = str(float(tag['cx']) / pxToMM)
+            y = str(float(tag['cy']) / pxToMM)
+
 
         at = ['at', x, y]
-        size = ['size', width, height]
-        layers = ['layers'] + tag['layers'].split(',')
+        if tag.has_attr('rotate'):
+            at.append(tag['rotate'])
 
+        layers = ['layers'] + tag['layers'].split(',')
         pad = ['pad', pin, process, padtype, at, size, layers]
 
         if tag.has_attr('roundrect_rratio'):
             pad.append(['roundrect_rratio',tag['roundrect_rratio']])
+            pad[3] = 'roundrect'
 
         if tag.has_attr('net'):
             pad.append(['net',tag['net'],tag['netname']])
