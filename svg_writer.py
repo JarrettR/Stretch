@@ -283,7 +283,7 @@ class FlexParse(object):
 
         at = []
         # svg = BeautifulSoup('<g inkscape:groupmode="layer" type="module" inkscape:label="module' + str(id) + '" id="module' + str(id) + '">', 'html.parser')
-        svg = BeautifulSoup('<g type="module" inkscape:label="module' + str(id) + '" id="module' + str(id) + '">', 'html.parser')
+        svg = BeautifulSoup('<g type="module" inkscape:label="module' + str(id) + '" id="module' + str(id) + '" name="' + input[1] + '">', 'html.parser')
         
         if input[0] != 'module':
             assert False,"Module: Not a module"

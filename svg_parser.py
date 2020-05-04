@@ -37,10 +37,11 @@ class SvgParser(object):
 
         lst = meta
 
-        layers, segments, gr_lines = self.Parse_Layers_Segments(base)
+        layers, modules, segments, gr_lines = self.Parse_Layers_Segments(base)
         # print(layers_segments)
 
         lst.append(layers)
+        lst = lst + modules
         lst = lst + segments
         lst = lst + gr_lines
 
@@ -48,6 +49,7 @@ class SvgParser(object):
 
     def Parse_Layers_Segments(self, base):
         layers = ['layers']
+        modules = []
         segments = []
         gr_lines = []
 
@@ -57,10 +59,10 @@ class SvgParser(object):
                 vias = self.Parse_Vias(tag)
 
             elif tag['id'].startswith('module'):
-                print(tag['id'])
+                module = self.Parse_Module(tag)
+                modules.append(module)
 
             elif tag['id'].startswith('layer'):
-                print(tag['id'])
                 layer = [ tag['number'] ]
                 layer.append(tag['inkscape:label'])
 
@@ -81,7 +83,41 @@ class SvgParser(object):
 
         # layers.append(vias)
         # layers.append(segments)
-        return layers, segments, gr_lines
+        return layers, modules, segments, gr_lines
+
+    def Parse_Module(self, tag):
+        print(tag['id'])
+        module = ['module', tag['name'], ['layer', tag['layer']]]
+        segments = []
+        gr_lines = []
+
+        transform = tag['transform']
+        
+        translate = transform[transform.find('translate(') + 10:]
+        translate = translate[0:translate.find(')')]
+        x = translate[0:translate.find(',')]
+        y = translate[len(x) + 1:]
+
+        rotate = 0
+        if(transform.find('rotate(')):
+            rotate = transform[transform.find('rotate(') + 7:]
+            rotate = (float(rotate[0:-1]) * -1) / pxToMM
+
+        at = ['at', str(x), str(y), str(rotate)]
+        module.append(at)
+
+        for path in tag.find_all('path'):
+            segment, gr_line = self.Parse_Segment(path)
+            segments = segments + segment
+            gr_line[0][0] = 'fp_line'
+            gr_lines = gr_lines + gr_line
+
+        if len(segments) > 0:
+            module.append(segments)
+
+        module = module + gr_lines
+        return module
+
 
     def Parse_Segment(self, tag):
         print(tag['id'])
