@@ -189,7 +189,7 @@ class SvgParser(object):
 
         name = ['layer', tag['layer']]
 
-        paths = parse_path(tag['d'], None)
+        paths = parse_path(tag['d'])
 
         segments = []
         gr_lines = []

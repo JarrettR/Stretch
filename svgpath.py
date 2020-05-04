@@ -353,7 +353,7 @@ def _tokenize_path(path_def):
             yield token
 
 
-def parse_path(pathdef, logger, current_pos=0j):
+def parse_path(pathdef, current_pos=0j):
     # In the SVG specs, initial movetos are absolute, even if
     # specified as 'm'. This is the default behavior here as well.
     # But if you pass in a current_pos variable, the initial moveto
@@ -436,9 +436,6 @@ def parse_path(pathdef, logger, current_pos=0j):
             current_pos = pos
 
         elif command == 'C':
-            logger.warn('Encountered Cubic Bezier segment. '
-                        'It is currently not supported and will be replaced '
-                        'by a line segment.')
             for i in range(4):
                 # ignore control points
                 elements.pop()
@@ -451,9 +448,6 @@ def parse_path(pathdef, logger, current_pos=0j):
             current_pos = end
 
         elif command == 'S':
-            logger.warn('Encountered Quadratic Bezier segment. '
-                        'It is currently not supported and will be replaced '
-                        'by a line segment.')
             for i in range(2):
                 # ignore control points
                 elements.pop()
@@ -466,9 +460,6 @@ def parse_path(pathdef, logger, current_pos=0j):
             current_pos = end
 
         elif command == 'Q':
-            logger.warn('Encountered Quadratic Bezier segment. '
-                        'It is currently not supported and will be replaced '
-                        'by a line segment.')
             for i in range(2):
                 # ignore control points
                 elements.pop()
@@ -481,9 +472,6 @@ def parse_path(pathdef, logger, current_pos=0j):
             current_pos = end
 
         elif command == 'T':
-            logger.warn('Encountered Quadratic Bezier segment. '
-                        'It is currently not supported and will be replaced '
-                        'by a line segment.')
 
             end = float(elements.pop()) + float(elements.pop()) * 1j
 
