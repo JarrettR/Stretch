@@ -151,18 +151,23 @@ class FlexParse(object):
 
             user = ''
             hide = ''
+            signal = ''
             if 'user' in item:
                 user = 'user="True" '
             if 'hide' in item:
                 hide = 'hide="True" '
+            if 'signal' in item:
+                signal = 'signal="True" '
 
 
             parameters = '<g '
             parameters += 'inkscape:label="' + layername + '" '
             parameters += 'inkscape:groupmode="layer" '
             parameters += 'id="layer' + layerid + '"'
+            parameters += 'number="' + layerid + '"'
             parameters += user
             parameters += hide
+            parameters += signal
             parameters += '/>'
 
             layers.append(parameters)

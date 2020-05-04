@@ -33,6 +33,7 @@ class SexpressionWriter(object):
 
         for value in lst:
             if type(value) is not list:
+                # print(value)
                 if RE.search(value):
                     value = '"' + value + '"'
 
