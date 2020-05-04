@@ -1,6 +1,7 @@
 import io
 from bs4 import BeautifulSoup
 import json
+import math
 
 from parser_base import ParserBase
 from sexpressions_parser import parse_sexpression
@@ -30,7 +31,7 @@ pxToMM = 3.779528
 
 class FlexParse(object):
     def __init__(self):
-        self.filename_in = "example/complex.kicad_pcb"
+        self.filename_in = "example/simple2.kicad_pcb"
         self.filename_json = "example/out.json"
         self.filename_svg = "example/out.svg"
         self.filename_base = "example/base.svg"
@@ -88,6 +89,11 @@ class FlexParse(object):
 
                 elif item[0] == 'gr_line':
                     tag = BeautifulSoup(self.Convert_Gr_Line_To_SVG(item, i), 'html.parser')
+                    layer = tag.path['layer']
+                    base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
+
+                elif item[0] == 'gr_arc':
+                    tag = BeautifulSoup(self.Convert_Gr_Arc_To_SVG(item, i), 'html.parser')
                     layer = tag.path['layer']
                     base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
 
@@ -324,6 +330,127 @@ class FlexParse(object):
             a += 1
 
         return svg
+
+    def Convert_Gr_Arc_To_SVG(self, input, id):
+        # 0 gr_arc
+        # 1
+        #   0 start
+        #   1 66.66
+        #   2 99.99
+        # 2
+        #   0 end
+        #   1 66.66
+        #   2 99.99
+        # 3
+        #   0 angle
+        #   1 -90
+        # 4
+        #   0 layer
+        #   1 Edge.Cuts
+        # 5
+        #   0 width
+        #   1 0.05
+        # 6
+        #   0 tstamp
+        #   1 5E451B20
+
+        start = []
+        end = []
+        centre = []
+
+        if input[0] != 'gr_arc' and input[0] != 'fp_arc':
+            assert False,"Gr_arc: Not a gr_arc"
+            return None
+
+        if input[1][0] != 'start':
+            assert False,"Gr_arc: Start out of order"
+            return None
+
+        centre.append(float(input[1][1]) * pxToMM)
+        centre.append(float(input[1][2]) * pxToMM)
+
+        if input[2][0] != 'end':
+            assert False,"Gr_arc: End out of order"
+            return None
+
+        start.append(float(input[2][1]) * pxToMM)
+        start.append(float(input[2][2]) * pxToMM)
+
+        if input[3][0] != 'angle':
+            assert False,"Gr_arc: Angle out of order"
+            return None
+
+        angle = float(input[3][1])
+
+        if input[4][0] != 'layer':
+            assert False,"Gr_arc: Layer out of order"
+            return None
+
+        layer = input[4][1]
+
+        if input[5][0] != 'width':
+            assert False,"Gr_arc: Width out of order"
+            return None
+
+        width = input[5][1]
+
+        tstamp = ''
+        if(len(input) > 6):
+            if input[6][0] != 'tstamp':
+                assert False,"Gr_arc: tstamp out of order"
+                return None
+
+            tstamp = 'tstamp="' + input[6][1] + '" '
+
+        # m 486.60713,151.00183 a 9.5535717,9.5535717 0 0 1 -9.55357,9.55357
+        # (rx ry x-axis-rotation large-arc-flag sweep-flag x y)
+
+        dx = start[0] - centre[0]
+        dy = centre[1] - start[1]
+        r = math.hypot(dx, dy)
+
+        print(dx, dy, r, angle)
+
+        angle = math.radians(angle)
+
+        # startangle = (math.pi / 2) - math.asin(dx / r)
+        startangle =  math.asin(dy / r)
+        endangle = startangle - angle
+
+        print(math.degrees(startangle))
+        print(math.degrees(endangle))
+
+        end.append((math.cos(endangle) * r) - dx)
+        end.append(dy - (math.sin(endangle) * r))
+        print([dx, dy])
+        print([(math.cos(endangle) * r), (math.sin(endangle) * r)])
+        print(end)
+
+        r = str(r)
+
+        print('')
+        print('')
+        print('')
+        
+        sweep = str(int(((angle / abs(angle)) + 1) / 2))
+        if angle > 180:
+            large = '1'
+        else:
+            large = '0'
+        a = ' '.join(['a', r + ',' + r, '0', large, sweep, str(end[0]) + ',' + str(end[1])])
+
+        parameters = '<path style="fill:none;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1'
+        parameters += ';stroke:#' + self.Assign_Layer_Colour(layer)
+        parameters += ';stroke-width:' + width + 'mm'
+        parameters += '" '
+        parameters += 'd="M ' + str(start[0]) + ',' + str(start[1]) + ' ' + a + '" '
+        parameters += 'id="path' + str(id) + '" '
+        parameters += 'layer="' + layer + '" '
+        parameters += 'type="gr_arc" '
+        parameters += tstamp
+        parameters += '/>'
+
+        return parameters
 
     def Convert_Gr_Line_To_SVG(self, input, id):
         # 0 gr_line
