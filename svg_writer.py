@@ -243,6 +243,7 @@ class FlexParse(object):
         # parameters += 'd="M ' + start[0] + ',' + start[1] + ' ' + end[0] + ',' + end[1] + '" '
         parameters += 'id="path' + str(id) + '" '
         parameters += 'layer="' + layer + '" '
+        parameters += 'type="segment" '
         parameters += 'net="' + net + '" '
         parameters += '/>'
 
@@ -388,6 +389,7 @@ class FlexParse(object):
         parameters += 'd="M ' + str(float(start[0]) * pxToMM) + ',' + str(float(start[1]) * pxToMM) + ' ' + str(float(end[0]) * pxToMM) + ',' + str(float(end[1]) * pxToMM) + '" '
         parameters += 'id="path' + str(id) + '" '
         parameters += 'layer="' + layer + '" '
+        parameters += 'type="gr_line" '
         parameters += tstamp
         parameters += '/>'
 

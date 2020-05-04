@@ -29,28 +29,27 @@ class SvgParser(object):
             f.write(lst)
 
     def Svg_To_List(self, base):
-        # content = base.svg.kicad.contents[0][:-3]
         content = base.svg.kicad.contents[0][1:-3]
         content = '[' + content + ' ]'
         self.Save(content)
         meta = json.loads(content)
-        # print(js)
         meta.insert(0, 'kicad_pcb')
 
         lst = meta
 
-
-        layers, segments = self.Parse_Layers_Segments(base)
+        layers, segments, gr_lines = self.Parse_Layers_Segments(base)
         # print(layers_segments)
 
         lst.append(layers)
         lst = lst + segments
+        lst = lst + gr_lines
 
         return lst
 
     def Parse_Layers_Segments(self, base):
         layers = ['layers']
         segments = []
+        gr_lines = []
 
 
         for tag in base.svg.find_all('g'):
@@ -75,12 +74,14 @@ class SvgParser(object):
                 layers.append(layer)
 
                 for path in tag.find_all('path'):
-                    segments = segments + self.Parse_Segment(path)
+                    segment, gr_line = self.Parse_Segment(path)
+                    segments = segments + segment
+                    gr_lines = gr_lines + gr_line
 
 
         # layers.append(vias)
         # layers.append(segments)
-        return layers, segments
+        return layers, segments, gr_lines
 
     def Parse_Segment(self, tag):
         print(tag['id'])
@@ -95,22 +96,30 @@ class SvgParser(object):
         paths = parse_path(tag['d'], None)
 
         segments = []
+        gr_lines = []
 
         for path in paths:
             segment = []
             start = ['start', str(path.start.real / pxToMM), str(path.start.imag / pxToMM)]
             end = ['end', str(path.end.real / pxToMM), str(path.end.imag / pxToMM)]
 
-            segment = [ 'segment', start, end, width, name]
+            segment = [ start, end, width, name]
 
             if 'net' in tag:
                 segment.append(['net', tag['net']])
             if 'tstamp' in tag:
                 segment.append(['tstamp', tag['tstamp']])
 
-            segments.append(segment)
+            if tag['type'] == 'gr_line':
+                segment = ['gr_line'] + segment
+                gr_lines.append(segment)
+            elif tag['type'] == 'segment':
+                segment = ['segment'] + segment
+                segments.append(segment)
+            else:
+                assert False,"Gr_line / segments: Nobody knows!"
 
-        return segments
+        return segments, gr_lines
 
     def Parse_Vias(self, tag):
         # for tag in base.svg.find_all('g'):
