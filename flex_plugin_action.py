@@ -5,13 +5,25 @@ from svg_writer import SvgWrite
 # from .svg_writer import SvgWrite 
 
 class FlexPluginAction(pcbnew.ActionPlugin):
+    def __init__(self, tool):
+        self.tool = tool
+        super(FlexPluginAction, self).__init__()
+
     def defaults(self):
-        self.name = "Flex"
-        self.category = "A KiCad plugin"
-        self.description = "A plugin to add beauty"
-        self.show_toolbar_button = True # Optional, defaults to False
-        self.icon_file_name = os.path.join(os.path.dirname(__file__), 'icon.png') # Optional
-        self.output_file_name = 'out.svg'
+        if self.tool == "to_svg":
+            self.name = "Flex-To-SVG"
+            self.category = "A KiCad plugin"
+            self.description = "A plugin to add beauty"
+            self.show_toolbar_button = True # Optional, defaults to False
+            self.icon_file_name = os.path.join(os.path.dirname(__file__), 'to_svg.png') # Optional
+            self.output_file_name = 'out.svg'
+        elif self.tool == "to_pcb":
+            self.name = "Flex-To-PCB"
+            self.category = "A KiCad plugin"
+            self.description = "A plugin to add beauty"
+            self.show_toolbar_button = True # Optional, defaults to False
+            self.icon_file_name = os.path.join(os.path.dirname(__file__), 'to_pcb.png') # Optional
+            self.output_file_name = 'out.svg'
 
     def Run(self):
         b = pcbnew.GetBoard()
