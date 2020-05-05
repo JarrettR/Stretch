@@ -1,4 +1,4 @@
-import io
+import io, os
 from bs4 import BeautifulSoup
 import json
 import math
@@ -30,16 +30,22 @@ pxToMM = 3.779528
 # via
 # zone
 
-class FlexParse(object):
+class SvgWrite(object):
     def __init__(self):
-        self.filename_in = "example/simple2.kicad_pcb"
-        self.filename_json = "example/out.json"
-        self.filename_svg = "example/out.svg"
-        self.filename_base = "example/base.svg"
+        print(os.path.dirname(os.path.realpath(__file__)) )
+        currentdir = os.path.dirname(os.path.realpath(__file__)) + '\\'
+        self.filename_in = currentdir + "example\\complex.kicad_pcb"
+        self.filename_json = currentdir + "example\\out.json"
+        self.filename_svg = currentdir + "example\\out.svg"
+        self.filename_base = currentdir + "example\\base.svg"
+        
 
 
-    def Load(self):
-        with io.open(self.filename_in, 'r', encoding='utf-8') as f:
+    def Load(self, filename = None):
+        if filename is None:
+            filename = self.filename_in
+
+        with io.open(filename, 'r', encoding='utf-8') as f:
             sexpression = parse_sexpression(f.read())
         return sexpression
 
@@ -47,9 +53,12 @@ class FlexParse(object):
         js = json.dumps(obj)
         return js
 
-    def Save(self, xml):
-        with open(self.filename_json, 'w') as f:
-            f.write(xml)
+    def Save(self, svg, filename = None):
+        if filename is None:
+            filename = self.filename_svg
+
+        with open(filename, 'wb') as f:
+            f.write(svg)
 
     def Print_Headings(self, dic):
         for item in dic:
@@ -62,8 +71,8 @@ class FlexParse(object):
         # svg = ''
         dic = []
         segments = []
-        if items[0] != 'kicad_pcb':
-            assert False,"kicad_pcb: Not a kicad_pcb"
+        #if items[0] != 'kicad_pcb':
+        #    assert False,"kicad_pcb: Not a kicad_pcb"
 
         base.svg.append(BeautifulSoup('<kicad />', 'html.parser'))
         base.svg.append(BeautifulSoup('<g inkscape:label="Vias" inkscape:groupmode="layer" id="layervia" user="True" />', 'html.parser'))
@@ -79,14 +88,23 @@ class FlexParse(object):
                     for layer in layers:
                         tag = BeautifulSoup(layer, 'html.parser')
                         base.svg.append(tag)
+                        
+        for item in items:
+            if type(item) is str:
+                print(item)
+            else:
+                if item[0] == 'module':
+                    base.svg.append(self.Convert_Module_To_SVG(item, i))
 
-                elif item[0] == 'segment':
+        for item in items:
+            if type(item) is str:
+                print(item)
+            else:
+                # print(item[0])
+                if item[0] == 'segment':
                     tag = BeautifulSoup(self.Convert_Segment_To_SVG(item, i), 'html.parser')
                     layer = tag.path['layer']
                     base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
-
-                elif item[0] == 'module':
-                    base.svg.append(self.Convert_Module_To_SVG(item, i))
 
                 elif item[0] == 'gr_line':
                     tag = BeautifulSoup(self.Convert_Gr_Line_To_SVG(item, i), 'html.parser')
@@ -109,10 +127,7 @@ class FlexParse(object):
         dic.append({'segment': segments})
 
         svg = base.prettify("utf-8")
-        with open(self.filename_svg, "wb") as file:
-            file.write(svg)
-
-        return dic
+        return svg
 
 
 
@@ -144,9 +159,9 @@ class FlexParse(object):
         i = 0
         layers = []
     
-        if input[0] != 'layers':
-            assert False,"Layers: Not a layer"
-            return None
+        # if input[0] != 'layers':
+        #     assert False,"Layers: Not a layer"
+        #     return None
 
         for item in input:
             i = i + 1
@@ -471,43 +486,28 @@ class FlexParse(object):
         start = []
         end = []
 
-        if input[0] != 'gr_line' and input[0] != 'fp_line':
-            assert False,"Gr_line: Not a gr_line"
-            return None
+        for item in input:
+            if type(item) == str:
+                #if item == 'gr_line' or item == 'fp_line':
+                continue
 
-        if input[1][0] != 'start':
-            assert False,"Gr_line: Start out of order"
-            return None
+            if item[0] == 'start':
+                start.append(item[1])
+                start.append(item[2])
 
-        start.append(input[1][1])
-        start.append(input[1][2])
+            if item[0] == 'end':
+                end.append(item[1])
+                end.append(item[2])
 
-        if input[2][0] != 'end':
-            assert False,"Gr_line: End out of order"
-            return None
+            if item[0] == 'layer':
+                layer = item[1]
 
-        end.append(input[2][1])
-        end.append(input[2][2])
+            if item[0] == 'width':
+                width = item[1]
 
-        if input[3][0] != 'layer':
-            assert False,"Gr_line: Layer out of order"
-            return None
-
-        layer = input[3][1]
-
-        if input[4][0] != 'width':
-            assert False,"Gr_line: Width out of order"
-            return None
-
-        width = input[4][1]
-
-        tstamp = ''
-        if(len(input) > 5):
-            if input[5][0] != 'tstamp':
-                assert False,"Gr_line: tstamp out of order"
-                return None
-
-            tstamp = 'tstamp="' + input[5][1] + '" '
+            tstamp = ''
+            if item[0] == 'tstamp':
+                tstamp = 'tstamp="' + item[1] + '" '
 
         parameters = '<path style="fill:none;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1'
         parameters += ';stroke:#' + self.Assign_Layer_Colour(layer)
@@ -785,26 +785,34 @@ class FlexParse(object):
         
         
 
-
-    def Run(self):
+    def Run_Standalone(self):
         dic = self.Load()
-        # self.Print_Headings(dic)
-        #js = self.Convert(dic)
-        #self.Save(js)
+        with open(self.filename_base, "r") as f:
+    
+            contents = f.read()
+            base = BeautifulSoup(contents, 'html.parser')
+        
+        svg = self.Handle_Headings(dic, base)
+
+        self.Save(svg)
+
+   
+    def Run_Plugin(self, filename, outfilename):
+        dic = self.Load(filename)
         
         with open(self.filename_base, "r") as f:
     
             contents = f.read()
             base = BeautifulSoup(contents, 'html.parser')
         
+        outfile = os.path.dirname(filename) + '/' + outfilename
 
-        tags = self.Handle_Headings(dic, base)
+        svg = self.Handle_Headings(dic, base)
 
-        # writer = SvgWriter(tags)
+        self.Save(svg, outfile)
 
-        # writer.Display()
 
 
 if __name__ == '__main__':
-    e = FlexParse()
-    e.Run()
+    e = SvgWrite()
+    e.Run_Standalone()
