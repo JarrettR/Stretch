@@ -11,7 +11,7 @@ from svgpath import parse_path
 
 pxToMM = 3.779528
 
-class SvgParser(object):
+class PcbWrite(object):
     def __init__(self):
         self.filename_in = "example/out.svg"
         self.filename_out = "example/out.kicad_pcb"
@@ -243,7 +243,16 @@ class SvgParser(object):
         return vias
 
 
-    def Run(self):
+    def Run_Standalone(self):
+        svg = self.Load()
+        lst = self.Svg_To_List(svg)
+        a = SexpressionWriter()
+        
+        sexpression = a.List_To_Sexpression(lst)
+        a.Save(sexpression)
+        # self.Save(sexpression)
+
+    def Run_Plugin(self):
         svg = self.Load()
         lst = self.Svg_To_List(svg)
         a = SexpressionWriter()
@@ -254,5 +263,5 @@ class SvgParser(object):
         
 
 if __name__ == '__main__':
-    e = SvgParser()
-    e.Run()
+    e = PcbWrite()
+    e.Run_Standalone()

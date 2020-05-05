@@ -2,6 +2,7 @@ import pcbnew
 import os
 
 from svg_writer import SvgWrite 
+from pcb_writer import PcbWrite 
 # from .svg_writer import SvgWrite 
 
 class FlexPluginAction(pcbnew.ActionPlugin):
@@ -29,11 +30,15 @@ class FlexPluginAction(pcbnew.ActionPlugin):
         b = pcbnew.GetBoard()
         filename = b.GetFileName()
 
-        a = SvgWrite()
-        a.Run_Plugin(filename, self.output_file_name)
+        if self.tool == "to_svg":
+            a = SvgWrite()
+            a.Run_Plugin(filename, self.output_file_name)
+        elif self.tool == "to_pcb":
+            a = PcbWrite()
+            a.Run_Plugin(filename, self.output_file_name)
 
         
 # D:\Programs\KiCad\bin\python.exe .\flex_plugin_action.py
 if __name__ == '__main__':
-    a = SvgWrite()
+    a = PcbWrite()
     a.Run_Plugin('D:\\Projects\\git\\test\\what.kicad_pcb', 'out.svg')
