@@ -2,6 +2,7 @@ import io
 from bs4 import BeautifulSoup
 import json
 import math
+import cmath
 
 from parser_base import ParserBase
 from sexpressions_parser import parse_sexpression
@@ -406,38 +407,33 @@ class FlexParse(object):
         # (rx ry x-axis-rotation large-arc-flag sweep-flag x y)
 
         dx = start[0] - centre[0]
-        dy = centre[1] - start[1]
-        r = math.hypot(dx, dy)
+        # dy = centre[1] - start[1]
+        dy = start[1] - centre[1]
 
-        print(dx, dy, r, angle)
+        r = (start[0] - centre[0]) + (centre[1] - start[1]) * 1j
 
         angle = math.radians(angle)
+        endangle = cmath.phase(r) - angle
+        # print('start angle rad', cmath.phase(r))
+        # print('start angle deg', math.degrees(cmath.phase(r)))
+        # print('move angle rad', angle)
+        # print('move angle deg', math.degrees(angle))
+        # print('end angle', math.degrees(endangle))
 
-        # startangle = (math.pi / 2) - math.asin(dx / r)
-        startangle =  math.asin(dy / r)
-        endangle = startangle - angle
-
-        print(math.degrees(startangle))
-        print(math.degrees(endangle))
-
-        end.append((math.cos(endangle) * r) - dx)
-        end.append(dy - (math.sin(endangle) * r))
-        print([dx, dy])
-        print([(math.cos(endangle) * r), (math.sin(endangle) * r)])
-        print(end)
-
-        r = str(r)
-
-        print('')
-        print('')
-        print('')
+        end_from_origin = cmath.rect(cmath.polar(r)[0], endangle)
+        end = end_from_origin - r
         
         sweep = str(int(((angle / abs(angle)) + 1) / 2))
-        if angle > 180:
+        if angle > cmath.pi:
             large = '1'
         else:
             large = '0'
-        a = ' '.join(['a', r + ',' + r, '0', large, sweep, str(end[0]) + ',' + str(end[1])])
+
+        radius = "{:.6f}".format(cmath.polar(r)[0])
+        end_x = "{:.6f}".format(end.real)
+        end_y = "{:.6f}".format(-end.imag)
+
+        a = ' '.join(['a', radius + ',' + radius, '0', large, sweep, end_x + ',' + end_y])
 
         parameters = '<path style="fill:none;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1'
         parameters += ';stroke:#' + self.Assign_Layer_Colour(layer)
