@@ -2,6 +2,8 @@ import io
 from bs4 import BeautifulSoup
 import json
 import re
+import math
+import cmath
 
 from parser_base import ParserBase
 from sexpressions_parser import parse_sexpression
@@ -37,7 +39,7 @@ class PcbWrite(object):
 
         lst = meta
 
-        layers, modules, segments, gr_lines, vias = self.Parse_Layers_Segments(base)
+        layers, modules, segments, gr_lines, gr_arcs, vias = self.Parse_Layers_Segments(base)
         # print(layers_segments)
 
         lst.append(layers)
@@ -45,6 +47,7 @@ class PcbWrite(object):
         lst = lst + modules
         lst = lst + segments
         lst = lst + gr_lines
+        lst = lst + gr_arcs
 
         return lst
 
@@ -53,6 +56,7 @@ class PcbWrite(object):
         modules = []
         segments = []
         gr_lines = []
+        gr_arcs = []
 
 
         for tag in base.svg.find_all('g'):
@@ -79,20 +83,22 @@ class PcbWrite(object):
                 layers.append(layer)
 
                 for path in tag.find_all('path'):
-                    segment, gr_line = self.Parse_Segment(path)
+                    segment, gr_line, gr_arc = self.Parse_Segment(path)
                     segments = segments + segment
                     gr_lines = gr_lines + gr_line
+                    gr_arcs = gr_arcs + gr_arc
 
 
         # layers.append(vias)
         # layers.append(segments)
-        return layers, modules, segments, gr_lines, vias
+        return layers, modules, segments, gr_lines, gr_arcs, vias
 
     def Parse_Module(self, tag):
         # print(tag['id'])
         module = ['module', tag['name'], ['layer', tag['layer']]]
         segments = []
         gr_lines = []
+        gr_arcs = []
         pads = []
         transform = tag['transform']
         
@@ -112,10 +118,11 @@ class PcbWrite(object):
         module.append(at)
 
         for path in tag.find_all('path'):
-            segment, gr_line = self.Parse_Segment(path)
+            segment, gr_line, gr_arc = self.Parse_Segment(path)
             segments = segments + segment
             gr_line[0][0] = 'fp_line'
             gr_lines = gr_lines + gr_line
+            gr_arcs = gr_arcs + gr_arc
 
         for rect in tag.find_all('rect'):
             pad = self.Parse_Pad(rect, 'rect')
@@ -131,7 +138,7 @@ class PcbWrite(object):
         if len(pads) > 0:
             module = module + pads
 
-        module = module + gr_lines
+        module = module + gr_lines + gr_arcs
         return module
 
 
@@ -193,6 +200,7 @@ class PcbWrite(object):
 
         segments = []
         gr_lines = []
+        gr_arcs = []
 
         for path in paths:
             segment = []
@@ -212,10 +220,109 @@ class PcbWrite(object):
             elif tag['type'] == 'segment':
                 segment = ['segment'] + segment
                 segments.append(segment)
+            elif tag['type'] == 'gr_arc':
+                gr_arcs.append(self.Parse_Arcs(tag, segment))
             else:
+                print(tag)
                 assert False,"Gr_line / segments: Nobody knows!"
 
-        return segments, gr_lines
+        return segments, gr_lines, gr_arcs
+
+    def Parse_Arcs(self, tag, segments):
+        # 0 gr_arc
+        # 1
+        #   0 start
+        #   1 66.66
+        #   2 99.99
+        # 2
+        #   0 end
+        #   1 66.66
+        #   2 99.99
+        # 3
+        #   0 angle
+        #   1 -90
+        # 4
+        #   0 layer
+        #   1 Edge.Cuts
+        # 5
+        #   0 width
+        #   1 0.05
+        # 6
+        #   0 tstamp
+        #   1 5E451B20
+
+        path = parse_path(tag['d'])
+        print(tag)
+        print(tag['d'])
+        print(path)
+        radius = path[0].radius.real / pxToMM
+        # angle = '90'
+        sweep = path[0].sweep
+        large_arc = path[0].large_arc
+        # print(segments)
+
+
+        if bool(large_arc) == True:
+            print("Handle~!")
+
+        #KiCad 'start' is actually centre, 'end' is actually svg start
+        #SVG end is actual end, we need to calculate centre instead
+        print(path[0].start, path[0].end)
+
+        end = [str(path[0].start.real / pxToMM), str(path[0].start.imag / pxToMM)]
+        end_complex = (path[0].start.real / pxToMM) + 1j * (path[0].start.imag / pxToMM)
+        start_complex = (path[0].end.real / pxToMM) + 1j * (path[0].end.imag / pxToMM)
+
+        # start = [str(path[0].start.real / pxToMM - radius), str(path[0].start.imag / pxToMM - radius)]
+        midpoint = (end_complex - start_complex) / 2
+        print(math.degrees(cmath.polar(midpoint)[1]))
+
+        q = math.sqrt((end_complex.real - start_complex.real)**2 + (end_complex.real - start_complex.real)**2)
+
+
+        x3 = (start_complex.real + end_complex.real) / 2
+        y3 = (start_complex.imag + end_complex.imag) / 2
+
+        print('r', radius)
+        print('a', radius**2)
+        print('b', ((q / 2) ** 2))
+        print('c', radius**2 - ((q / 2) ** 2))
+        
+        if bool(sweep) == False:
+            # angle = -angle
+            angle = -90
+            x = x3 + math.sqrt(radius**2 - (q / 2) ** 2) * (start_complex.imag - end_complex.imag) / q
+            y = y3 - math.sqrt(radius**2 - (q / 2) ** 2) * (start_complex.real - end_complex.real) / q
+        else:
+            angle = 90
+            x = x3 - math.sqrt(radius**2 - (q / 2) ** 2) * (start_complex.imag - end_complex.imag) / q
+            y = y3 + math.sqrt(radius**2 - (q / 2) ** 2) * (start_complex.real - end_complex.real) / q
+   
+        print(x)
+        midpoint_angle = (math.pi / 2) - cmath.polar(midpoint)[1]
+        
+        b = math.sqrt(radius**2 - (cmath.polar(midpoint)[0] / 2)**2)
+        print('b', b)
+        # b = math.sqrt(math.pow(radius, 2) - pow(cmath.polar(midpoint)[0],2))
+        print(b)
+        print(cmath.rect(b, midpoint_angle))
+
+        start = [str(x), str(y)]
+
+        start_list = ['start', start[0], start[1]]
+        end_list = ['end', end[0], end[1]]
+
+        # if bool(sweep) == False:
+        #     angle = -angle
+        angle = str(angle)
+        
+        segments[0] = start_list
+        segments[1] = end_list
+        segments.insert(2, ([ 'angle', angle]))
+        segments.insert(0, 'gr_arc')
+        print(segments, radius, sweep, large_arc)
+        return segments
+
 
     def Parse_Vias(self, tag):
         # (via (at 205.486 133.731) (size 0.6) (drill 0.3) (layers F.Cu B.Cu) (net 0) (tstamp 5EA04144) (status 30))
