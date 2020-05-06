@@ -36,6 +36,7 @@ class FlexPluginAction(pcbnew.ActionPlugin):
         elif self.tool == "to_pcb":
             a = PcbWrite()
             a.Run_Plugin(pcb_filename, self.svg_file_name)
+            pcbnew.Refresh()
 
         
 # D:\Programs\KiCad\bin\python.exe .\flex_plugin_action.py
