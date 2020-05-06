@@ -373,50 +373,39 @@ class SvgWrite(object):
         start = []
         end = []
         centre = []
-
-        if input[0] != 'gr_arc' and input[0] != 'fp_arc':
-            assert False,"Gr_arc: Not a gr_arc"
-            return None
-
-        if input[1][0] != 'start':
-            assert False,"Gr_arc: Start out of order"
-            return None
-
-        centre.append(float(input[1][1]) * pxToMM)
-        centre.append(float(input[1][2]) * pxToMM)
-
-        if input[2][0] != 'end':
-            assert False,"Gr_arc: End out of order"
-            return None
-
-        start.append(float(input[2][1]) * pxToMM)
-        start.append(float(input[2][2]) * pxToMM)
-
-        if input[3][0] != 'angle':
-            assert False,"Gr_arc: Angle out of order"
-            return None
-
-        angle = float(input[3][1])
-
-        if input[4][0] != 'layer':
-            assert False,"Gr_arc: Layer out of order"
-            return None
-
-        layer = input[4][1]
-
-        if input[5][0] != 'width':
-            assert False,"Gr_arc: Width out of order"
-            return None
-
-        width = input[5][1]
-
         tstamp = ''
-        if(len(input) > 6):
-            if input[6][0] != 'tstamp':
-                assert False,"Gr_arc: tstamp out of order"
-                return None
 
-            tstamp = 'tstamp="' + input[6][1] + '" '
+        for item in input:
+
+            # if input[0] != 'gr_arc' and input[0] != 'fp_arc':
+            #     assert False,"Gr_arc: Not a gr_arc"
+            #     return None
+
+            if item[0] == 'start':
+
+                centre.append(float(item[1]) * pxToMM)
+                centre.append(float(item[2]) * pxToMM)
+
+            if item[0] == 'end':
+
+                start.append(float(item[1]) * pxToMM)
+                start.append(float(item[2]) * pxToMM)
+
+            if item[0] == 'angle':
+
+                angle = float(item[1])
+
+            if item[0] == 'layer':
+
+                layer = item[1]
+
+            if item[0] == 'width':
+
+                width = item[1]
+
+            if item[0] == 'tstamp':
+
+                tstamp = 'tstamp="' + input[6][1] + '" '
 
         # m 486.60713,151.00183 a 9.5535717,9.5535717 0 0 1 -9.55357,9.55357
         # (rx ry x-axis-rotation large-arc-flag sweep-flag x y)

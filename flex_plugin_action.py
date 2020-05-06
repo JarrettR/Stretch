@@ -17,25 +17,25 @@ class FlexPluginAction(pcbnew.ActionPlugin):
             self.description = "A plugin to add beauty"
             self.show_toolbar_button = True # Optional, defaults to False
             self.icon_file_name = os.path.join(os.path.dirname(__file__), 'to_svg.png') # Optional
-            self.output_file_name = 'out.svg'
         elif self.tool == "to_pcb":
             self.name = "Flex-To-PCB"
             self.category = "A KiCad plugin"
             self.description = "A plugin to add beauty"
             self.show_toolbar_button = True # Optional, defaults to False
             self.icon_file_name = os.path.join(os.path.dirname(__file__), 'to_pcb.png') # Optional
-            self.output_file_name = 'out.svg'
+
+        self.svg_file_name = 'out.svg'
 
     def Run(self):
         b = pcbnew.GetBoard()
-        filename = b.GetFileName()
+        pcb_filename = b.GetFileName()
 
         if self.tool == "to_svg":
             a = SvgWrite()
-            a.Run_Plugin(filename, self.output_file_name)
+            a.Run_Plugin(pcb_filename, self.svg_file_name)
         elif self.tool == "to_pcb":
             a = PcbWrite()
-            a.Run_Plugin(filename, self.output_file_name)
+            a.Run_Plugin(pcb_filename, self.svg_file_name)
 
         
 # D:\Programs\KiCad\bin\python.exe .\flex_plugin_action.py

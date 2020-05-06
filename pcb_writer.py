@@ -1,4 +1,4 @@
-import io
+import io, os
 from bs4 import BeautifulSoup
 import json
 import re
@@ -23,7 +23,7 @@ class PcbWrite(object):
         if filename is None:
             filename = self.filename_in
 
-        with open(self.filename_in, "r") as f:
+        with open(filename, "r") as f:
     
             contents = f.read()
             svg = BeautifulSoup(contents, 'html.parser')
@@ -41,7 +41,9 @@ class PcbWrite(object):
         content = '[' + content + ' ]'
         # self.Save(content)
         meta = json.loads(content)
-        meta.insert(0, 'kicad_pcb')
+        # meta.insert(0, 'kicad_pcb')
+        if meta[0] != 'kicad_pcb':
+            meta.insert(0, 'kicad_pcb')
 
         lst = meta
 
@@ -200,7 +202,13 @@ class PcbWrite(object):
         width = style[style.find('stroke-width:') + 13:]
         width = ['width', width[0:width.find('mm')]]
 
-        name = ['layer', tag['layer']]
+        if tag.has_attr('layer'):
+            name = ['layer', tag['layer']]
+        elif tag.parent.has_attr('inkscape:label'):
+            #XML metadata trashed, try to recover from parent tag
+            name = ['layer', tag.parent['inkscape:label']]
+        else:
+            assert False, "Path not in layer"
 
         paths = parse_path(tag['d'])
 
@@ -220,7 +228,7 @@ class PcbWrite(object):
             if tag.has_attr('tstamp'):
                 segment.append(['tstamp', tag['tstamp']])
 
-            if tag['type'] == 'gr_line':
+            if tag.has_attr('type') == False or tag['type'] == 'gr_line':
                 segment = ['gr_line'] + segment
                 gr_lines.append(segment)
             elif tag['type'] == 'segment':
@@ -283,6 +291,14 @@ class PcbWrite(object):
 
         x3 = (start_complex.real + end_complex.real) / 2
         y3 = (start_complex.imag + end_complex.imag) / 2
+
+
+        if bool(large_arc) == True:
+            #hackhack / fix / whatever:
+            #figure out why this is larger than radius sometimes
+            print("hackhack: generating janky arc")
+            print(radius , q)
+            q = q / 2
 
 
         if bool(sweep) == False:
@@ -355,13 +371,16 @@ class PcbWrite(object):
         a.Save(sexpression)
         # self.Save(sexpression)
 
-    def Run_Plugin(self, filename, outfilename):
-        svg = self.Load()
+    def Run_Plugin(self, pcb_filename, svg_filename):
+        
+        infile = os.path.dirname(pcb_filename) + '/' + svg_filename
+
+        svg = self.Load(infile)
         lst = self.Svg_To_List(svg)
         a = SexpressionWriter()
         
         sexpression = a.List_To_Sexpression(lst)
-        a.Save(sexpression, outfilename)
+        a.Save(sexpression, pcb_filename)
         # self.Save(sexpression)
         
 
