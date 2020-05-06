@@ -19,21 +19,27 @@ class PcbWrite(object):
         self.filename_out = "example/out.kicad_pcb"
         self.filename_json = "example/out.json"
 
-    def Load(self):
+    def Load(self, filename = None):
+        if filename is None:
+            filename = self.filename_in
+
         with open(self.filename_in, "r") as f:
     
             contents = f.read()
             svg = BeautifulSoup(contents, 'html.parser')
             return svg
 
-    def Save(self, lst):
-        with open(self.filename_json, 'w') as f:
+    def Save(self, lst, filename = None):
+        if filename is None:
+            filename = self.filename_json
+
+        with open(filename, 'w') as f:
             f.write(lst)
 
     def Svg_To_List(self, base):
         content = base.svg.kicad.contents[0][1:-3]
         content = '[' + content + ' ]'
-        self.Save(content)
+        # self.Save(content)
         meta = json.loads(content)
         meta.insert(0, 'kicad_pcb')
 
@@ -349,13 +355,13 @@ class PcbWrite(object):
         a.Save(sexpression)
         # self.Save(sexpression)
 
-    def Run_Plugin(self):
+    def Run_Plugin(self, filename, outfilename):
         svg = self.Load()
         lst = self.Svg_To_List(svg)
         a = SexpressionWriter()
         
         sexpression = a.List_To_Sexpression(lst)
-        a.Save(sexpression)
+        a.Save(sexpression, outfilename)
         # self.Save(sexpression)
         
 

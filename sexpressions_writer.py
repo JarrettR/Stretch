@@ -60,8 +60,11 @@ class SexpressionWriter(object):
 
         return out
 
-    def Save(self, sexpression):
-        with open(self.filename_out, 'w') as f:
+    def Save(self, sexpression, filename = None):
+        if filename is None:
+            filename = self.filename_out
+
+        with open(filename, 'w') as f:
             f.write(sexpression)
 
     def Run(self):
