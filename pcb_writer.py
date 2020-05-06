@@ -252,9 +252,9 @@ class PcbWrite(object):
         #   1 5E451B20
 
         path = parse_path(tag['d'])
-        print(tag)
-        print(tag['d'])
-        print(path)
+        # print(tag)
+        # print(tag['d'])
+        # print(path)
         radius = path[0].radius.real / pxToMM
         # angle = '90'
         sweep = path[0].sweep
@@ -267,62 +267,52 @@ class PcbWrite(object):
 
         #KiCad 'start' is actually centre, 'end' is actually svg start
         #SVG end is actual end, we need to calculate centre instead
-        print(path[0].start, path[0].end)
+        # print('path', path[0].start, path[0].end)
 
         end = [str(path[0].start.real / pxToMM), str(path[0].start.imag / pxToMM)]
         end_complex = (path[0].start.real / pxToMM) + 1j * (path[0].start.imag / pxToMM)
         start_complex = (path[0].end.real / pxToMM) + 1j * (path[0].end.imag / pxToMM)
 
-        # start = [str(path[0].start.real / pxToMM - radius), str(path[0].start.imag / pxToMM - radius)]
-        midpoint = (end_complex - start_complex) / 2
-        print(math.degrees(cmath.polar(midpoint)[1]))
-
         q = math.sqrt((end_complex.real - start_complex.real)**2 + (end_complex.real - start_complex.real)**2)
-
 
         x3 = (start_complex.real + end_complex.real) / 2
         y3 = (start_complex.imag + end_complex.imag) / 2
 
-        print('r', radius)
-        print('a', radius**2)
-        print('b', ((q / 2) ** 2))
-        print('c', radius**2 - ((q / 2) ** 2))
-        
+
         if bool(sweep) == False:
             # angle = -angle
-            angle = -90
+            angle = 1
             x = x3 + math.sqrt(radius**2 - (q / 2) ** 2) * (start_complex.imag - end_complex.imag) / q
             y = y3 - math.sqrt(radius**2 - (q / 2) ** 2) * (start_complex.real - end_complex.real) / q
         else:
-            angle = 90
+            # angle = '90'
+            angle = -1
             x = x3 - math.sqrt(radius**2 - (q / 2) ** 2) * (start_complex.imag - end_complex.imag) / q
             y = y3 + math.sqrt(radius**2 - (q / 2) ** 2) * (start_complex.real - end_complex.real) / q
    
-        print(x)
-        midpoint_angle = (math.pi / 2) - cmath.polar(midpoint)[1]
-        
-        b = math.sqrt(radius**2 - (cmath.polar(midpoint)[0] / 2)**2)
-        print('b', b)
-        # b = math.sqrt(math.pow(radius, 2) - pow(cmath.polar(midpoint)[0],2))
-        print(b)
-        print(cmath.rect(b, midpoint_angle))
-
-        start = [str(x), str(y)]
-
-        start_list = ['start', start[0], start[1]]
+        start_list = ['start', str(x), str(y)]
         end_list = ['end', end[0], end[1]]
 
-        # if bool(sweep) == False:
-        #     angle = -angle
-        angle = str(angle)
+        start_angle = self.Get_Angle([x,y], [path[0].start.real / pxToMM, path[0].start.imag / pxToMM])
+        end_angle = self.Get_Angle([x,y], [path[0].end.real / pxToMM, path[0].end.imag / pxToMM])
+
+        angle = angle * (end_angle - start_angle)
+        if bool(sweep) == True:
+            angle = 360 - angle
+        angle = "{:.6f}".format(round(angle, 6))
         
         segments[0] = start_list
         segments[1] = end_list
         segments.insert(2, ([ 'angle', angle]))
         segments.insert(0, 'gr_arc')
-        print(segments, radius, sweep, large_arc)
         return segments
 
+
+    def Get_Angle(self, centre, point):
+        vec1 = centre[0] + 1j * centre[1]
+        vec2 = point[0] + 1j * point[1]
+        vec3 = vec2 - vec1
+        return math.degrees(cmath.phase(vec3))
 
     def Parse_Vias(self, tag):
         # (via (at 205.486 133.731) (size 0.6) (drill 0.3) (layers F.Cu B.Cu) (net 0) (tstamp 5EA04144) (status 30))

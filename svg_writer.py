@@ -444,9 +444,9 @@ class SvgWrite(object):
         else:
             large = '0'
 
-        radius = "{:.6f}".format(cmath.polar(r)[0])
-        end_x = "{:.6f}".format(end.real)
-        end_y = "{:.6f}".format(-end.imag)
+        radius = "{:.6f}".format(round(cmath.polar(r)[0], 6))
+        end_x = "{:.6f}".format(round(end.real, 6))
+        end_y = "{:.6f}".format(round(-end.imag, 6))
 
         a = ' '.join(['a', radius + ',' + radius, '0', large, sweep, end_x + ',' + end_y])
 
