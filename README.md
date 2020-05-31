@@ -30,6 +30,7 @@ Back to KiCad:
 ## Usage
 
 - Copy the Flex folder into your KiCad plugin folder
+- Install dependencies using `D:\Programs\KiCad\bin\python.exe -m pip install bs4` (but substituting your own KiCad\bin path)
 - Open up your KiCad project, and then your PCB in Pcbnew
 - Hit the "UP" arrow in your plugin bar ![flex-to-svg](to_svg.png)
 - There is now a file in your PCB directory called "out.svg". Open it in Inkscape, or your preferred vector software
