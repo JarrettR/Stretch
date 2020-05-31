@@ -160,6 +160,7 @@ class SvgWrite(object):
 
         i = 0
         layers = []
+        #print(input)
     
         # if input[0] != 'layers':
         #     assert False,"Layers: Not a layer"
@@ -198,7 +199,7 @@ class SvgWrite(object):
             parameters += power
             parameters += '/>'
 
-            layers.append(parameters)
+            layers.insert(0, parameters)
             i = i + 1
         
         # return {'layers': layers }
@@ -679,7 +680,8 @@ class SvgWrite(object):
         roundcorners = ''
         first = True
 
-        for layer in layers:
+        #Reverse list
+        for layer in layers[::-1]:
             parameters = ''
             if shape == 'rect':
 
