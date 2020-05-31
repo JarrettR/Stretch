@@ -75,8 +75,7 @@ class SvgWrite(object):
         #    assert False,"kicad_pcb: Not a kicad_pcb"
 
         base.svg.append(BeautifulSoup('<kicad />', 'html.parser'))
-        base.svg.append(BeautifulSoup('<g inkscape:label="Vias" inkscape:groupmode="layer" id="layervia" user="True" />', 'html.parser'))
-        
+
         i = 0
         for item in items:
             if type(item) is str:
@@ -89,7 +88,9 @@ class SvgWrite(object):
                         tag = BeautifulSoup(layer, 'html.parser')
                         base.svg.append(tag)
             i = i + 1
-                        
+        
+        base.svg.append(BeautifulSoup('<g inkscape:label="Vias" inkscape:groupmode="layer" id="layervia" user="True" />', 'html.parser'))
+                     
         for item in items:
             if type(item) is str:
                 print(item)
