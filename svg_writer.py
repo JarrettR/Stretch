@@ -588,12 +588,36 @@ class SvgWrite(object):
                 status = 'status="' + input[7][1] + '" '
 
 
-        parameters = '<circle style="stroke:none;stroke-linecap:round;stroke-linejoin:miter;fill-opacity:1'
-        parameters += ';fill:#' + self.Assign_Layer_Colour('Edge.Cuts')
+
+        parameters = '<g '
+        parameters += 'x="' + str(float(at[0]) * pxToMM) + '" '
+        parameters += 'y="' + str(float(at[1]) * pxToMM) + '" '
+        parameters += 'id="via' + str(id) + '" '
+        parameters += 'type="via" '
+        parameters += 'layers="' + layers[0] + ',' + layers[1] + '" '
+        parameters += 'size="' + size + '" '
+        parameters += 'drill="' + drill + '" '
+        parameters += 'net="' + net + '" '
+        parameters += tstamp
+        parameters += status
+        parameters += '>'
+
+        hole = '<circle style="stroke:none;stroke-linecap:round;stroke-linejoin:miter;fill-opacity:1'
+        hole += ';fill:#' + self.Assign_Layer_Colour('Via.Inner')
+        hole += '" '
+        hole += 'cx="' + str(float(at[0]) * pxToMM) + '" '
+        hole += 'cy="' + str(float(at[1]) * pxToMM) + '" '
+        hole += 'id="viai' + str(id) + '" '
+        #hole += 'drill="true" '
+        hole += 'r="' + str(float(drill)  * (pxToMM / 2)) + '" '
+        hole += '/>'
+
+        parameters += '<circle style="stroke:none;stroke-linecap:round;stroke-linejoin:miter;fill-opacity:1'
+        parameters += ';fill:#' + self.Assign_Layer_Colour('Via.Outer')
         parameters += '" '
         parameters += 'cx="' + str(float(at[0]) * pxToMM) + '" '
         parameters += 'cy="' + str(float(at[1]) * pxToMM) + '" '
-        parameters += 'id="path' + str(id) + '" '
+        parameters += 'id="viao' + str(id) + '" '
         parameters += 'r="' + str(float(size)  * (pxToMM / 2)) + '" '
         parameters += 'layers="' + layers[0] + ',' + layers[1] + '" '
         parameters += 'size="' + size + '" '
@@ -601,7 +625,9 @@ class SvgWrite(object):
         parameters += 'net="' + net + '" '
         parameters += tstamp
         parameters += status
-        parameters += '/>'
+        parameters += '/>' + hole 
+
+        parameters += '</g>'
 
         #print(parameters)
         return parameters
@@ -768,6 +794,8 @@ class SvgWrite(object):
             'F.CrtYd': 'c2c2c2',
             'B.Fab': '000084',
             'F.Fab': '848484',
+            'Via.Outer': 'c2c2c2',
+            'Via.Inner': '8c7827',
             'Default': 'FFFF00'
         }
 

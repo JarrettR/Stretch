@@ -50,7 +50,7 @@ class PcbWrite(object):
         layers, modules, segments, gr_lines, gr_arcs, vias = self.Parse_Layers_Segments(base)
         # print(layers_segments)
 
-        lst.append(layers)
+        lst.append(layers[::-1])
         lst = lst + vias
         lst = lst + modules
         lst = lst + segments
@@ -60,7 +60,8 @@ class PcbWrite(object):
         return lst
 
     def Parse_Layers_Segments(self, base):
-        layers = ['layers']
+        #This gets reversed later
+        layers = []
         modules = []
         segments = []
         gr_lines = []
@@ -76,6 +77,7 @@ class PcbWrite(object):
                 modules.append(module)
 
             elif tag['id'].startswith('layer'):
+                #This gets reversed later
                 layer = [ tag['number'] ]
                 layer.append(tag['inkscape:label'])
 
@@ -97,8 +99,7 @@ class PcbWrite(object):
                     gr_arcs = gr_arcs + gr_arc
 
 
-        # layers.append(vias)
-        # layers.append(segments)
+        layers.append('layers')
         return layers, modules, segments, gr_lines, gr_arcs, vias
 
     def Parse_Module(self, tag):
@@ -339,24 +340,28 @@ class PcbWrite(object):
     def Parse_Vias(self, tag):
         # (via (at 205.486 133.731) (size 0.6) (drill 0.3) (layers F.Cu B.Cu) (net 0) (tstamp 5EA04144) (status 30))
         vias = []
-        for circle in tag.find_all('circle'):
-            x = circle['cx']
-            y = circle['cy']
+        for via_in in tag.find_all('g'):
+            if not via_in.has_attr('type'):
+                continue
+            if not via_in['type'] == "via":
+                continue
+            x = via_in['x']
+            y = via_in['y']
             at = ['at', str(float(x) / pxToMM), str(float(y) / pxToMM)]
 
-            via = [ 'via', at, ['size', circle['size']], ['drill', circle['drill']]]
+            via = [ 'via', at, ['size', via_in['size']], ['drill', via_in['drill']]]
 
-            layers = circle['layers'].split(',')
+            layers = via_in['layers'].split(',')
             layers = ['layers'] + layers
 
             via.append(layers)
 
-            via.append(['net', circle['net']])
+            via.append(['net', via_in['net']])
 
-            if circle.has_attr('tstamp'):
-                via.append(['tstamp', circle['tstamp']])
-            if circle.has_attr('status'):
-                via.append(['status', circle['status']])
+            if via_in.has_attr('tstamp'):
+                via.append(['tstamp', via_in['tstamp']])
+            if via_in.has_attr('status'):
+                via.append(['status', via_in['status']])
 
             vias.append(via)
         return vias
