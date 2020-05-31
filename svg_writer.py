@@ -49,8 +49,11 @@ class SvgWrite(object):
             sexpression = parse_sexpression(f.read())
         return sexpression
 
-    def Convert(self, obj):
+    def Convert(self, obj, save = False):
         js = json.dumps(obj)
+        if save:
+            with open(self.filename_json, 'wb') as f:
+                f.write(js)
         return js
 
     def Save(self, svg, filename = None):
@@ -337,8 +340,13 @@ class SvgWrite(object):
                 svg.g['transform'] = transform
 
             if item[0] == 'layer':
-
                 svg.g['layer'] = item[1]
+
+            if item[0] == 'tedit':
+                svg.g['tedit'] = item[1]
+
+            if item[0] == 'tstamp':
+                svg.g['tstamp'] = item[1]
 
             if item[0] == 'fp_line':
                 tag = BeautifulSoup(self.Convert_Gr_Line_To_SVG(item, str(id) + '-' + str(a)), 'html.parser')
@@ -414,9 +422,9 @@ class SvgWrite(object):
         # m 486.60713,151.00183 a 9.5535717,9.5535717 0 0 1 -9.55357,9.55357
         # (rx ry x-axis-rotation large-arc-flag sweep-flag x y)
 
-        dx = start[0] - centre[0]
+        # dx = start[0] - centre[0]
         # dy = centre[1] - start[1]
-        dy = start[1] - centre[1]
+        # dy = start[1] - centre[1]
 
         r = (start[0] - centre[0]) + (centre[1] - start[1]) * 1j
 
@@ -809,6 +817,10 @@ class SvgWrite(object):
 
     def Run_Standalone(self):
         dic = self.Load()
+        
+        #Save JSON file, for development
+        #self.Convert(dic, True)
+
         with open(self.filename_base, "r") as f:
     
             contents = f.read()

@@ -60,7 +60,7 @@ class PcbWrite(object):
         return lst
 
     def Parse_Layers_Segments(self, base):
-        #This gets reversed later
+        #This gets reversed after it returns
         layers = []
         modules = []
         segments = []
@@ -122,6 +122,13 @@ class PcbWrite(object):
         if 'rotate(' in transform:
             rotate = transform[transform.find('rotate(') + 7:]
             rotate = float(rotate[0:-1]) * -1
+
+        
+        if tag.has_attr('tedit'):
+            module.append(['tedit', tag['tedit']])
+
+        if tag.has_attr('tstamp'):
+            module.append(['tstamp', tag['tstamp']])
 
         at = ['at', str(x), str(y), str(rotate)]
         module.append(at)
