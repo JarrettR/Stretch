@@ -122,6 +122,11 @@ class SvgWrite(object):
                     layer = tag.path['layer']
                     base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
 
+                elif item[0] == 'gr_text':
+                    tag = BeautifulSoup(self.Convert_Gr_Text_To_SVG(item, i), 'html.parser')
+                    layer = tag.find('text')['layer']
+                    base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
+
                 elif item[0] == 'via':
                     tag = BeautifulSoup(self.Convert_Via_To_SVG(item, i), 'html.parser')
                     base.svg.find('g', {'inkscape:label': 'Vias'}, recursive=False).append(tag)
@@ -351,6 +356,11 @@ class SvgWrite(object):
             if item[0] == 'fp_line':
                 tag = BeautifulSoup(self.Convert_Gr_Line_To_SVG(item, str(id) + '-' + str(a)), 'html.parser')
                 svg.g.append(tag)
+
+            if item[0] == 'fp_text':
+                tag = BeautifulSoup(self.Convert_Gr_Text_To_SVG(item, str(id) + '-' + str(a)), 'html.parser')
+                svg.g.append(tag)
+
             elif item[0] == 'pad':
                 tag = BeautifulSoup(self.Convert_Pad_To_SVG(item, str(id) + '-' + str(a)), 'html.parser')
                 svg.g.append(tag)
@@ -520,6 +530,100 @@ class SvgWrite(object):
         parameters += 'type="gr_line" '
         parameters += tstamp
         parameters += '/>'
+
+        return parameters
+
+    def Convert_Gr_Text_To_SVG(self, input, id):
+        # 0 gr_text
+        # 1 text
+        # 2
+        #   0 at
+        #   1 66.66
+        #   2 99.99
+        # 3
+        #   0 layer
+        #   1 F.SilkS
+        # 4
+        #   0 effects
+        #   1 
+        #       0 font
+        #           1
+        #               0 size
+        #               1 1.5
+        #               2 1.5
+        #           2
+        #               0 thickness
+        #               1 0.3
+        #   2
+        #       0 justify
+        #       1 mirror
+
+        at = []
+
+        #gr_text is user-created label, fp_text is module ref/value
+        if input[0] == 'gr_text':
+            type_text = 'gr_text'
+            text = input[1]
+
+        if input[0] == 'fp_text':
+            type_text = input[1]
+            text = input[2]
+
+
+        effect_text = ''
+        transform = ''
+
+        for item in input:
+            if type(item) == str:
+                continue
+
+            if item[0] == 'at':
+                at.append(item[1])
+                at.append(item[2])
+                if len(item) > 3:
+                    transform += 'rotate(' + item[3] + ')'
+
+            if item[0] == 'layer':
+                layer = item[1]
+
+            if item[0] == 'effects':
+                for effect in item[1:]:
+                    if effect[0] == 'font':
+                        for param in effect[1:]:
+                            if param[0] == 'size':
+                                size = [param[1], param[2]]
+                            if param[0] == 'thickness':
+                                thickness = param[1]
+                    else:
+                        effect_text = 'effects="' + ';'.join(effect) + '" '
+                        if 'mirror' in effect:
+                            transform += ' scale(-1,1)'
+
+            tstamp = ''
+            if item[0] == 'tstamp':
+                tstamp = 'tstamp="' + item[1] + '" '
+
+        if len(transform) > 0:
+            transform = 'transform="' + transform + '" '
+
+        parameters = '<text '
+        parameters += 'xml:space="preserve" '
+        parameters += 'style="font-style:normal;font-weight:normal;font-family:sans-serif'
+        parameters += ';fill-opacity:1;stroke:none'
+        parameters += ';font-size:' + str(float(size[0]) * pxToMM) + 'px'
+        parameters += ';fill:#' + self.Assign_Layer_Colour(layer)
+        parameters += '" '
+        parameters += 'x="' + str(float(at[0]) * pxToMM) + '" '
+        parameters += 'y="' + str(float(at[1]) * pxToMM) + '" '
+        parameters += 'id="text' + str(id) + '" '
+        parameters += effect_text
+        parameters += 'layer="' + layer + '" '
+        parameters += 'thickness="' + thickness + '" '
+        parameters += 'type="' + type_text + '" '
+        parameters += tstamp
+        # parameters += transform
+        parameters += '>' + text
+        parameters += '</text>'
 
         return parameters
 
