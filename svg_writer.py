@@ -34,7 +34,8 @@ class SvgWrite(object):
     def __init__(self):
         print(os.path.dirname(os.path.realpath(__file__)) )
         currentdir = os.path.dirname(os.path.realpath(__file__)) + '\\'
-        self.filename_in = currentdir + "example\\complex.kicad_pcb"
+        # self.filename_in = currentdir + "example\\complex.kicad_pcb"
+        self.filename_in = currentdir + "example\\simple.kicad_pcb"
         self.filename_json = currentdir + "example\\out.json"
         self.filename_svg = currentdir + "example\\out.svg"
         self.filename_base = currentdir + "example\\base.svg"
@@ -122,6 +123,11 @@ class SvgWrite(object):
                     layer = tag.path['layer']
                     base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
 
+                elif item[0] == 'gr_curve':
+                    tag = BeautifulSoup(self.Convert_Gr_Curve_To_SVG(item, i), 'html.parser')
+                    layer = tag.path['layer']
+                    base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
+
                 elif item[0] == 'gr_text':
                     tag = BeautifulSoup(self.Convert_Gr_Text_To_SVG(item, i), 'html.parser')
                     layer = tag.find('text')['layer']
@@ -139,8 +145,8 @@ class SvgWrite(object):
             i = i + 1
         dic.append({'segment': segments})
 
-        svg = base.encode()
-        # svg = base.prettify("utf-8")
+        # svg = base.encode()
+        svg = base.prettify("utf-8")
         
         return svg
 
@@ -361,6 +367,10 @@ class SvgWrite(object):
                 tag = BeautifulSoup(self.Convert_Gr_Line_To_SVG(item, str(id) + '-' + str(a)), 'html.parser')
                 svg.g.append(tag)
 
+            if item[0] == 'fp_curve':
+                tag = BeautifulSoup(self.Convert_Gr_Curve_To_SVG(item, str(id) + '-' + str(a)), 'html.parser')
+                svg.g.append(tag)
+
             if item[0] == 'fp_text':
                 tag = BeautifulSoup(self.Convert_Gr_Text_To_SVG(item, str(id) + '-' + str(a)), 'html.parser')
                 svg.g.append(tag)
@@ -532,6 +542,77 @@ class SvgWrite(object):
         parameters += 'id="path' + str(id) + '" '
         parameters += 'layer="' + layer + '" '
         parameters += 'type="gr_line" '
+        parameters += tstamp
+        parameters += '/>'
+
+        return parameters
+
+    def Convert_Gr_Curve_To_SVG(self, input, id):
+        # 0 gr_curve
+        # 1
+        #   0 pts
+        #   1
+        #       0 xy
+        #       1 99.99
+        #       2 99.99
+        #   2
+        #       0 xy
+        #       1 99.99
+        #       2 99.99
+        #   3
+        #       0 xy
+        #       1 99.99
+        #       2 99.99
+        #   4
+        #       0 xy
+        #       1 99.99
+        #       2 99.99
+        # 2
+        #   0 layer
+        #   1 Edge.Cuts
+        # 3
+        #   0 width
+        #   1 0.05
+        # 4
+        #   0 tstamp
+        #   1 5E451B20
+
+        points = []
+        
+        for item in input:
+            if type(item) == str:
+                #if item == 'gr_curve' or item == 'fp_curve':
+                continue
+
+            #This might have a problem with random list ordering in certain versions of Python
+            if item[0] == 'pts':
+                for xy in item:
+                    if xy[0] == 'xy':
+                        points.append(float(xy[1]))
+                        points.append(float(xy[2]))
+
+            if item[0] == 'layer':
+                layer = item[1]
+
+            if item[0] == 'width':
+                width = item[1]
+
+            tstamp = ''
+            if item[0] == 'tstamp':
+                tstamp = 'tstamp="' + item[1] + '" '
+
+
+        parameters = '<path style="fill:none;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1'
+        parameters += ';stroke:#' + self.Assign_Layer_Colour(layer)
+        parameters += ';stroke-width:' + width + 'mm'
+        parameters += '" '
+        parameters += 'd="M ' + str(points[0] * pxToMM) + ',' + str(points[1] * pxToMM) + ' C '
+        parameters += str(points[2] * pxToMM) + ',' + str(points[3] * pxToMM) + ' '
+        parameters += str(points[4] * pxToMM) + ',' + str(points[5] * pxToMM) + ' '
+        parameters += str(points[6] * pxToMM) + ',' + str(points[7] * pxToMM) + '" '
+        parameters += 'id="path' + str(id) + '" '
+        parameters += 'layer="' + layer + '" '
+        parameters += 'type="gr_curve" '
         parameters += tstamp
         parameters += '/>'
 
