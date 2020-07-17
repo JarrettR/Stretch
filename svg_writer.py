@@ -130,14 +130,18 @@ class SvgWrite(object):
                 elif item[0] == 'via':
                     tag = BeautifulSoup(self.Convert_Via_To_SVG(item, i), 'html.parser')
                     base.svg.find('g', {'inkscape:label': 'Vias'}, recursive=False).append(tag)
+                    
                 elif item[0] != 'layers' and item[0] != 'module':
                     # Already handled above
                     svg = self.Convert_Metadata_To_SVG(item)
                     base.svg.kicad.append(BeautifulSoup(svg, 'html.parser'))
+                    
             i = i + 1
         dic.append({'segment': segments})
 
-        svg = base.prettify("utf-8")
+        svg = base.encode()
+        # svg = base.prettify("utf-8")
+        
         return svg
 
 
