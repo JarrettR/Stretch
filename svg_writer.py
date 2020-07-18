@@ -96,9 +96,7 @@ class SvgWrite(object):
                         tag = BeautifulSoup(layer, 'html.parser')
                         base.svg.append(tag)
             i = i + 1
-        
-        base.svg.append(BeautifulSoup('<g inkscape:label="Vias" inkscape:groupmode="layer" id="layervia" user="True" />', 'html.parser'))
-                     
+                             
         for item in items:
             if type(item) is str:
                 print(item)
@@ -106,6 +104,9 @@ class SvgWrite(object):
                 if item[0] == 'module':
                     base.svg.append(self.Convert_Module_To_SVG(item, i))
             i = i + 1
+            
+        base.svg.append(BeautifulSoup('<g inkscape:label="Vias" inkscape:groupmode="layer" id="layervia" user="True" />', 'html.parser'))
+
 
         for item in items:
             if type(item) is str:
@@ -135,6 +136,11 @@ class SvgWrite(object):
                 elif item[0] == 'gr_text':
                     tag = BeautifulSoup(self.Convert_Gr_Text_To_SVG(item, i), 'html.parser')
                     layer = tag.find('text')['layer']
+                    base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
+
+                elif item[0] == 'zone':
+                    tag = BeautifulSoup(self.Convert_Zone_To_SVG(item, i), 'html.parser')
+                    layer = tag.path['layer']
                     base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
 
                 elif item[0] == 'via':
@@ -301,6 +307,112 @@ class SvgWrite(object):
         parameters += 'type="segment" '
         parameters += 'net="' + net + '" '
         parameters += '/>'
+
+        # print(parameters)
+        return parameters
+
+    def Convert_Zone_To_SVG(self, input, id):
+        # 0 zone
+        # 1
+        #   0 net
+        #   1 16
+        # 2
+        #   0 net_name
+        #   1 GND
+        # 4
+        #   0 layer
+        #   1 B.Cu
+        # 5
+        #   0 tstamp
+        #   1 5EACCA92
+        # 6
+        #   0 hatch
+        #   1 edge
+        #   2 0.508
+        # 7
+        #   0 connect_pads
+        #   1
+        #     0 clearance
+        #     1 0.1524
+        # 8
+        #   0 min_thickness
+        #   1 0.1524
+        # 9
+        #   0 fill
+        #   1 yes
+        #   2
+        #     0 arc_segments
+        #     1 32
+        #   3
+        #     0 thermal_gap
+        #     1 0.1524
+        #   4
+        #     0 thermal_bridge_width
+        #     1 0.1525
+        # 10
+        #   0 polygon
+        #   1
+        #     0 pts
+        #     1
+        #       0 xy
+        #       1 147.6375
+        #       2 120.9675
+        #     2
+        #       0 xy
+        #       1 147.6375
+        #       2 120.9675
+        #     3
+        #       ...
+        # 11
+        #   0 filled_polygon
+        #   1
+        #     0 pts
+        #     1
+        #       0 xy
+        #       1 147.6375
+        #       2 120.9675
+        #     2
+        #       0 xy
+        #       1 147.6375
+        #       2 120.9675
+        #     3
+        #       ...
+        
+        xy_text = ''
+        additional = ''
+        hide = ''
+
+        for item in input:
+                
+            if item[0] == 'layer':
+                layer = item[1]
+                
+            elif item[0] == 'hatch':
+                width = item[2]
+                
+            elif item[0] == 'polygon':
+                for xy in item[1]:
+                    if xy[0] == 'xy':
+                        xy_text += ' ' + str(float(xy[1]) * pxToMM)
+                        xy_text += ',' + str(float(xy[2]) * pxToMM)
+                        
+            else:
+                additional += self.Convert_Metadata_To_SVG(item)
+
+        if layer in self.hiddenLayers:
+            hide = ';display:none'
+            
+        parameters = '<path style="fill:none;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1'
+        parameters += ';stroke:#' + self.Assign_Layer_Colour(layer)
+        parameters += ';stroke-width:' + width + 'mm'
+        parameters += hide
+        parameters += '" '
+        parameters += 'd="M ' + xy_text + ' Z" '
+        parameters += 'id="path' + str(id) + '" '
+        parameters += 'layer="' + layer + '" '
+        parameters += 'type="zone">'
+        parameters += additional
+        parameters += '</path>'
 
         # print(parameters)
         return parameters
@@ -665,6 +777,7 @@ class SvgWrite(object):
         effect_text = ''
         transform = ''
         hide = ''
+        mirror_text = ''
         mirror = 1
 
         for item in input:
@@ -692,6 +805,7 @@ class SvgWrite(object):
                         if effect[1] == 'mirror':
                             transform += ' scale(-1,1)'
                             mirror = -1
+                            mirror_text = 'mirrored="true" '
                         
                     else:
                         effect_text = 'effects="' + ';'.join(effect) + '" '
@@ -719,6 +833,7 @@ class SvgWrite(object):
         parameters += 'y="' + str(float(at[1]) * pxToMM) + '" '
         parameters += 'id="text' + str(id) + '" '
         parameters += effect_text
+        parameters += mirror_text
         parameters += 'layer="' + layer + '" '
         parameters += 'text-anchor="middle" '
         parameters += 'thickness="' + thickness + '" '
