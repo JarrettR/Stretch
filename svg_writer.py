@@ -10,6 +10,9 @@ from sexpressions_writer import SexpressionWriter
 
 pxToMM = 3.779528
 
+#Prettifies SVG output, but messes up text field spacing
+debug = False
+# debug = True
 
 # kicad_pcb
 # version
@@ -34,12 +37,13 @@ class SvgWrite(object):
     def __init__(self):
         print(os.path.dirname(os.path.realpath(__file__)) )
         currentdir = os.path.dirname(os.path.realpath(__file__)) + '\\'
-        # self.filename_in = currentdir + "example\\complex.kicad_pcb"
-        self.filename_in = currentdir + "example\\simple.kicad_pcb"
+        self.filename_in = currentdir + "example\\complex.kicad_pcb"
+        # self.filename_in = currentdir + "example\\simple.kicad_pcb"
         self.filename_json = currentdir + "example\\out.json"
         self.filename_svg = currentdir + "example\\out.svg"
         self.filename_base = currentdir + "example\\base.svg"
         
+        self.hiddenLayers = []
 
 
     def Load(self, filename = None):
@@ -145,8 +149,10 @@ class SvgWrite(object):
             i = i + 1
         dic.append({'segment': segments})
 
-        # svg = base.encode()
-        svg = base.prettify("utf-8")
+        if debug == True:
+            svg = base.prettify("utf-8")
+        else:
+            svg = base.encode()
         
         return svg
 
@@ -201,6 +207,7 @@ class SvgWrite(object):
                 user = 'user="True" '
             if 'hide' in item:
                 hide = 'hide="True" '
+                self.hiddenLayers.append(layername)
             if 'signal' in item:
                 signal = 'signal="True" '
             if 'power' in item:
@@ -657,6 +664,8 @@ class SvgWrite(object):
 
         effect_text = ''
         transform = ''
+        hide = ''
+        mirror = 1
 
         for item in input:
             if type(item) == str:
@@ -679,10 +688,14 @@ class SvgWrite(object):
                                 size = [param[1], param[2]]
                             if param[0] == 'thickness':
                                 thickness = param[1]
+                    elif effect[0] == 'justify':
+                        if effect[1] == 'mirror':
+                            transform += ' scale(-1,1)'
+                            mirror = -1
+                        
                     else:
                         effect_text = 'effects="' + ';'.join(effect) + '" '
-                        if 'mirror' in effect:
-                            transform += ' scale(-1,1)'
+                            
 
             tstamp = ''
             if item[0] == 'tstamp':
@@ -690,15 +703,19 @@ class SvgWrite(object):
 
         if len(transform) > 0:
             transform = 'transform="' + transform + '" '
-
+            
+        if layer in self.hiddenLayers:
+            hide = ';display:none'
+            
         parameters = '<text '
         parameters += 'xml:space="preserve" '
         parameters += 'style="font-style:normal;font-weight:normal;font-family:sans-serif'
         parameters += ';fill-opacity:1;stroke:none'
+        parameters += hide
         parameters += ';font-size:' + str(float(size[0]) * pxToMM) + 'px'
         parameters += ';fill:#' + self.Assign_Layer_Colour(layer)
         parameters += '" '
-        parameters += 'x="' + str(float(at[0]) * pxToMM) + '" '
+        parameters += 'x="' + str(float(at[0]) * pxToMM * mirror) + '" '
         parameters += 'y="' + str(float(at[1]) * pxToMM) + '" '
         parameters += 'id="text' + str(id) + '" '
         parameters += effect_text
@@ -706,7 +723,7 @@ class SvgWrite(object):
         parameters += 'thickness="' + thickness + '" '
         parameters += 'type="' + type_text + '" '
         parameters += tstamp
-        # parameters += transform
+        parameters += transform
         parameters += '>' + text
         parameters += '</text>'
 
