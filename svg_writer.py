@@ -720,6 +720,7 @@ class SvgWrite(object):
         parameters += 'id="text' + str(id) + '" '
         parameters += effect_text
         parameters += 'layer="' + layer + '" '
+        parameters += 'text-anchor="middle" '
         parameters += 'thickness="' + thickness + '" '
         parameters += 'type="' + type_text + '" '
         parameters += tstamp
