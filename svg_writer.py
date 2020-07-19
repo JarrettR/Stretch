@@ -37,8 +37,8 @@ class SvgWrite(object):
     def __init__(self):
         print(os.path.dirname(os.path.realpath(__file__)) )
         currentdir = os.path.dirname(os.path.realpath(__file__)) + '\\'
-        self.filename_in = currentdir + "example\\complex.kicad_pcb"
-        # self.filename_in = currentdir + "example\\simple.kicad_pcb"
+        # self.filename_in = currentdir + "example\\complex.kicad_pcb"
+        self.filename_in = currentdir + "example\\simple.kicad_pcb"
         self.filename_json = currentdir + "example\\out.json"
         self.filename_svg = currentdir + "example\\out.svg"
         self.filename_base = currentdir + "example\\base.svg"
@@ -319,25 +319,25 @@ class SvgWrite(object):
         # 2
         #   0 net_name
         #   1 GND
-        # 4
+        # 3
         #   0 layer
         #   1 B.Cu
-        # 5
+        # 4
         #   0 tstamp
         #   1 5EACCA92
-        # 6
+        # 5
         #   0 hatch
         #   1 edge
         #   2 0.508
-        # 7
+        # 6
         #   0 connect_pads
         #   1
         #     0 clearance
         #     1 0.1524
-        # 8
+        # 7
         #   0 min_thickness
         #   1 0.1524
-        # 9
+        # 8
         #   0 fill
         #   1 yes
         #   2
@@ -349,7 +349,7 @@ class SvgWrite(object):
         #   4
         #     0 thermal_bridge_width
         #     1 0.1525
-        # 10
+        # 9
         #   0 polygon
         #   1
         #     0 pts
@@ -363,7 +363,7 @@ class SvgWrite(object):
         #       2 120.9675
         #     3
         #       ...
-        # 11
+        # 10
         #   0 filled_polygon
         #   1
         #     0 pts

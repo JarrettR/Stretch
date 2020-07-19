@@ -37,7 +37,7 @@ class PcbWrite(object):
             f.write(lst)
 
     def Svg_To_List(self, base):
-        content = base.svg.kicad.contents[0][1:-3]
+        content = base.svg.kicad.contents[0][0:-1]
         content = '[' + content + ' ]'
         # self.Save(content)
         meta = json.loads(content)
@@ -47,7 +47,7 @@ class PcbWrite(object):
 
         lst = meta
 
-        layers, modules, segments, gr_lines, gr_arcs, vias = self.Parse_Layers_Segments(base)
+        layers, modules, segments, gr_lines, gr_arcs, gr_curves, vias, zones = self.Parse_Layers_Segments(base)
         # print(layers_segments)
 
         lst.append(layers[::-1])
@@ -56,6 +56,9 @@ class PcbWrite(object):
         lst = lst + segments
         lst = lst + gr_lines
         lst = lst + gr_arcs
+        lst = lst + gr_curves
+        lst = lst + zones
+        print(lst)
 
         return lst
 
@@ -66,7 +69,8 @@ class PcbWrite(object):
         segments = []
         gr_lines = []
         gr_arcs = []
-
+        gr_curves = []
+        zones = []
 
         for tag in base.svg.find_all('g'):
             if tag['id'] == 'layervia':
@@ -93,14 +97,18 @@ class PcbWrite(object):
                 layers.append(layer)
 
                 for path in tag.find_all('path'):
-                    segment, gr_line, gr_arc = self.Parse_Segment(path)
-                    segments = segments + segment
-                    gr_lines = gr_lines + gr_line
-                    gr_arcs = gr_arcs + gr_arc
+                    if path.has_attr('type') == True and path['type'] == 'zone':
+                        zones += self.Parse_Zone(path)
+                    else:
+                        segment, gr_line, gr_arc, gr_curve = self.Parse_Segment(path)
+                        segments += segment
+                        gr_lines += gr_line
+                        gr_arcs += gr_arc
+                        gr_curves += gr_curve
 
 
         layers.append('layers')
-        return layers, modules, segments, gr_lines, gr_arcs, vias
+        return layers, modules, segments, gr_lines, gr_arcs, gr_curves, vias, zones
 
     def Parse_Module(self, tag):
         # print(tag['id'])
@@ -108,7 +116,9 @@ class PcbWrite(object):
         segments = []
         gr_lines = []
         gr_arcs = []
+        gr_curves = []
         pads = []
+        zones = []
         transform = tag['transform']
         
         translate = transform[transform.find('translate(') + 10:]
@@ -134,11 +144,14 @@ class PcbWrite(object):
         module.append(at)
 
         for path in tag.find_all('path'):
-            segment, gr_line, gr_arc = self.Parse_Segment(path)
-            segments = segments + segment
-            gr_line[0][0] = 'fp_line'
-            gr_lines = gr_lines + gr_line
-            gr_arcs = gr_arcs + gr_arc
+            if path.has_attr('type') == True and path['type'] == 'zone':
+                zones += self.Parse_Zone(path)
+            else:
+                segment, gr_line, gr_arc, gr_curves = self.Parse_Segment(path)
+                segments = segments + segment
+                gr_line[0][0] = 'fp_line'
+                gr_lines += gr_line
+                gr_arcs += gr_arc
 
         for rect in tag.find_all('rect'):
             pad = self.Parse_Pad(rect, 'rect')
@@ -154,7 +167,7 @@ class PcbWrite(object):
         if len(pads) > 0:
             module = module + pads
 
-        module = module + gr_lines + gr_arcs
+        module = module + gr_lines + gr_arcs + gr_curves + zones
         return module
 
 
@@ -223,6 +236,8 @@ class PcbWrite(object):
         segments = []
         gr_lines = []
         gr_arcs = []
+        gr_curves = []
+        zones = []
 
         for path in paths:
             segment = []
@@ -244,11 +259,13 @@ class PcbWrite(object):
                 segments.append(segment)
             elif tag['type'] == 'gr_arc':
                 gr_arcs.append(self.Parse_Arcs(tag, segment))
+            elif tag['type'] == 'gr_curve':
+                gr_curves.append(self.Parse_Curves(tag, segment))
             else:
                 print(tag)
                 assert False,"Gr_line / segments: Nobody knows!"
 
-        return segments, gr_lines, gr_arcs
+        return segments, gr_lines, gr_arcs, gr_curves
 
     def Parse_Arcs(self, tag, segments):
         # 0 gr_arc
@@ -336,6 +353,178 @@ class PcbWrite(object):
         segments.insert(2, ([ 'angle', angle]))
         segments.insert(0, 'gr_arc')
         return segments
+
+    def Parse_Curves(self, tag, segments):
+        # 0 gr_curve
+        # 1
+        #   0 pts
+        #   1
+        #       0 xy
+        #       1 99.99
+        #       2 99.99
+        #   2
+        #       0 xy
+        #       1 99.99
+        #       2 99.99
+        #   3
+        #       0 xy
+        #       1 99.99
+        #       2 99.99
+        #   4
+        #       0 xy
+        #       1 99.99
+        #       2 99.99
+        # 2
+        #   0 layer
+        #   1 Edge.Cuts
+        # 3
+        #   0 width
+        #   1 0.05
+        # 4
+        #   0 tstamp
+        #   1 5E451B20
+
+        unparsed_path = tag['d'].split(' ')
+        # print(tag)
+        # print(tag['d'])
+        # print(unparsed_path)
+        # print(segments)
+        
+        #['M', '61.632,52.32', 'C', '66.48,54.91', '59.52,63.45', '56.42,57.52']
+        
+        xy_str = unparsed_path[1].split(',')
+        xy = ['xy', str(float(xy_str[0]) / pxToMM), str(float(xy_str[1]) / pxToMM)]
+        
+        pts = ['pts', xy]
+
+        xy_str = unparsed_path[3].split(',')
+        xy = ['xy', str(float(xy_str[0]) / pxToMM), str(float(xy_str[1]) / pxToMM)]
+        pts.append(xy)
+
+        xy_str = unparsed_path[4].split(',')
+        xy = ['xy', str(float(xy_str[0]) / pxToMM), str(float(xy_str[1]) / pxToMM)]
+        pts.append(xy)
+
+        xy_str = unparsed_path[5].split(',')
+        xy = ['xy', str(float(xy_str[0]) / pxToMM), str(float(xy_str[1]) / pxToMM)]
+        pts.append(xy)
+
+        data = ['gr_curve']
+        data.append(pts)
+        data.append(segments[3])
+        data.append(segments[2])
+        
+        if tag.has_attr('tstamp') == True:
+            data.append(['tstamp', tag['tstamp']])
+        
+        return data
+
+    def Parse_Zone(self, tag):
+        # 0 zone
+        # 1
+        #   0 net
+        #   1 16
+        # 2
+        #   0 net_name
+        #   1 GND
+        # 3
+        #   0 layer
+        #   1 B.Cu
+        # 4
+        #   0 tstamp
+        #   1 5EACCA92
+        # 5
+        #   0 hatch
+        #   1 edge
+        #   2 0.508
+        # 6
+        #   0 connect_pads
+        #   1
+        #     0 clearance
+        #     1 0.1524
+        # 7
+        #   0 min_thickness
+        #   1 0.1524
+        # 8
+        #   0 fill
+        #   1 yes
+        #   2
+        #     0 arc_segments
+        #     1 32
+        #   3
+        #     0 thermal_gap
+        #     1 0.1524
+        #   4
+        #     0 thermal_bridge_width
+        #     1 0.1525
+        # 9
+        #   0 polygon
+        #   1
+        #     0 pts
+        #     1
+        #       0 xy
+        #       1 147.6375
+        #       2 120.9675
+        #     2
+        #       0 xy
+        #       1 147.6375
+        #       2 120.9675
+        #     3
+        #       ...
+        # 10
+        #   0 filled_polygon
+        #   1
+        #     0 pts
+        #     1
+        #       0 xy
+        #       1 147.6375
+        #       2 120.9675
+        #     2
+        #       0 xy
+        #       1 147.6375
+        #       2 120.9675
+        #     3
+        #       ...
+
+        style = tag['style']
+
+        width = style[style.find('stroke-width:') + 13:]
+        hatch = ['hatch', 'edge', width[0:width.find('mm')]]
+
+        if tag.has_attr('layer'):
+            layer = ['layer', tag['layer']]
+        elif tag.parent.has_attr('inkscape:label'):
+            #XML metadata trashed, try to recover from parent tag
+            layer = ['layer', tag.parent['inkscape:label']]
+        else:
+            assert False, "Zone not in layer"
+            
+            
+        path = parse_path(tag['d'])
+        # print(tag)
+        # print(tag['d'])
+        # print(path)
+        
+        pts = ['pts']
+        for point in path:
+            xy = ['xy']
+            xy.append(point.start.real / pxToMM)
+            xy.append(point.start.imag / pxToMM)
+            pts.append(xy)
+
+        polygon = ['polygon', pts]
+        
+        content = tag.contents[0][0:-1]
+        content = '[' + content + ' ]'
+        # self.Save(content)
+        data = json.loads(content)
+        
+        data.insert(3, layer)
+        data.insert(5, hatch)
+        data.insert(9, polygon)
+        
+        
+        return data
 
 
     def Get_Angle(self, centre, point):
