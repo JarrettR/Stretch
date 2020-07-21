@@ -58,7 +58,6 @@ class PcbWrite(object):
         lst = lst + gr_arcs
         lst = lst + gr_curves
         lst = lst + zones
-        print(lst)
 
         return lst
 
@@ -98,7 +97,7 @@ class PcbWrite(object):
 
                 for path in tag.find_all('path'):
                     if path.has_attr('type') == True and path['type'] == 'zone':
-                        zones += self.Parse_Zone(path)
+                        zones.append(self.Parse_Zone(path))
                     else:
                         segment, gr_line, gr_arc, gr_curve = self.Parse_Segment(path)
                         segments += segment
@@ -145,7 +144,7 @@ class PcbWrite(object):
 
         for path in tag.find_all('path'):
             if path.has_attr('type') == True and path['type'] == 'zone':
-                zones += self.Parse_Zone(path)
+                zones.append(self.Parse_Zone(path))
             else:
                 segment, gr_line, gr_arc, gr_curves = self.Parse_Segment(path)
                 segments = segments + segment
@@ -237,7 +236,6 @@ class PcbWrite(object):
         gr_lines = []
         gr_arcs = []
         gr_curves = []
-        zones = []
 
         for path in paths:
             segment = []
@@ -508,8 +506,8 @@ class PcbWrite(object):
         pts = ['pts']
         for point in path:
             xy = ['xy']
-            xy.append(point.start.real / pxToMM)
-            xy.append(point.start.imag / pxToMM)
+            xy.append(str(point.start.real / pxToMM))
+            xy.append(str(point.start.imag / pxToMM))
             pts.append(xy)
 
         polygon = ['polygon', pts]
@@ -522,8 +520,7 @@ class PcbWrite(object):
         data.insert(3, layer)
         data.insert(5, hatch)
         data.insert(9, polygon)
-        
-        
+                
         return data
 
 
@@ -561,6 +558,15 @@ class PcbWrite(object):
 
             vias.append(via)
         return vias
+        
+    def Save_Json(self, obj, save = False):
+        currentdir = os.path.dirname(os.path.realpath(__file__)) + '\\'
+        self.filename_json = currentdir + "example\\out.json"
+        js = json.dumps(obj)
+        if save:
+            with open(self.filename_json, 'wb') as f:
+                f.write(js)
+        return js
 
 
     def Run_Standalone(self):
