@@ -122,6 +122,11 @@ class SvgWrite(object):
                     tag = BeautifulSoup(self.Convert_Gr_Line_To_SVG(item, i), 'html.parser')
                     layer = tag.path['layer']
                     base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
+                    
+                elif item[0] == 'gr_poly':
+                    tag = BeautifulSoup(self.Convert_Gr_Poly_To_SVG(item, i), 'html.parser')
+                    layer = tag.path['layer']
+                    base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
 
                 elif item[0] == 'gr_arc':
                     tag = BeautifulSoup(self.Convert_Gr_Arc_To_SVG(item, i), 'html.parser')
@@ -502,6 +507,63 @@ class SvgWrite(object):
 
         return svg
 
+
+    def Convert_Gr_Poly_To_SVG(self, input, id):
+        # 0 gr_poly
+        # 1
+        #   0 pts
+        #   1
+        #     0 xy
+        #     1 147.6375
+        #     2 120.9675
+        #   2
+        #     0 xy
+        #     1 147.6375
+        #     2 120.9675
+        #   3
+        #     ...
+        # 2
+        #   0 layer
+        #   1 B.Cu
+        # 3
+        #   0 width
+        #   1 0.1
+        
+        xy_text = ''
+        additional = ''
+        hide = ''
+
+        for item in input:
+                
+            if item[0] == 'layer':
+                layer = item[1]
+                
+            elif item[0] == 'width':
+                width = item[1]
+                
+            elif item[0] == 'pts':
+                for xy in item:
+                    if xy[0] == 'xy':
+                        xy_text += ' ' + str(float(xy[1]) * pxToMM)
+                        xy_text += ',' + str(float(xy[2]) * pxToMM)
+                        
+        if layer in self.hiddenLayers:
+            hide = ';display:none'
+            
+        parameters = '<path style="stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1'
+        parameters += ';fill:#' + self.Assign_Layer_Colour(layer)
+        parameters += ';stroke:#' + self.Assign_Layer_Colour(layer)
+        parameters += ';stroke-width:' + width + 'mm'
+        parameters += hide
+        parameters += '" '
+        parameters += 'd="M ' + xy_text + ' Z" '
+        parameters += 'id="path' + str(id) + '" '
+        parameters += 'layer="' + layer + '" '
+        parameters += 'type="gr_poly" />'
+        
+        print(parameters)
+        return parameters
+        
     def Convert_Gr_Arc_To_SVG(self, input, id):
         # 0 gr_arc
         # 1
