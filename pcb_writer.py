@@ -381,6 +381,8 @@ class PcbWrite(object):
         # 4
         #   0 tstamp
         #   1 5E451B20
+        
+        xy_float = 4 * [0.0]
 
         unparsed_path = tag['d'].split(' ')
         # print(tag)
@@ -391,20 +393,36 @@ class PcbWrite(object):
         #['M', '61.632,52.32', 'C', '66.48,54.91', '59.52,63.45', '56.42,57.52']
         
         xy_str = unparsed_path[1].split(',')
-        xy = ['xy', str(float(xy_str[0]) / pxToMM), str(float(xy_str[1]) / pxToMM)]
+        xy_float[0] = [float(xy_str[0]), float(xy_str[1])]
+        xy_str = unparsed_path[3].split(',')
+        xy_float[1] = [float(xy_str[0]), float(xy_str[1])]
+        xy_str = unparsed_path[4].split(',')
+        xy_float[2] = [float(xy_str[0]), float(xy_str[1])]
+        xy_str = unparsed_path[5].split(',')
+        xy_float[3] = [float(xy_str[0]), float(xy_str[1])]
+        
+        
+        #relative / absolute compensation
+        if unparsed_path[2] == 'c':
+            xy_float[1][0] = xy_float[0][0] - xy_float[1][0] * -1
+            xy_float[1][1] = xy_float[0][1] - xy_float[1][1] * -1
+            xy_float[2][0] = xy_float[0][0] - xy_float[2][0] * -1
+            xy_float[2][1] = xy_float[0][1] - xy_float[2][1] * -1
+            xy_float[3][0] = xy_float[0][0] - xy_float[3][0] * -1
+            xy_float[3][1] = xy_float[0][1] - xy_float[3][1] * -1
+        
+        
+        xy = ['xy', str(xy_float[0][0] / pxToMM), str(xy_float[0][1] / pxToMM)]
         
         pts = ['pts', xy]
-
-        xy_str = unparsed_path[3].split(',')
-        xy = ['xy', str(float(xy_str[0]) / pxToMM), str(float(xy_str[1]) / pxToMM)]
+        
+        xy = ['xy', str(xy_float[1][0] / pxToMM), str(xy_float[1][1] / pxToMM)]
         pts.append(xy)
 
-        xy_str = unparsed_path[4].split(',')
-        xy = ['xy', str(float(xy_str[0]) / pxToMM), str(float(xy_str[1]) / pxToMM)]
+        xy = ['xy', str(xy_float[2][0] / pxToMM), str(xy_float[2][1] / pxToMM)]
         pts.append(xy)
 
-        xy_str = unparsed_path[5].split(',')
-        xy = ['xy', str(float(xy_str[0]) / pxToMM), str(float(xy_str[1]) / pxToMM)]
+        xy = ['xy', str(xy_float[3][0] / pxToMM), str(xy_float[3][1] / pxToMM)]
         pts.append(xy)
 
         data = ['gr_curve']
