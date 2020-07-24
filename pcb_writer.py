@@ -47,17 +47,11 @@ class PcbWrite(object):
 
         lst = meta
 
-        layers, modules, segments, gr_lines, gr_arcs, gr_curves, vias, zones = self.Parse_Layers_Segments(base)
+        layers, chunk = self.Parse_Layers_Segments(base)
         # print(layers_segments)
 
         lst.append(layers[::-1])
-        lst = lst + vias
-        lst = lst + modules
-        lst = lst + segments
-        lst = lst + gr_lines
-        lst = lst + gr_arcs
-        lst = lst + gr_curves
-        lst = lst + zones
+        lst = lst + chunk
 
         return lst
 
@@ -69,6 +63,7 @@ class PcbWrite(object):
         gr_lines = []
         gr_arcs = []
         gr_curves = []
+        gr_text = []
         zones = []
 
         for tag in base.svg.find_all('g'):
@@ -104,10 +99,14 @@ class PcbWrite(object):
                         gr_lines += gr_line
                         gr_arcs += gr_arc
                         gr_curves += gr_curve
+                        
+                for text in tag.find_all('text'):
+                    gr_text.append(self.Parse_Text(text))
 
 
         layers.append('layers')
-        return layers, modules, segments, gr_lines, gr_arcs, gr_curves, vias, zones
+        chunk = modules + segments + gr_lines + gr_arcs + gr_curves + gr_text + vias + zones
+        return layers, chunk
 
     def Parse_Module(self, tag):
         # print(tag['id'])
@@ -236,6 +235,7 @@ class PcbWrite(object):
         gr_lines = []
         gr_arcs = []
         gr_curves = []
+        gr_polys = []
 
         for path in paths:
             segment = []
@@ -259,6 +259,8 @@ class PcbWrite(object):
                 gr_arcs.append(self.Parse_Arcs(tag, segment))
             elif tag['type'] == 'gr_curve':
                 gr_curves.append(self.Parse_Curves(tag, segment))
+            elif tag['type'] == 'gr_poly':
+                gr_polys.append(self.Parse_Polys(tag))
             else:
                 print(tag)
                 assert False,"Gr_line / segments: Nobody knows!"
@@ -540,6 +542,111 @@ class PcbWrite(object):
         data.insert(9, polygon)
                 
         return data
+
+    def Parse_Polys(self, tag):
+        # 0 gr_poly
+        # 1
+        #   0 pts
+        #   1
+        #     0 xy
+        #     1 147.6375
+        #     2 120.9675
+        #   2
+        #     0 xy
+        #     1 147.6375
+        #     2 120.9675
+        #   3
+        #     ...
+        # 2
+        #   0 layer
+        #   1 B.Cu
+        # 3
+        #   0 width
+        #   1 0.1
+
+        data = [tag['type']]
+        style = tag['style']
+
+        styletag = style[style.find('stroke-width:') + 13:]
+        width = styletag[0:styletag.find('mm')]
+
+        if tag.has_attr('layer'):
+            layer = ['layer', tag['layer']]
+        elif tag.parent.has_attr('inkscape:label'):
+            #XML metadata trashed, try to recover from parent tag
+            layer = ['layer', tag.parent['inkscape:label']]
+        else:
+            assert False, "Poly not in layer"
+            
+            
+        path = parse_path(tag['d'])
+        # print(tag)
+        # print(tag['d'])
+        # print(path)
+        
+        pts = ['pts']
+        for point in path:
+            xy = ['xy']
+            xy.append(str(point.start.real / pxToMM))
+            xy.append(str(point.start.imag / pxToMM))
+            pts.append(xy)
+
+        data.append(pts)
+        data.append(layer)
+        data.append(width)
+        
+                
+        return data
+
+    def Parse_Text(self, tag):
+        # 0 gr_text
+        # 1 text
+        # 2
+        #   0 at
+        #   1 66.66
+        #   2 99.99
+        # 3
+        #   0 layer
+        #   1 F.SilkS
+        # 4
+        #   0 effects
+        #   1 
+        #       0 font
+        #           1
+        #               0 size
+        #               1 1.5
+        #               2 1.5
+        #           2
+        #               0 thickness
+        #               1 0.3
+        #   2
+        #       0 justify
+        #       1 mirror
+
+        text = [tag['type']]
+        text.append(tag.contents[0])
+        x = tag['x']
+        y = tag['y']
+        
+        text.append(['at', x, y])
+        
+        if tag.has_attr('layer'):
+            layer = ['layer', tag['layer']]
+        elif tag.parent.has_attr('inkscape:label'):
+            #XML metadata trashed, try to recover from parent tag
+            layer = ['layer', tag.parent['inkscape:label']]
+        else:
+            assert False, "Text not in layer"
+            
+        text.append(layer)
+        
+        
+        font = ['font', ['size', '1.5', '1.5'], ['thickness', '0.3']]
+        effects = ['effects', font, ['justify']]
+        
+        text.append(effects)
+        
+        return text
 
 
     def Get_Angle(self, centre, point):
