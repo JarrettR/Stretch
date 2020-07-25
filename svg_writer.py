@@ -452,6 +452,24 @@ class SvgWrite(object):
         #   1 1
         #....
         #....
+        # 5
+        #   0 model
+        #   1 ${KISYS3DMOD}/Package_TO_SOT_SMD.3dshapes/SOT-23-6.wrl
+        #   2 offset
+        #     0 xyz
+        #     1 0
+        #     2 0
+        #     3 0
+        #   3 scale
+        #     0 xyz
+        #     1 1
+        #     2 1
+        #     3 1
+        #   4 rotate
+        #     0 xyz
+        #     1 0
+        #     2 0
+        #     3 0
 
         at = []
         # svg = BeautifulSoup('<g inkscape:groupmode="layer" type="module" inkscape:label="module' + str(id) + '" id="module' + str(id) + '">', 'html.parser')
@@ -486,6 +504,27 @@ class SvgWrite(object):
 
             if item[0] == 'tstamp':
                 svg.g['tstamp'] = item[1]
+
+            if item[0] == 'descr':
+                svg.g['descr'] = item[1]
+
+            if item[0] == 'tags':
+                svg.g['tags'] = item[1]
+
+            if item[0] == 'path':
+                svg.g['path'] = item[1]
+
+            if item[0] == 'attr':
+                svg.g['attr'] = item[1]
+
+            if item[0] == 'model':
+                svg.g['model'] = item[1] + ';'
+                #offset
+                svg.g['model'] += item[2][1][1] + ',' + item[2][1][2] + ',' + item[2][1][3] + ';'
+                #scale
+                svg.g['model'] += item[3][1][1] + ',' + item[3][1][2] + ',' + item[3][1][3] + ';'
+                #rotate
+                svg.g['model'] += item[4][1][1] + ',' + item[4][1][2] + ',' + item[4][1][3] + ';'
 
             if item[0] == 'fp_line':
                 tag = BeautifulSoup(self.Convert_Gr_Line_To_SVG(item, str(id) + '-' + str(a)), 'html.parser')
@@ -561,7 +600,7 @@ class SvgWrite(object):
         parameters += 'layer="' + layer + '" '
         parameters += 'type="gr_poly" />'
         
-        print(parameters)
+        # print(parameters)
         return parameters
         
     def Convert_Gr_Arc_To_SVG(self, input, id):
@@ -810,6 +849,11 @@ class SvgWrite(object):
         #   0 layer
         #   1 F.SilkS
         # 4
+        #   0 hide
+        # 5
+        #   0 tstamp
+        #   1 F.SilkS
+        # 6
         #   0 effects
         #   1 
         #       0 font
@@ -839,12 +883,15 @@ class SvgWrite(object):
         effect_text = ''
         transform = ''
         hide = ''
+        hidelayer = ''
+        tstamp = ''
         mirror_text = ''
         mirror = 1
 
         for item in input:
             if type(item) == str:
-                continue
+                if item == 'hide':
+                    hide = 'hide="True" '
 
             if item[0] == 'at':
                 at.append(item[1])
@@ -854,6 +901,9 @@ class SvgWrite(object):
 
             if item[0] == 'layer':
                 layer = item[1]
+                
+            if item[0] == 'tstamp':
+                tstamp = 'tstamp="' + item[1] + '" '
 
             if item[0] == 'effects':
                 for effect in item[1:]:
@@ -873,21 +923,18 @@ class SvgWrite(object):
                         effect_text = 'effects="' + ';'.join(effect) + '" '
                             
 
-            tstamp = ''
-            if item[0] == 'tstamp':
-                tstamp = 'tstamp="' + item[1] + '" '
 
         if len(transform) > 0:
             transform = 'transform="' + transform + '" '
             
         if layer in self.hiddenLayers:
-            hide = ';display:none'
+            hidelayer = ';display:none'
             
         parameters = '<text '
         parameters += 'xml:space="preserve" '
         parameters += 'style="font-style:normal;font-weight:normal;font-family:sans-serif'
         parameters += ';fill-opacity:1;stroke:none'
-        parameters += hide
+        parameters += hidelayer
         parameters += ';font-size:' + str(float(size[0]) * pxToMM) + 'px'
         parameters += ';fill:#' + self.Assign_Layer_Colour(layer)
         parameters += '" '
@@ -901,6 +948,7 @@ class SvgWrite(object):
         parameters += 'thickness="' + thickness + '" '
         parameters += 'type="' + type_text + '" '
         parameters += tstamp
+        parameters += hide
         parameters += transform
         parameters += '>' + text
         parameters += '</text>'

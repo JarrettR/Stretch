@@ -63,6 +63,7 @@ class PcbWrite(object):
         gr_lines = []
         gr_arcs = []
         gr_curves = []
+        gr_polys = []
         gr_text = []
         zones = []
 
@@ -93,6 +94,8 @@ class PcbWrite(object):
                 for path in tag.find_all('path'):
                     if path.has_attr('type') == True and path['type'] == 'zone':
                         zones.append(self.Parse_Zone(path))
+                    elif path.has_attr('type') == True and path['type'] == 'gr_poly':
+                        gr_polys.append(self.Parse_Polys(path))
                     else:
                         segment, gr_line, gr_arc, gr_curve = self.Parse_Segment(path)
                         segments += segment
@@ -105,7 +108,7 @@ class PcbWrite(object):
 
 
         layers.append('layers')
-        chunk = modules + segments + gr_lines + gr_arcs + gr_curves + gr_text + vias + zones
+        chunk = modules + segments + gr_polys + gr_lines + gr_arcs + gr_curves + gr_text + vias + zones
         return layers, chunk
 
     def Parse_Module(self, tag):
@@ -115,6 +118,7 @@ class PcbWrite(object):
         gr_lines = []
         gr_arcs = []
         gr_curves = []
+        gr_polys = []
         pads = []
         zones = []
         transform = tag['transform']
@@ -140,16 +144,45 @@ class PcbWrite(object):
 
         at = ['at', str(x), str(y), str(rotate)]
         module.append(at)
+        
+        if tag.has_attr('descr'):
+            module.append(['descr', tag['descr']])
+
+        if tag.has_attr('tags'):
+            module.append(['tags', tag['tags']])
+
+        if tag.has_attr('path'):
+            module.append(['path', tag['path']])
+
+        if tag.has_attr('attr'):
+            module.append(['attr', tag['attr']])
+
+        if tag.has_attr('model'):
+            modeltag = tag['model']
+            model = ['model']
+            model.append(modeltag[0:modeltag.find(';')])
+            modeltag = modeltag[modeltag.find(';') + 1:]
+            offset = ['xyz'] + modeltag[0:modeltag.find(';')].split(',')
+            modeltag = modeltag[modeltag.find(';') + 1:]
+            scale = ['xyz'] + modeltag[0:modeltag.find(';')].split(',')
+            modeltag = modeltag[modeltag.find(';') + 1:]
+            rotate = ['xyz'] + modeltag[0:modeltag.find(';')].split(',')
+            model.append(['offset', offset])
+            model.append(['scale', scale])
+            model.append(['rotate', rotate])
+            
+            module.append(model)
 
         for path in tag.find_all('path'):
             if path.has_attr('type') == True and path['type'] == 'zone':
                 zones.append(self.Parse_Zone(path))
             else:
-                segment, gr_line, gr_arc, gr_curves = self.Parse_Segment(path)
+                segment, gr_line, gr_arc, gr_curve = self.Parse_Segment(path)
                 segments = segments + segment
                 gr_line[0][0] = 'fp_line'
                 gr_lines += gr_line
                 gr_arcs += gr_arc
+                gr_curves += gr_curve
 
         for rect in tag.find_all('rect'):
             pad = self.Parse_Pad(rect, 'rect')
@@ -164,8 +197,14 @@ class PcbWrite(object):
             module.append(segments)
         if len(pads) > 0:
             module = module + pads
-
-        module = module + gr_lines + gr_arcs + gr_curves + zones
+            
+        gr_lines.reverse()
+        gr_arcs.reverse()
+        gr_curves.reverse()
+        gr_polys.reverse()
+        zones.reverse()
+            
+        module = module + gr_lines + gr_arcs + gr_curves + gr_polys + zones
         return module
 
 
@@ -259,11 +298,14 @@ class PcbWrite(object):
                 gr_arcs.append(self.Parse_Arcs(tag, segment))
             elif tag['type'] == 'gr_curve':
                 gr_curves.append(self.Parse_Curves(tag, segment))
-            elif tag['type'] == 'gr_poly':
-                gr_polys.append(self.Parse_Polys(tag))
             else:
                 print(tag)
                 assert False,"Gr_line / segments: Nobody knows!"
+                
+            segments.reverse()
+            gr_lines.reverse()
+            gr_arcs.reverse()
+            gr_curves.reverse()
 
         return segments, gr_lines, gr_arcs, gr_curves
 
@@ -593,7 +635,7 @@ class PcbWrite(object):
 
         data.append(pts)
         data.append(layer)
-        data.append(width)
+        data.append(['width', width])
         
                 
         return data
@@ -609,6 +651,9 @@ class PcbWrite(object):
         #   0 layer
         #   1 F.SilkS
         # 4
+        #   0 tstamp
+        #   1 F.SilkS
+        # 5
         #   0 effects
         #   1 
         #       0 font
@@ -647,6 +692,14 @@ class PcbWrite(object):
             assert False, "Text not in layer"
             
         text.append(layer)
+        
+        if tag.has_attr('hide'):
+            print(tag['hide'])
+            if tag['hide'] == 'True':
+                text.append(['hide'])
+        
+        if tag.has_attr('tstamp'):
+            text.append(['tstamp', tag['tstamp']])
         
         style = tag['style']
 
