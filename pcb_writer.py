@@ -625,9 +625,17 @@ class PcbWrite(object):
 
         text = [tag['type']]
         text.append(tag.contents[0])
-        x = tag['x']
-        y = tag['y']
+        x = str(float(tag['x']) / pxToMM)
+        y = str(float(tag['y']) / pxToMM)
         
+        attribs  = ['justify']
+        
+        if tag.has_attr('mirrored'):
+            if tag['mirrored'] == 'true':
+                attribs.append('mirror')
+                x = str(float(x) * -1.0)
+            
+            
         text.append(['at', x, y])
         
         if tag.has_attr('layer'):
@@ -640,9 +648,16 @@ class PcbWrite(object):
             
         text.append(layer)
         
+        style = tag['style']
+
+        styletag = style[style.find('font-size:') + 10:]
         
-        font = ['font', ['size', '1.5', '1.5'], ['thickness', '0.3']]
-        effects = ['effects', font, ['justify']]
+        size = styletag[0:styletag.find('px')]
+        size = str(float(size) / pxToMM)
+        
+        font = ['font', ['size', size, size], ['thickness', tag['thickness']]]
+        
+        effects = ['effects', font, attribs]
         
         text.append(effects)
         
