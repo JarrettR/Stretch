@@ -156,6 +156,9 @@ class PcbWrite(object):
 
         if tag.has_attr('attr'):
             module.append(['attr', tag['attr']])
+            
+        for text in tag.find_all('text'):
+            module.append(self.Parse_Text(text))
 
         if tag.has_attr('model'):
             modeltag = tag['model']
@@ -667,8 +670,15 @@ class PcbWrite(object):
         #   2
         #       0 justify
         #       1 mirror
-
-        text = [tag['type']]
+        
+        text = []
+        
+        if tag['type'] == 'gr_text':
+            text.append('gr_text')
+        else:
+            text.append('fp_text')
+            text.append(tag['type'])
+            
         text.append(tag.contents[0])
         x = str(float(tag['x']) / pxToMM)
         y = str(float(tag['y']) / pxToMM)
@@ -694,9 +704,8 @@ class PcbWrite(object):
         text.append(layer)
         
         if tag.has_attr('hide'):
-            print(tag['hide'])
             if tag['hide'] == 'True':
-                text.append(['hide'])
+                text.append('hide')
         
         if tag.has_attr('tstamp'):
             text.append(['tstamp', tag['tstamp']])

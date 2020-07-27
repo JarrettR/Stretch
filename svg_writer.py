@@ -37,8 +37,8 @@ class SvgWrite(object):
     def __init__(self):
         print(os.path.dirname(os.path.realpath(__file__)) )
         currentdir = os.path.dirname(os.path.realpath(__file__)) + '\\'
-        # self.filename_in = currentdir + "example\\complex.kicad_pcb"
-        self.filename_in = currentdir + "example\\simple.kicad_pcb"
+        self.filename_in = currentdir + "example\\complex.kicad_pcb"
+        # self.filename_in = currentdir + "example\\simple.kicad_pcb"
         self.filename_json = currentdir + "example\\out.json"
         self.filename_svg = currentdir + "example\\out.svg"
         self.filename_base = currentdir + "example\\base.svg"
@@ -867,7 +867,13 @@ class SvgWrite(object):
         #   2
         #       0 justify
         #       1 mirror
-
+        #
+        # ---
+        # 0 fp_text
+        # 1 reference / value / user
+        # 2 text
+        # 3
+        #   0 at
         at = []
 
         #gr_text is user-created label, fp_text is module ref/value
@@ -878,7 +884,6 @@ class SvgWrite(object):
         if input[0] == 'fp_text':
             type_text = input[1]
             text = input[2]
-
 
         effect_text = ''
         transform = ''
