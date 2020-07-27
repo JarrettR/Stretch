@@ -288,6 +288,10 @@ class PcbWrite(object):
 
             if tag.has_attr('net'):
                 segment.append(['net', tag['net']])
+                
+            if tag.has_attr('status'):
+                segment.append(['status', tag['status']])
+                
             if tag.has_attr('tstamp'):
                 segment.append(['tstamp', tag['tstamp']])
 

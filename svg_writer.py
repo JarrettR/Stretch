@@ -301,6 +301,20 @@ class SvgWrite(object):
 
         net = input[5][1]
 
+        tstamp = ''
+        status = ''
+
+        if len(input) > 6:
+            if input[6][0] == 'tstamp':
+                tstamp = 'tstamp="' + input[6][1] + '" '
+            if input[6][0] == 'status':
+                status = 'status="' + input[6][1] + '" '
+        if len(input) > 7:
+            if input[7][0] == 'tstamp':
+                tstamp = 'tstamp="' + input[7][1] + '" '
+            if input[7][0] == 'status':
+                status = 'status="' + input[7][1] + '" '
+
         parameters = '<path style="fill:none;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1'
         parameters += ';stroke:#' + self.Assign_Layer_Colour(layer)
         parameters += ';stroke-width:' + width + 'mm'
@@ -310,7 +324,8 @@ class SvgWrite(object):
         parameters += 'id="path' + str(id) + '" '
         parameters += 'layer="' + layer + '" '
         parameters += 'type="segment" '
-        parameters += 'net="' + net + '" '
+        parameters += tstamp
+        parameters += status
         parameters += '/>'
 
         # print(parameters)
