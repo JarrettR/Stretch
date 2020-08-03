@@ -1,4 +1,4 @@
-from .flex_plugin_action import FlexPluginAction # Note the relative import!
+from .stretch_plugin_action import StretchPluginAction # Note the relative import!
 
-FlexPluginAction('to_svg').register() # Instantiate and register to Pcbnew
-FlexPluginAction('to_pcb').register() # Instantiate and register to Pcbnew
+StretchPluginAction('to_svg').register() # Instantiate and register to Pcbnew
+StretchPluginAction('to_pcb').register() # Instantiate and register to Pcbnew

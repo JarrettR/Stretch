@@ -46,6 +46,7 @@ The workflow is intended to be seamless and painless to go back and forth.
 
 - Copy the Stretch folder into your KiCad plugin folder
 - Install dependencies using `D:\Programs\KiCad\bin\python.exe -m pip install bs4` (but substituting your own KiCad\bin path)
+- Open up a PCB and then in Pcbnew, got to `Tools->External Plugins...->Refresh Plugins`
 
 
 ## Workflow
@@ -56,7 +57,7 @@ The workflow is intended to be seamless and painless to go back and forth.
 - Make your modifications. Bend some lines, draw some pictures, rotate some footprints
 - Save your SVG
 - In KiCad/Pcbnew: Hit the "DOWN" arrrow ![stretch-to-pcb](to_pcb.png) *(Stretch down to PCB)*
-- Close PCBNew and then re-open the PCB in the main KiCad window
+- Close Pcbnew and then re-open the PCB in the main KiCad window
 - Continue tweaking. Change some nets, add more components
 - Hit the "UP" arrow again to go right back to SVG
 - In Inkscape: File->Revert to quickly reload the SVG. **Alt-F** and then **V** works as well
