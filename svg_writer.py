@@ -324,6 +324,7 @@ class SvgWrite(object):
         parameters += 'id="path' + str(id) + '" '
         parameters += 'layer="' + layer + '" '
         parameters += 'type="segment" '
+        parameters += 'net="' + net + '" '
         parameters += tstamp
         parameters += status
         parameters += '/>'
@@ -934,10 +935,11 @@ class SvgWrite(object):
                             if param[0] == 'thickness':
                                 thickness = param[1]
                     elif effect[0] == 'justify':
-                        if effect[1] == 'mirror':
-                            transform += ' scale(-1,1)'
-                            mirror = -1
-                            mirror_text = 'mirrored="true" '
+                        if len(effect) > 1:
+                            if effect[1] == 'mirror':
+                                transform += ' scale(-1,1)'
+                                mirror = -1
+                                mirror_text = 'mirrored="true" '
                         
                     else:
                         effect_text = 'effects="' + ';'.join(effect) + '" '
@@ -1122,6 +1124,7 @@ class SvgWrite(object):
         layers = []
         roundrect_rratio = ''
         net = ''
+        drill = ''
         rotate = ''
 
         if input[0] != 'pad':
@@ -1148,6 +1151,9 @@ class SvgWrite(object):
                 if row[0] == 'roundrect_rratio':
                     ratio = row[1]
                     roundrect_rratio = 'roundrect_rratio="' + row[1] + '"'
+
+                if row[0] == 'drill':
+                    drill = 'drill="' + row[1] + '" '
 
                 if row[0] == 'net':
                     net = 'net="' + row[1] + '" '
@@ -1218,6 +1224,7 @@ class SvgWrite(object):
             parameters += roundrect_rratio
             parameters += net
             parameters += rotate
+            parameters += drill
             parameters += 'process="' + process + '"'
             parameters += 'pin="' + pin + '"'
             if first == True:

@@ -242,9 +242,14 @@ class PcbWrite(object):
         if tag.has_attr('rotate'):
             at.append(tag['rotate'])
 
-        layers = ['layers'] + tag['layers'].split(',')
-        pad = ['pad', pin, process, padtype, at, size, layers]
+        pad = ['pad', pin, process, padtype, at, size]
 
+        if tag.has_attr('drill'):
+            pad.append(['drill',tag['drill']])
+            
+        layers = ['layers'] + tag['layers'].split(',')
+        pad.append(layers)
+            
         if tag.has_attr('roundrect_rratio'):
             pad.append(['roundrect_rratio',tag['roundrect_rratio']])
             pad[3] = 'roundrect'
