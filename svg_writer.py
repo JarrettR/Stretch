@@ -146,7 +146,8 @@ class SvgWrite(object):
                 elif item[0] == 'zone':
                     tag = BeautifulSoup(self.Convert_Zone_To_SVG(item, i), 'html.parser')
                     layer = tag.path['layer']
-                    base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
+                    if layer:
+                        base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
 
                 elif item[0] == 'via':
                     tag = BeautifulSoup(self.Convert_Via_To_SVG(item, i), 'html.parser')
@@ -407,6 +408,12 @@ class SvgWrite(object):
                 
             if item[0] == 'layer':
                 layer = item[1]
+                if layer in self.hiddenLayers:
+                    hide = ';display:none'
+                    
+            if item[0] == 'layers':
+                #todo
+                layer = ''
                 
             elif item[0] == 'hatch':
                 width = item[2]
@@ -420,8 +427,6 @@ class SvgWrite(object):
             else:
                 additional += self.Convert_Metadata_To_SVG(item)
 
-        if layer in self.hiddenLayers:
-            hide = ';display:none'
             
         parameters = '<path style="fill:none;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1'
         parameters += ';stroke:#' + self.Assign_Layer_Colour(layer)
@@ -1211,6 +1216,16 @@ class SvgWrite(object):
                 svgsize += 'cx="' + str(at[0] * pxToMM) + '" '
                 svgsize += 'cy="' + str(at[1] * pxToMM) + '" '
                 svgsize += 'r="' + str(float(size[0])  * (pxToMM / 2)) + '" '
+                svgsize += 'height="' + str(float(size[1])  * pxToMM) + '" '
+            elif shape == 'custom':
+                # todo: Setting custom shape to rect for now
+                x = at[0] - float(size[0]) / 2
+                y = at[1] - float(size[1]) / 2
+
+                parameters += '<rect style="stroke:none;stroke-linecap:round;stroke-linejoin:miter;fill-opacity:1'
+                svgsize += 'x="' + str(x * pxToMM) + '" '
+                svgsize += 'y="' + str(y * pxToMM) + '" '
+                svgsize += 'width="' + str(float(size[0])  * pxToMM) + '" '
                 svgsize += 'height="' + str(float(size[1])  * pxToMM) + '" '
             else:
                 assert False,"Pad: Unfamiliar shape: " + shape
