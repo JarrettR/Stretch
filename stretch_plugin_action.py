@@ -1,9 +1,8 @@
 import pcbnew
 import os
 
-from svg_writer import SvgWrite 
-from pcb_writer import PcbWrite 
-# from .svg_writer import SvgWrite 
+from .svg_writer import SvgWrite 
+from .pcb_writer import PcbWrite 
 
 class StretchPluginAction(pcbnew.ActionPlugin):
     def __init__(self, tool):
