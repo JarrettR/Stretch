@@ -5,9 +5,15 @@ import re
 import math
 import cmath
 
-from parser_base import ParserBase
-from sexpressions_parser import parse_sexpression
-from sexpressions_writer import SexpressionWriter
+#Running KiCad Linux vs. standalone requires different imports
+try:
+    from .parser_base import ParserBase
+    from .sexpressions_parser import parse_sexpression
+    from .sexpressions_writer import SexpressionWriter
+except:
+    from parser_base import ParserBase
+    from sexpressions_parser import parse_sexpression
+    from sexpressions_writer import SexpressionWriter
 
 from svgpath import parse_path
 
