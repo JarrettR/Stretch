@@ -44,7 +44,7 @@ class StretchPluginAction(pcbnew.ActionPlugin):
             a.Run_Plugin(pcb_filename, self.svg_file_name)
             pcbnew.Refresh()
 
-        
+#Only run using when issuing the following command, for testing the environment  
 # D:\Programs\KiCad\bin\python.exe .\stretch_plugin_action.py
 if __name__ == '__main__':
     a = PcbWrite()

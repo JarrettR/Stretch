@@ -15,9 +15,10 @@ pxToMM = 3.779528
 
 class PcbWrite(object):
     def __init__(self):
-        self.filename_in = "example/out.svg"
-        self.filename_out = "example/out.kicad_pcb"
-        self.filename_json = "example/out.json"
+        currentdir = os.path.dirname(os.path.realpath(__file__))
+        self.filename_in = os.path.join(currentdir, 'example', 'out.svg')
+        self.filename_out = os.path.join(currentdir, 'example', 'out.kicad_pcb')
+        self.filename_json = os.path.join(currentdir, 'example', 'out.json')
 
     def Load(self, filename = None):
         if filename is None:
@@ -771,8 +772,8 @@ class PcbWrite(object):
         return vias
         
     def Save_Json(self, obj, save = False):
-        currentdir = os.path.dirname(os.path.realpath(__file__)) + '\\'
-        self.filename_json = currentdir + "example\\out.json"
+        currentdir = os.path.dirname(os.path.realpath(__file__))
+        self.filename_json = os.path.join(currentdir, 'example', 'out.json')
         js = json.dumps(obj)
         if save:
             with open(self.filename_json, 'wb') as f:
@@ -791,7 +792,7 @@ class PcbWrite(object):
 
     def Run_Plugin(self, pcb_filename, svg_filename):
         
-        infile = os.path.dirname(pcb_filename) + '/' + svg_filename
+        infile = os.path.join(os.path.dirname(pcb_filename),svg_filename)
 
         svg = self.Load(infile)
         lst = self.Svg_To_List(svg)

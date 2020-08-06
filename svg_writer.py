@@ -36,12 +36,12 @@ debug = False
 class SvgWrite(object):
     def __init__(self):
         print(os.path.dirname(os.path.realpath(__file__)) )
-        currentdir = os.path.dirname(os.path.realpath(__file__)) + '\\'
-        self.filename_in = currentdir + "example\\complex.kicad_pcb"
-        # self.filename_in = currentdir + "example\\simple.kicad_pcb"
-        self.filename_json = currentdir + "example\\out.json"
-        self.filename_svg = currentdir + "example\\out.svg"
-        self.filename_base = currentdir + "example\\base.svg"
+        currentdir = os.path.dirname(os.path.realpath(__file__))
+        self.filename_in = os.path.join(currentdir, 'example', 'complex.kicad_pcb')
+        # self.filename_in = os.path.join(currentdir, 'example', 'simple.kicad_pcb')
+        self.filename_json = os.path.join(currentdir, 'example', 'out.json')
+        self.filename_svg = os.path.join(currentdir, 'example', 'out.svg')
+        self.filename_base = os.path.join(currentdir, 'example', 'base.svg')
         
         self.hiddenLayers = []
 
@@ -1313,7 +1313,7 @@ class SvgWrite(object):
             contents = f.read()
             base = BeautifulSoup(contents, 'html.parser')
         
-        outfile = os.path.dirname(filename) + '/' + outfilename
+        outfile = os.path.join(os.path.dirname(filename), outfilename)
 
         svg = self.Handle_Headings(dic, base)
 
