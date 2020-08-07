@@ -10,12 +10,12 @@ try:
     from .parser_base import ParserBase
     from .sexpressions_parser import parse_sexpression
     from .sexpressions_writer import SexpressionWriter
+    from .svgpath import parse_path
 except:
     from parser_base import ParserBase
     from sexpressions_parser import parse_sexpression
     from sexpressions_writer import SexpressionWriter
-
-from svgpath import parse_path
+    from svgpath import parse_path
 
 pxToMM = 3.779528
 
