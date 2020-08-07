@@ -1,17 +1,22 @@
-import io
+import io, os
 from bs4 import BeautifulSoup
 import json
 import re
 
-from parser_base import ParserBase
-from sexpressions_parser import parse_sexpression
+#Running KiCad Linux vs. standalone requires different imports
+try:
+    from .parser_base import ParserBase
+    from .sexpressions_parser import parse_sexpression
+except:
+    from parser_base import ParserBase
+    from sexpressions_parser import parse_sexpression
 
 
 class SexpressionWriter(object):
     def __init__(self):
-        self.filename_in = "example/out.svg"
-        self.filename_out = "example/out.kicad_pcb"
-        self.filename_sexpression = "example/complex.kicad_pcb"
+        self.filename_in = os.path.join('example', 'out.svg')
+        self.filename_out = os.path.join('example', 'out.kicad_pcb')
+        self.filename_sexpression = os.path.join('example', 'complex.kicad_pcb')
 
     def Load(self):
         with open(self.filename_in, "r") as f:

@@ -4,7 +4,7 @@ import json
 import math
 import cmath
 
-#Running KiCad (Linux only) vs. standalone requires different imports
+#Running KiCad Linux vs. standalone requires different imports
 try:
     from .parser_base import ParserBase
     from .sexpressions_parser import parse_sexpression
