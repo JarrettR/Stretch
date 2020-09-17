@@ -512,14 +512,17 @@ class SvgWrite(object):
 
 
             if item[0] == 'at':
+                x = float(item[1]) * pxToMM
+                y = float(item[2]) * pxToMM
+                rotate = 0
 
                 at.append(item[1])
                 at.append(item[2])
-                transform = 'translate(' + str(float(item[1]) * pxToMM) + ',' + str(float(item[2]) * pxToMM) + ')'
+                transform = 'translate(' + str(x) + ',' + str(y) + ')'
 
                 if len(item) > 3:
-                    rotate = str(-1 * float(item[3]))
-                    transform += ' rotate(' + rotate + ')'
+                    rotate = float(item[3])
+                    transform += ' rotate(' + str(-1 * rotate) + ')'
 
                 svg.g['transform'] = transform
 
@@ -562,11 +565,11 @@ class SvgWrite(object):
                 svg.g.append(tag)
 
             if item[0] == 'fp_text':
-                tag = BeautifulSoup(self.Convert_Gr_Text_To_SVG(item, str(id) + '-' + str(a)), 'html.parser')
+                tag = BeautifulSoup(self.Convert_Gr_Text_To_SVG(item, str(id) + '-' + str(a), rotate), 'html.parser')
                 svg.g.append(tag)
 
             elif item[0] == 'pad':
-                tag = BeautifulSoup(self.Convert_Pad_To_SVG(item, str(id) + '-' + str(a)), 'html.parser')
+                tag = BeautifulSoup(self.Convert_Pad_To_SVG(item, str(id) + '-' + str(a), rotate), 'html.parser')
                 svg.g.append(tag)
 
             a += 1
@@ -865,7 +868,7 @@ class SvgWrite(object):
 
         return parameters
 
-    def Convert_Gr_Text_To_SVG(self, input, id):
+    def Convert_Gr_Text_To_SVG(self, input, id, r_offset = 0):
         # 0 gr_text
         # 1 text
         # 2
@@ -929,7 +932,7 @@ class SvgWrite(object):
                 at.append(item[1])
                 at.append(item[2])
                 if len(item) > 3:
-                    transform += 'rotate(' + item[3] + ')'
+                    transform += 'rotate(' + str(float(item[3]) + r_offset)+ ')'
 
             if item[0] == 'layer':
                 layer = item[1]
@@ -1106,7 +1109,7 @@ class SvgWrite(object):
         #print(parameters)
         return parameters
 
-    def Convert_Pad_To_SVG(self, input, id):
+    def Convert_Pad_To_SVG(self, input, id, r_offset = 0):
         # 0 pad
         # 1 1/2/3
         # 2 smd
@@ -1153,7 +1156,17 @@ class SvgWrite(object):
                     at.append(float(row[2]))
 
                     if len(row) > 3:
-                        rotate = 'rotate="' + row[3] + '"'
+                        start = at[0] + at[1] * 1j
+                        angle = math.radians(float(row[3]) - r_offset)
+                        endangle = cmath.phase(start) - angle
+                        end = cmath.rect(cmath.polar(start)[0], endangle)
+                        
+                        at[0] = end.real 
+                        at[1] = end.imag
+                        
+                        rotate += 'transform=rotate(' + str(float(row[3]) - r_offset) + ') '
+                        rotate += 'rotate = ' + str(float(row[3])) + ' '
+                        
 
                 if row[0] == 'size':
                     size.append(row[1])
