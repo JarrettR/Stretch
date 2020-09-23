@@ -1013,59 +1013,42 @@ class SvgWrite(object):
 
         at = []
         layers = []
+        blind = ''
+        status = ''
+        tstamp = ''
 
         if input[0] != 'via':
             assert False,"Via: Not a via"
             return None
 
-        if input[1][0] != 'at':
-            assert False,"Via: At out of order"
-            return None
 
-        at.append(input[1][1])
-        at.append(input[1][2])
+        for item in input:
+            if item[0] == 'at':
+                at.append(item[1])
+                at.append(item[2])
 
-        if input[2][0] != 'size':
-            assert False,"Via: Size out of order"
-            return None
+            if item[0] == 'size':
+                size = item[1]
 
-        size = input[2][1]
+            if item[0] == 'drill':
+                drill = item[1]
 
-        if input[3][0] != 'drill':
-            assert False,"Via: Layer out of order"
-            return None
+            if item[0] == 'layers':
+                layers.append(item[1])
+                layers.append(item[2])
 
-        drill = input[3][1]
+            if item[0] == 'net':
+                net = item[1]
 
-        if input[4][0] != 'layers':
-            assert False,"Via: Layers out of order"
-            return None
+            if item == 'blind':
+                blind = 'blind=true '
 
-        layers.append(input[4][1])
-        layers.append(input[4][2])
-
-        if input[5][0] != 'net':
-            assert False,"Via: Net out of order"
-            return None
-
-        net = input[5][1]
-
-        status = ''
-        tstamp = ''
-        if len(input) > 6:
-            if input[6][0] == 'tstamp':
-                tstamp = 'tstamp="' + input[6][1] + '" '
-            elif input[6][0] == 'status':
-                status = 'status="' + input[6][1] + '" '
+            if item[0] == 'tstamp':
+                tstamp = 'tstamp="' + item[1] + '" '
             
-        if len(input) > 7:
-            if input[7][0] == 'tstamp':
-                tstamp = 'tstamp="' + input[7][1] + '" '
-            elif input[7][0] == 'status':
-                status = 'status="' + input[7][1] + '" '
-
-
-
+            if item[0] == 'status':
+                status = 'status="' + item[1] + '" '
+         
         parameters = '<g '
         parameters += 'x="' + str(float(at[0]) * pxToMM) + '" '
         parameters += 'y="' + str(float(at[1]) * pxToMM) + '" '
@@ -1075,6 +1058,7 @@ class SvgWrite(object):
         parameters += 'size="' + size + '" '
         parameters += 'drill="' + drill + '" '
         parameters += 'net="' + net + '" '
+        parameters += blind
         parameters += tstamp
         parameters += status
         parameters += '>'
@@ -1100,6 +1084,7 @@ class SvgWrite(object):
         parameters += 'size="' + size + '" '
         parameters += 'drill="' + drill + '" '
         parameters += 'net="' + net + '" '
+        parameters += blind
         parameters += tstamp
         parameters += status
         parameters += '/>' + hole 
