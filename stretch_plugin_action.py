@@ -15,13 +15,13 @@ class StretchPluginAction(pcbnew.ActionPlugin):
             self.category = "A KiCad plugin"
             self.description = "A plugin to add beauty"
             self.show_toolbar_button = True # Optional, defaults to False
-            self.icon_file_name = os.path.join(os.path.dirname(__file__), 'to_svg.png') # Optional
+            self.icon_file_name = os.path.join(os.path.dirname(__file__), 'icons', 'to_svg.png') # Optional
         elif self.tool == "to_pcb":
             self.name = "Stretch-To-PCB"
             self.category = "A KiCad plugin"
             self.description = "A plugin to add beauty"
             self.show_toolbar_button = True # Optional, defaults to False
-            self.icon_file_name = os.path.join(os.path.dirname(__file__), 'to_pcb.png') # Optional
+            self.icon_file_name = os.path.join(os.path.dirname(__file__), 'icons', 'to_pcb.png') # Optional
 
         self.svg_file_name = 'out.svg'
 

@@ -45,18 +45,21 @@ The workflow is intended to be seamless and painless to go back and forth.
 ## Installation
 
 - Copy the Stretch folder into your KiCad plugin folder
-- Install dependencies using `D:\Programs\KiCad\bin\python.exe -m pip install bs4` (but substituting your own KiCad\bin path)
+- Install dependencies:
+    - On Windows using `D:\Programs\KiCad\bin\python.exe -m pip install bs4` as administrator (but substituting your own KiCad\bin path)
+    - On Linux using `sudo python3 -m pip install bs4`
 - Open up a PCB and then in Pcbnew, got to `Tools->External Plugins...->Refresh Plugins`
+- This is known to work on versions 5.1.5 and 5.1.6. Nightlies are not explicitly supported, but this might still work, worth a shot.
 
 
 ## Workflow
 
 - In Kicad: Open up your KiCad project, and then your PCB in Pcbnew
-- Hit the "UP" arrow in your plugin bar ![stretch-to-svg](to_svg.png) *(Stretch up to SVG)*
+- Hit the "UP" arrow in your plugin bar ![stretch-to-svg](icons/to_svg.png) *(Stretch up to SVG)*
 - In Inkscape: There is now a file in your PCB directory called "out.svg". Open it in Inkscape, or your preferred vector software
 - Make your modifications. Bend some lines, draw some pictures, rotate some footprints
 - Save your SVG
-- In KiCad/Pcbnew: Hit the "DOWN" arrrow ![stretch-to-pcb](to_pcb.png) *(Stretch down to PCB)*
+- In KiCad/Pcbnew: Hit the "DOWN" arrrow ![stretch-to-pcb](icons/to_pcb.png) *(Stretch down to PCB)*
 - Close Pcbnew and then re-open the PCB in the main KiCad window
 - Continue tweaking. Change some nets, add more components
 - Hit the "UP" arrow again to go right back to SVG
@@ -71,9 +74,9 @@ Fonts are iffy, and dimensions may be a little off. This imports properly back i
 
 Closing the PCB window and opening it again is annoying - There is no way to programmatically reload it from disk, perhaps rebuilding the existing PCB from file, using the API is possible.
 
-Metadata that doesn't need to be processed, or do not yet have processors written are stored as-is so they can be dumped back into the PCB wholesale.
+Metadata that doesn't need to be processed, or do not yet have processors written are still stored. They are unchanged and hidden in the SVG so they can be imported properly back into the PCB.
 
-Most data is processed properly though! Diffs on some mildly complicated 4-layer boards are coming back clean.
+Most data is processed properly! Diffs on some mildly complicated 4-layer boards are coming back clean.
 
 This is still kind of a hack. Obviously, save and backup everything before using this, and **check check check** your gerbers before purchasing anything.
 
