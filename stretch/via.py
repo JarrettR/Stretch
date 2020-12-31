@@ -1,3 +1,18 @@
+class Via(object):
+
+
+    def __init__(self):
+    
+        self.isModule = False
+        self.x = 0
+        self.y = 0
+        self.size = 0
+        self.drill = 0
+        self.layers = []
+        self.net = 0
+        self.tstamp = ''
+
+
     def Parse_Vias(self, tag):
         # (via (at 205.486 133.731) (size 0.6) (drill 0.3) (layers F.Cu B.Cu) (net 0) (tstamp 5EA04144) (status 30))
         vias = []

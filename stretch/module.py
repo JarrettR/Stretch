@@ -1,3 +1,5 @@
+# https://github.com/KiCad/kicad-source-mirror/blob/93466fa1653191104c5e13231dfdc1640b272777/pcbnew/plugins/kicad/pcb_parser.cpp#L2839
+
     def Parse_Module(self, tag):
         # print(tag['id'])
         module = ['module', tag['name'], ['layer', tag['layer']]]
