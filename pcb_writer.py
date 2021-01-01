@@ -130,16 +130,21 @@ class PcbWrite(object):
         zones = []
         transform = tag['transform']
         
-        translate = transform[transform.find('translate(') + 10:]
-        translate = translate[0:translate.find(')')]
-        x = translate[0:translate.find(',')]
-        y = translate[len(x) + 1:]
-        x = float(x) / pxToMM
-        y = float(y) / pxToMM
+        x = 0
+        y = 0
+        if 'translate(' in transform:
+            translate = transform[transform.find('translate(') + 10:]
+            translate = translate[0:translate.find(')')]
+            x = translate[0:translate.find(',')]
+            y = translate[len(x) + 1:]
+            x = float(x) / pxToMM
+            y = float(y) / pxToMM
 
         rotate = 0
         if 'rotate(' in transform:
             rotate = transform[transform.find('rotate(') + 7:]
+            if ',' in rotate:
+                rotate = rotate[:rotate.find(',')]
             rotate = float(rotate[0:-1]) * -1
 
         
