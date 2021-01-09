@@ -1,4 +1,10 @@
 
+class Zone(object):
+
+    def __init__(self):
+        self.tstamp = ''
+        
+        
     def Parse_Zone(self, tag):
         # 0 zone
         # 1

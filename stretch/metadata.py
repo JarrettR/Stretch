@@ -1,3 +1,9 @@
+
+class Metadata(object):
+
+    def __init__(self):
+        self.tstamp = ''
+        
     def Handle_Headings(self, items, base):
         # svg = ''
         dic = []

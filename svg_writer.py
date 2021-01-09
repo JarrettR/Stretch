@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import json
 import math
 import cmath
+import stretch
 
 #Running KiCad Linux vs. standalone requires different imports
 try:
@@ -20,34 +21,16 @@ pxToMM = 3.779528
 debug = False
 # debug = True
 
-# kicad_pcb
-# version
-# host
-# general
-# page
-# title_block
-# layers
-# setup
-# net
-# net_class
-# module
-# dimension
-# gr_line
-# gr_arc
-# gr_text
-# segment
-# via
-# zone
 
 class SvgWrite(object):
     def __init__(self):
         print(os.path.dirname(os.path.realpath(__file__)) )
         currentdir = os.path.dirname(os.path.realpath(__file__))
-        self.filename_in = os.path.join(currentdir, 'example', 'complex.kicad_pcb')
-        # self.filename_in = os.path.join(currentdir, 'example', 'simple.kicad_pcb')
-        self.filename_json = os.path.join(currentdir, 'example', 'out.json')
-        self.filename_svg = os.path.join(currentdir, 'example', 'out.svg')
-        self.filename_base = os.path.join(currentdir, 'example', 'base.svg')
+        # self.filename_in = os.path.join(currentdir, 'tests', 'complex.kicad_pcb')
+        self.filename_in = os.path.join(currentdir, 'tests', 'simple.kicad_pcb')
+        self.filename_json = os.path.join(currentdir, 'tests', 'out.json')
+        self.filename_svg = os.path.join(currentdir, 'tests', 'out.svg')
+        self.filename_base = os.path.join(currentdir, 'tests', 'base.svg')
         
         self.hiddenLayers = []
 
@@ -95,9 +78,12 @@ class SvgWrite(object):
             contents = f.read()
             base = BeautifulSoup(contents, 'html.parser')
         
-        svg = self.Handle_Headings(dic, base)
+        # svg = self.Handle_Headings(dic, base)
+        
+        board = stretch.Board()
+        board.From_PCB(dic)
 
-        self.Save(svg)
+        # self.Save(svg)
 
    
     def Run_Plugin(self, filename, outfilename):

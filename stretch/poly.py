@@ -1,3 +1,9 @@
+
+class Poly(object):
+
+    def __init__(self):
+        self.tstamp = ''
+        
     def Parse_Polys(self, tag):
         # 0 gr_poly
         # 1

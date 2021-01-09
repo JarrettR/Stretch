@@ -1,4 +1,4 @@
-https://github.com/KiCad/kicad-source-mirror/blob/93466fa1653191104c5e13231dfdc1640b272777/pcbnew/plugins/kicad/pcb_parser.cpp#L4275
+#https://github.com/KiCad/kicad-source-mirror/blob/93466fa1653191104c5e13231dfdc1640b272777/pcbnew/plugins/kicad/pcb_parser.cpp#L4275
 
 # 0 via
 # 1
@@ -40,9 +40,9 @@ class Via(object):
 
     def From_SVG(self, tag):
         if not tag.has_attr('type'):
-            break
+            return
         if not tag['type'] == "via":
-            break
+            return
             
         x = tag['x']
         y = tag['y']
@@ -53,7 +53,7 @@ class Via(object):
 
         self.layers = tag['layers'].split(',')
 
-        self.net = tag['net']])
+        self.net = tag['net']
 
         if tag.has_attr('tstamp'):
             self.tstamp = tag['tstamp']

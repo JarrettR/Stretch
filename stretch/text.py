@@ -1,3 +1,10 @@
+
+class Text(object):
+
+    def __init__(self):
+        self.tstamp = ''
+
+
     def Parse_Text(self, tag):
         # 0 gr_text
         # 1 text

@@ -1,3 +1,9 @@
+
+class Pad(object):
+
+    def __init__(self):
+        self.tstamp = ''
+        
     def Parse_Pad(self, tag, padtype):
         # print(tag['id'])
 

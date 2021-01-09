@@ -1,4 +1,10 @@
 
+class Layer(object):
+
+    def __init__(self):
+        self.tstamp = ''
+        
+        
     def Convert_Layers_To_SVG(self, input):
         # 0 layers
         # 1

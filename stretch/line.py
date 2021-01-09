@@ -1,4 +1,10 @@
 
+class Line(object):
+
+    def __init__(self):
+        self.tstamp = ''
+        
+        
     def Convert_Gr_Line_To_SVG(self, input, id):
         # 0 gr_line
         # 1

@@ -1,3 +1,10 @@
+
+class Arc(object):
+
+    def __init__(self):
+        self.tstamp = ''
+
+
     def Parse_Arcs(self, tag, segments):
         # 0 gr_arc
         # 1

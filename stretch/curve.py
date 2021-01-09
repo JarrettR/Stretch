@@ -1,4 +1,10 @@
 
+class Curve(object):
+
+    def __init__(self):
+        self.tstamp = ''
+        
+        
     def Parse_Curves(self, tag, segments):
         # 0 gr_curve
         # 1
