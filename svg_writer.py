@@ -15,12 +15,6 @@ except:
     from sexpressions_parser import parse_sexpression
     from sexpressions_writer import SexpressionWriter
 
-pxToMM = 3.779528
-
-#Prettifies SVG output, but messes up text field spacing
-debug = False
-# debug = True
-
 
 class SvgWrite(object):
     def __init__(self):
@@ -74,16 +68,16 @@ class SvgWrite(object):
         #self.Convert(dic, True)
 
         with open(self.filename_base, "r") as f:
-    
             contents = f.read()
             base = BeautifulSoup(contents, 'html.parser')
         
-        # svg = self.Handle_Headings(dic, base)
-        
+
         board = stretch.Board()
         board.From_PCB(dic)
+        
+        svg = board.To_SVG()
 
-        # self.Save(svg)
+        self.Save(svg)
 
    
     def Run_Plugin(self, filename, outfilename):

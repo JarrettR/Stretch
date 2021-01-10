@@ -2,7 +2,7 @@ __all__ = [
     'Arc',
     'Board',
     'Curve',
-    'Layer',
+    'Layers',
     'Line',
     'Metadata',
     'Module',
@@ -17,7 +17,7 @@ __all__ = [
 from .arc import Arc
 from .board import Board
 from .curve import Curve
-from .layer import Layer
+from .layers import Layers
 from .line import Line
 from .metadata import Metadata
 from .module import Module

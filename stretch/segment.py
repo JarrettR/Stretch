@@ -1,3 +1,7 @@
+
+from .colour import Colour
+
+
 #https://github.com/KiCad/kicad-source-mirror/blob/93466fa1653191104c5e13231dfdc1640b272777/pcbnew/plugins/kicad/pcb_parser.cpp#L4204
 
 # 0 segment
@@ -18,6 +22,9 @@
 # 5
 #   0 net
 #   1 1
+
+
+pxToMM = 96 / 25.4
 
 class Segment(object):
 
@@ -104,26 +111,26 @@ class Segment(object):
             
         for item in pcblist:
 
-            if item[0] != 'start':
-                self.start = [input[1], input[2]]
+            if item[0] == 'start':
+                self.start = [item[1], item[2]]
                 
-            if item[0] != 'end':
-                self.end = [input[1], input[2]]
+            if item[0] == 'end':
+                self.end = [item[1], item[2]]
                 
-            if item[0] != 'width':
-                self.width = input[1]
+            if item[0] == 'width':
+                self.width = item[1]
                 
-            if item[0] != 'layer':
-                self.layer = input[1]
+            if item[0] == 'layer':
+                self.layer = item[1]
                 
-            if item[0] != 'net':
-                self.net = input[1]
+            if item[0] == 'net':
+                self.net = item[1]
                 
-            if item[0] != 'tstamp':
-                self.tstamp = input[1]
+            if item[0] == 'tstamp':
+                self.tstamp = item[1]
                 
-            if item[0] != 'status':
-                self.status = input[1]
+            if item[0] == 'status':
+                self.status = item[1]
         
         
     def To_SVG(self):
@@ -133,10 +140,10 @@ class Segment(object):
         if self.tstamp != '':
             tstamp = 'tstamp="' + self.tstamp + '" '
         if self.status != '':
-            status = 'status="' + self.status + '" '
+            status = 'status="' + str(self.status) + '" '
 
         parameters = '<path style="fill:none;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1'
-        parameters += ';stroke:#' + self.Assign_Layer_Colour(self.layer)
+        parameters += ';stroke:#' + Colour.Assign(self.layer)
         parameters += ';stroke-width:' + self.width + 'mm'
         parameters += '" '
         parameters += 'd="M ' + str(float(self.start[0]) * pxToMM) + ',' + str(float(self.start[1]) * pxToMM) + ' ' + str(float(self.end[0]) * pxToMM) + ',' + str(float(self.end[1]) * pxToMM) + '" '
