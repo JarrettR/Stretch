@@ -48,30 +48,26 @@ class Board(object):
         self.property = ''
         self.net = ''
         self.net_class = ''
-        self.gr_arc = ''
-        self.gr_curve = ''
-        self.gr_line = ''
-        self.gr_poly = ''
-        self.gr_circle = ''
-        self.gr_rect = ''
-        self.gr_text = ''
-        self.gr_dimension = ''
-        self.module = ''
-        self.footprint = ''
+        self.gr_arc = []
+        self.gr_curve = []
+        self.gr_line = []
+        self.gr_poly = []
+        self.gr_circle = []
+        self.gr_rect = []
+        self.gr_text = []
+        self.gr_dimension = []
+        self.module = []
+        self.footprint = []
         self.segment = []
         self.arc = []
         self.group = ''
         self.via = []
-        self.zone = ''
+        self.zone = []
         self.target = ''
         
         
     def From_PCB(self, pcb):
-        # svg = ''
-        dic = []
-        segments = []
-
-        i = 0
+    
         for item in pcb:
             if type(item) is str:
                 print(item)
@@ -93,7 +89,9 @@ class Board(object):
                     # base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
 
                 elif item[0] == 'gr_line':
-                    print(item[0])
+                    line = Line()
+                    line.From_PCB(item)
+                    self.gr_line.append(line)
                     # tag = BeautifulSoup(self.Convert_Gr_Line_To_SVG(item, i), 'html.parser')
                     # layer = tag.path['layer']
                     # base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
@@ -164,6 +162,11 @@ class Board(object):
 
 
         for item in self.segment:
+            tag = BeautifulSoup(item.To_SVG(), 'html.parser')
+            layer = item.layer
+            base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
+            
+        for item in self.gr_line:
             tag = BeautifulSoup(item.To_SVG(), 'html.parser')
             layer = item.layer
             base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
