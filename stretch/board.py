@@ -1,7 +1,17 @@
 from bs4 import BeautifulSoup
 
+from .arc import Arc
+from .curve import Curve
 from .layers import Layers
+from .line import Line
+from .metadata import Metadata
+from .module import Module
+from .pad import Pad
+from .poly import Poly
 from .segment import Segment
+from .text import Text
+from .via import Via
+from .zone import Zone
 
 #https://github.com/KiCad/kicad-source-mirror/blob/93466fa1653191104c5e13231dfdc1640b272777/pcbnew/plugins/kicad/pcb_parser.cpp#L533
 
@@ -33,7 +43,7 @@ class Board(object):
         self.general = ''
         self.paper = ''
         self.title_block = ''
-        self.layers = ''
+        # self.layers = ''
         self.setup = ''
         self.property = ''
         self.net = ''
@@ -49,9 +59,9 @@ class Board(object):
         self.module = ''
         self.footprint = ''
         self.segment = []
-        self.arc = ''
+        self.arc = []
         self.group = ''
-        self.via = ''
+        self.via = []
         self.zone = ''
         self.target = ''
         
@@ -68,7 +78,6 @@ class Board(object):
             else:
             
                 if item[0] == 'layers':
-                    print(item[0])
                     self.layers = Layers()
                     self.layers.From_PCB(item)
                     
@@ -76,7 +85,6 @@ class Board(object):
                     print(item[0])
 
                 elif item[0] == 'segment':
-                    print(item[0])
                     segment = Segment()
                     segment.From_PCB(item)
                     self.segment.append(segment)
@@ -122,7 +130,9 @@ class Board(object):
                         # base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
 
                 elif item[0] == 'via':
-                    print(item[0])
+                    via = Via()
+                    via.From_PCB(item)
+                    self.via.append(via)
                     # tag = BeautifulSoup(self.Convert_Via_To_SVG(item, i), 'html.parser')
                     # base.svg.find('g', {'inkscape:label': 'Vias'}, recursive=False).append(tag)
                     
@@ -133,9 +143,6 @@ class Board(object):
                     
                     
     def To_SVG(self):
-        # svg = ''
-        dic = []
-        segments = []
 
         base.svg.append(BeautifulSoup('<kicad />', 'html.parser'))
 
@@ -160,6 +167,10 @@ class Board(object):
             tag = BeautifulSoup(item.To_SVG(), 'html.parser')
             layer = item.layer
             base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
+            
+        for item in self.via:
+            tag = BeautifulSoup(item.To_SVG(), 'html.parser')
+            base.svg.find('g', {'inkscape:label': 'Vias'}, recursive=False).append(tag)
         
         
         # for item in items:
@@ -209,7 +220,6 @@ class Board(object):
                     # base.svg.kicad.append(BeautifulSoup(svg, 'html.parser'))
                     
             # i = i + 1
-        dic.append({'segment': segments})
 
         if debug == True:
             svg = base.prettify("utf-8")

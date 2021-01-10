@@ -1,5 +1,54 @@
 # https://github.com/KiCad/kicad-source-mirror/blob/93466fa1653191104c5e13231dfdc1640b272777/pcbnew/plugins/kicad/pcb_parser.cpp#L2839
 
+# 0 module
+# 1 Diode_SMD:D_SMD_SOD123
+# 2
+#   0 layer
+#   1 B.Cu
+# 3
+#   0 tstamp
+#   1 0DF
+# 4
+#   0 at
+#   1 66.66
+#   2 99.99
+# 3
+#   0 descr
+#   1 0.25
+# 4
+#   0 tags
+#   1 B.Cu
+# 5
+#   0 path
+#   1 1
+# 5
+#   0 attr
+#   1 1
+# 5
+#   0 fp_text / fp_line / fp_text / pad
+#   1 1
+#....
+#....
+# 5
+#   0 model
+#   1 ${KISYS3DMOD}/Package_TO_SOT_SMD.3dshapes/SOT-23-6.wrl
+#   2 offset
+#     0 xyz
+#     1 0
+#     2 0
+#     3 0
+#   3 scale
+#     0 xyz
+#     1 1
+#     2 1
+#     3 1
+#   4 rotate
+#     0 xyz
+#     1 0
+#     2 0
+#     3 0
+
+
 class Module(object):
 
     def __init__(self):
@@ -107,53 +156,7 @@ class Module(object):
 
 
     def Convert_Module_To_SVG(self, input, id):
-        # 0 module
-        # 1 Diode_SMD:D_SMD_SOD123
-        # 2
-        #   0 layer
-        #   1 B.Cu
-        # 3
-        #   0 tstamp
-        #   1 0DF
-        # 4
-        #   0 at
-        #   1 66.66
-        #   2 99.99
-        # 3
-        #   0 descr
-        #   1 0.25
-        # 4
-        #   0 tags
-        #   1 B.Cu
-        # 5
-        #   0 path
-        #   1 1
-        # 5
-        #   0 attr
-        #   1 1
-        # 5
-        #   0 fp_text / fp_line / fp_text / pad
-        #   1 1
-        #....
-        #....
-        # 5
-        #   0 model
-        #   1 ${KISYS3DMOD}/Package_TO_SOT_SMD.3dshapes/SOT-23-6.wrl
-        #   2 offset
-        #     0 xyz
-        #     1 0
-        #     2 0
-        #     3 0
-        #   3 scale
-        #     0 xyz
-        #     1 1
-        #     2 1
-        #     3 1
-        #   4 rotate
-        #     0 xyz
-        #     1 0
-        #     2 0
-        #     3 0
+
 
         at = []
         # svg = BeautifulSoup('<g inkscape:groupmode="layer" type="module" inkscape:label="module' + str(id) + '" id="module' + str(id) + '">', 'html.parser')

@@ -1,3 +1,6 @@
+
+from .colour import Colour
+
 #https://github.com/KiCad/kicad-source-mirror/blob/93466fa1653191104c5e13231dfdc1640b272777/pcbnew/plugins/kicad/pcb_parser.cpp#L4275
 
 # 0 via
@@ -20,12 +23,14 @@
 #   1 16
 
 
+pxToMM = 96 / 25.4
+
 class Via(object):
 
     def __init__(self):
         self.blind = False
         self.micro = False
-        seld.at = []
+        self.at = []
         self.size = 0
         self.drill = 0
         self.layers = []
@@ -186,7 +191,7 @@ class Via(object):
         parameters += '>'
 
         hole = '<circle style="stroke:none;stroke-linecap:round;stroke-linejoin:miter;fill-opacity:1'
-        hole += ';fill:#' + self.Assign_Layer_Colour('Via.Inner')
+        hole += ';fill:#' + Colour.Assign('Via.Inner')
         hole += '" '
         hole += 'cx="' + str(float(self.at[0]) * pxToMM) + '" '
         hole += 'cy="' + str(float(self.at[1]) * pxToMM) + '" '
@@ -196,7 +201,7 @@ class Via(object):
         hole += '/>'
 
         parameters += '<circle style="stroke:none;stroke-linecap:round;stroke-linejoin:miter;fill-opacity:1'
-        parameters += ';fill:#' + self.Assign_Layer_Colour('Via.Outer')
+        parameters += ';fill:#' + Colour.Assign('Via.Outer')
         parameters += '" '
         parameters += 'cx="' + str(float(self.at[0]) * pxToMM) + '" '
         parameters += 'cy="' + str(float(self.at[1]) * pxToMM) + '" '
