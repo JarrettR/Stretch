@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 
 from .arc import Arc
+from .circle import Circle
 from .curve import Curve
 from .layers import Layers
 from .line import Line
@@ -95,6 +96,11 @@ class Board(object):
                     line.From_PCB(item)
                     self.gr_line.append(line)
                     
+                elif item[0] == 'gr_circle':
+                    circle = Circle()
+                    circle.From_PCB(item)
+                    self.gr_circle.append(circle)
+                    
                 elif item[0] == 'gr_poly':
                     print(item[0])
                     # tag = BeautifulSoup(self.Convert_Gr_Poly_To_SVG(item, i), 'html.parser')
@@ -163,6 +169,11 @@ class Board(object):
             base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
             
         for item in self.gr_line:
+            tag = BeautifulSoup(item.To_SVG(), 'html.parser')
+            layer = item.layer
+            base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
+            
+        for item in self.gr_circle:
             tag = BeautifulSoup(item.To_SVG(), 'html.parser')
             layer = item.layer
             base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
