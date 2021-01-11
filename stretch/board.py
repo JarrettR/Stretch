@@ -79,7 +79,9 @@ class Board(object):
                     self.layers.From_PCB(item)
                     
                 elif item[0] == 'module':
-                    print(item[0])
+                    module = Module()
+                    module.From_PCB(item)
+                    self.module.append(module)
 
                 elif item[0] == 'segment':
                     segment = Segment()
@@ -160,6 +162,11 @@ class Board(object):
 
         for item in self.segment:
             tag = BeautifulSoup(item.To_SVG(), 'html.parser')
+            layer = item.layer
+            base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
+            
+        for item in self.module:
+            tag = item.To_SVG()
             layer = item.layer
             base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
             

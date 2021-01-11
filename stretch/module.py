@@ -1,3 +1,19 @@
+from bs4 import BeautifulSoup
+
+from .arc import Arc
+from .circle import Circle
+from .curve import Curve
+from .layers import Layers
+from .line import Line
+from .metadata import Metadata
+from .pad import Pad
+from .poly import Poly
+from .segment import Segment
+from .text import Text
+from .via import Via
+from .zone import Zone
+
+
 # https://github.com/KiCad/kicad-source-mirror/blob/93466fa1653191104c5e13231dfdc1640b272777/pcbnew/plugins/kicad/pcb_parser.cpp#L2839
 
 # 0 module
@@ -49,11 +65,245 @@
 #     3 0
 
 
+pxToMM = 96 / 25.4
+
 class Module(object):
 
     def __init__(self):
+        self.symbol = ''
+        self.version = ''
+        self.generator = ''
+        self.locked = False
+        self.placed = False
+        self.layer = ''
+        self.tedit = ''
         self.tstamp = ''
+        self.at = []
+        self.descr = ''
+        self.tags = ''
+        self.property = ''
+        self.path = ''
+        self.autoplace_cost90 = ''
+        self.autoplace_cost180 = ''
+        self.solder_mask_margin = ''
+        self.solder_paste_margin = ''
+        self.solder_paste_ratio = ''
+        self.clearance = ''
+        self.zone_connect = ''
+        self.thermal_width = ''
+        self.thermal_gap = ''
+        self.attr = []
+        self.fp_text = []
+        self.fp_arc = []
+        self.fp_circle = []
+        self.fp_curve = []
+        self.fp_rect = []
+        self.fp_line = []
+        self.fp_poly = []
+        self.pad = []
+        self.model = ''
+        self.zone = []
+        self.group = ''
         
+        
+    def From_PCB(self, pcblist):
+
+        if type(pcblist[1]) != str:
+            assert False,"Module: Expected symbol"
+            return None
+
+        self.symbol = pcblist[1]
+        
+        a = 0
+
+        for item in pcblist[2:]:
+
+
+            if item[0] == 'version':
+                self.version = item[1]
+                
+            if item[0] == 'generator':
+                self.generator = item[1]
+                
+            if item[0] == 'locked':
+                self.locked = True
+                
+            if item[0] == 'placed':
+                self.placed = True
+                
+            if item[0] == 'layer':
+                self.layer = item[1]
+                
+            if item[0] == 'tedit':
+                self.tedit = item[1]
+                
+            if item[0] == 'tstamp':
+                self.tstamp = item[1]
+            
+            if item[0] == 'at':
+                self.at += item[1:]
+                
+            if item[0] == 'descr':
+                self.descr = item[1]
+                
+            if item[0] == 'tags':
+                self.tags = item[1]
+                
+            if item[0] == 'property':
+                self.property = item[1]
+                
+            if item[0] == 'path':
+                self.path = item[1]
+                
+            if item[0] == 'autoplace_cost90':
+                self.autoplace_cost90 = item[1]
+                
+            if item[0] == 'autoplace_cost180':
+                self.autoplace_cost180 = item[1]
+                
+            if item[0] == 'solder_mask_margin':
+                self.solder_mask_margin = item[1]
+                
+            if item[0] == 'solder_paste_margin':
+                self.solder_paste_margin = item[1]
+                
+            if item[0] == 'solder_paste_ratio':
+                self.solder_paste_ratio = item[1]
+                
+            if item[0] == 'clearance':
+                self.clearance = item[1]
+                
+            if item[0] == 'zone_connect':
+                self.zone_connect = item[1]
+                
+            if item[0] == 'thermal_width':
+                self.thermal_width = item[1]
+                
+            if item[0] == 'thermal_gap':
+                self.thermal_gap = item[1]
+                
+            if item[0] == 'attr':
+                self.attr += item[1:]
+                
+            if item[0] == 'fp_text':
+                # for fp_text in item:
+                text = Text()
+                # text.From_PCB(item)
+                # self.fp_text.append(text)
+                
+            if item[0] == 'fp_line':
+                line = Line()
+                line.From_PCB(item)
+                self.fp_line.append(line)
+
+
+
+            # if item[0] == 'model':
+                # svg.g['model'] = item[1] + ';'
+                # #offset
+                # svg.g['model'] += item[2][1][1] + ',' + item[2][1][2] + ',' + item[2][1][3] + ';'
+                # #scale
+                # svg.g['model'] += item[3][1][1] + ',' + item[3][1][2] + ',' + item[3][1][3] + ';'
+                # #rotate
+                # svg.g['model'] += item[4][1][1] + ',' + item[4][1][2] + ',' + item[4][1][3] + ';'
+
+            # if item[0] == 'fp_line':
+                # tag = BeautifulSoup(self.Convert_Gr_Line_To_SVG(item, str(id) + '-' + str(a)), 'html.parser')
+                # svg.g.append(tag)
+
+            # if item[0] == 'fp_curve':
+                # tag = BeautifulSoup(self.Convert_Gr_Curve_To_SVG(item, str(id) + '-' + str(a)), 'html.parser')
+                # svg.g.append(tag)
+
+            # if item[0] == 'fp_text':
+                # tag = BeautifulSoup(self.Convert_Gr_Text_To_SVG(item, str(id) + '-' + str(a), rotate), 'html.parser')
+                # svg.g.append(tag)
+
+            # elif item[0] == 'pad':
+                # tag = BeautifulSoup(self.Convert_Pad_To_SVG(item, str(id) + '-' + str(a), rotate), 'html.parser')
+                # svg.g.append(tag)
+
+            # a += 1
+
+
+
+    def To_SVG(self):
+        svg = BeautifulSoup('<g type="module" name="' + self.symbol + '">', 'html.parser')
+        
+
+        if self.version != '':
+            svg.g['version'] = self.version
+            
+        if self.generator != '':
+            svg.g['generator'] = self.generator
+            
+        if self.locked == True:
+            svg.g['locked'] = 'true'
+            
+        if self.placed == True:
+            svg.g['placed'] = 'true'
+            
+        if self.layer != '':
+            svg.g['layer'] = self.layer
+        else:
+            svg.g['layer'] = 'F.Cu'
+            
+        if self.tedit != '':
+            svg.g['tedit'] = self.tedit
+            
+        if self.tstamp != '':
+            svg.g['tstamp'] = self.tstamp
+
+        #at
+        x = float(self.at[0]) * pxToMM
+        y = float(self.at[1]) * pxToMM
+        rotate = 0
+
+        transform = 'translate(' + str(x) + ',' + str(y) + ')'
+
+        if len(self.at) > 2:
+            rotate = float(self.at[2])
+            transform += ' rotate(' + str(-1 * rotate) + ')'
+
+        svg.g['transform'] = transform
+            
+        for item in self.fp_line:
+            tag = BeautifulSoup(item.To_SVG(), 'html.parser')
+            layer = item.layer
+            svg.g.append(tag)
+            
+
+
+            # if item[0] == 'model':
+                # svg.g['model'] = item[1] + ';'
+                # #offset
+                # svg.g['model'] += item[2][1][1] + ',' + item[2][1][2] + ',' + item[2][1][3] + ';'
+                # #scale
+                # svg.g['model'] += item[3][1][1] + ',' + item[3][1][2] + ',' + item[3][1][3] + ';'
+                # #rotate
+                # svg.g['model'] += item[4][1][1] + ',' + item[4][1][2] + ',' + item[4][1][3] + ';'
+
+            # if item[0] == 'fp_line':
+                # tag = BeautifulSoup(self.Convert_Gr_Line_To_SVG(item, str(id) + '-' + str(a)), 'html.parser')
+                # svg.g.append(tag)
+
+            # if item[0] == 'fp_curve':
+                # tag = BeautifulSoup(self.Convert_Gr_Curve_To_SVG(item, str(id) + '-' + str(a)), 'html.parser')
+                # svg.g.append(tag)
+
+            # if item[0] == 'fp_text':
+                # tag = BeautifulSoup(self.Convert_Gr_Text_To_SVG(item, str(id) + '-' + str(a), rotate), 'html.parser')
+                # svg.g.append(tag)
+
+            # elif item[0] == 'pad':
+                # tag = BeautifulSoup(self.Convert_Pad_To_SVG(item, str(id) + '-' + str(a), rotate), 'html.parser')
+                # svg.g.append(tag)
+
+            # a += 1
+
+        return svg
+
+
         
     def Parse_Module(self, tag):
         # print(tag['id'])
@@ -153,86 +403,4 @@ class Module(object):
             
         module = module + gr_lines + gr_arcs + gr_curves + gr_polys + zones
         return module
-
-
-    def Convert_Module_To_SVG(self, input, id):
-
-
-        at = []
-        # svg = BeautifulSoup('<g inkscape:groupmode="layer" type="module" inkscape:label="module' + str(id) + '" id="module' + str(id) + '">', 'html.parser')
-        svg = BeautifulSoup('<g type="module" inkscape:label="module' + str(id) + '" id="module' + str(id) + '" name="' + input[1] + '">', 'html.parser')
-        
-        if input[0] != 'module':
-            assert False,"Module: Not a module"
-            return None
-
-        a = 0
-
-        for item in input:
-
-
-            if item[0] == 'at':
-                x = float(item[1]) * pxToMM
-                y = float(item[2]) * pxToMM
-                rotate = 0
-
-                at.append(item[1])
-                at.append(item[2])
-                transform = 'translate(' + str(x) + ',' + str(y) + ')'
-
-                if len(item) > 3:
-                    rotate = float(item[3])
-                    transform += ' rotate(' + str(-1 * rotate) + ')'
-
-                svg.g['transform'] = transform
-
-            if item[0] == 'layer':
-                svg.g['layer'] = item[1]
-
-            if item[0] == 'tedit':
-                svg.g['tedit'] = item[1]
-
-            if item[0] == 'tstamp':
-                svg.g['tstamp'] = item[1]
-
-            if item[0] == 'descr':
-                svg.g['descr'] = item[1]
-
-            if item[0] == 'tags':
-                svg.g['tags'] = item[1]
-
-            if item[0] == 'path':
-                svg.g['path'] = item[1]
-
-            if item[0] == 'attr':
-                svg.g['attr'] = item[1]
-
-            if item[0] == 'model':
-                svg.g['model'] = item[1] + ';'
-                #offset
-                svg.g['model'] += item[2][1][1] + ',' + item[2][1][2] + ',' + item[2][1][3] + ';'
-                #scale
-                svg.g['model'] += item[3][1][1] + ',' + item[3][1][2] + ',' + item[3][1][3] + ';'
-                #rotate
-                svg.g['model'] += item[4][1][1] + ',' + item[4][1][2] + ',' + item[4][1][3] + ';'
-
-            if item[0] == 'fp_line':
-                tag = BeautifulSoup(self.Convert_Gr_Line_To_SVG(item, str(id) + '-' + str(a)), 'html.parser')
-                svg.g.append(tag)
-
-            if item[0] == 'fp_curve':
-                tag = BeautifulSoup(self.Convert_Gr_Curve_To_SVG(item, str(id) + '-' + str(a)), 'html.parser')
-                svg.g.append(tag)
-
-            if item[0] == 'fp_text':
-                tag = BeautifulSoup(self.Convert_Gr_Text_To_SVG(item, str(id) + '-' + str(a), rotate), 'html.parser')
-                svg.g.append(tag)
-
-            elif item[0] == 'pad':
-                tag = BeautifulSoup(self.Convert_Pad_To_SVG(item, str(id) + '-' + str(a), rotate), 'html.parser')
-                svg.g.append(tag)
-
-            a += 1
-
-        return svg
 
