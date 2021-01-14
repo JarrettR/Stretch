@@ -144,21 +144,16 @@ class Pad(object):
         drill = ''
         rotate = ''
         parameters = ''
+        
+        # Corner coordinates to centre coordinate system
+        x = self.at[0] - float(self.size[0]) / 2
+        y = self.at[1] - float(self.size[1]) / 2
 
         if len(self.at) > 2:
-            # start = self.at[0] + self.at[1] * 1j
-            # angle = math.radians(float(row[3]) - r_offset)
-            # endangle = cmath.phase(start) - angle
-            # end = cmath.rect(cmath.polar(start)[0], endangle)
-            
-            # at[0] = end.real 
-            # at[1] = end.imag
-            
-            # rotate += 'transform=rotate(' + str(float(row[3]) - r_offset) + ') '
-            rotate += 'rotate = ' + str(float(self.at[2])) + ' '
+            rotate += 'transform="rotate(' + str(self.at[2]) + ', ' + str(self.at[0] * pxToMM) + ', ' + str(self.at[1] * pxToMM) + ')" '
                         
         if self.roundrect_rratio != '':
-            roundrect_rratio = 'roundrect_rratio="' + self.roundrect_rratio + '"'
+            roundrect_rratio = 'roundrect_rratio="' + self.roundrect_rratio + '" '
 
         if len(self.drill) > 0:
             drill = 'drill="' + self.drill[1] + '" '
@@ -173,11 +168,6 @@ class Pad(object):
         first = True
         
         if self.shape == 'rect':
-
-            # Corner coordinates to centre coordinate system
-            x = self.at[0] - float(self.size[0]) / 2
-            y = self.at[1] - float(self.size[1]) / 2
-
             parameters += '<rect style="stroke:none;stroke-linecap:round;stroke-linejoin:miter;fill-opacity:1'
             svgsize += 'x="' + str(x * pxToMM) + '" '
             svgsize += 'y="' + str(y * pxToMM) + '" '
@@ -185,10 +175,6 @@ class Pad(object):
             svgsize += 'height="' + str(float(self.size[1])  * pxToMM) + '" '
             
         elif self.shape == 'roundrect':
-            
-            # Corner coordinates to centre coordinate system
-            x = self.at[0] - float(self.size[0]) / 2
-            y = self.at[1] - float(self.size[1]) / 2
 
             parameters += '<rect style="stroke:none;stroke-linecap:round;stroke-linejoin:miter;fill-opacity:1'
             roundcorners += 'rx="' + str(float(self.size[0]) * float(self.roundrect_rratio)  * pxToMM) + '" '
@@ -213,10 +199,6 @@ class Pad(object):
             svgsize += 'height="' + str(float(self.size[1])  * pxToMM) + '" '
             
         elif self.shape == 'custom':
-            # todo: Setting custom shape to rect for now
-            x = at[0] - float(self.size[0]) / 2
-            y = at[1] - float(self.size[1]) / 2
-
             parameters += '<rect style="stroke:none;stroke-linecap:round;stroke-linejoin:miter;fill-opacity:1'
             svgsize += 'x="' + str(x * pxToMM) + '" '
             svgsize += 'y="' + str(y * pxToMM) + '" '
@@ -236,12 +218,12 @@ class Pad(object):
         parameters += rotate
         parameters += drill
         if first == True:
-            parameters += 'first="True"'
-            parameters += 'layers="' + ','.join(self.layers) + '"'
+            parameters += 'first="True" '
+            parameters += 'layers="' + ','.join(self.layers) + '" '
         parameters += '/>'
 
         svg += parameters
-        #print(parameters)
+        # print(parameters)
         return svg
 
 
