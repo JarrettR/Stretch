@@ -27,6 +27,7 @@ class Colour(object):
             'F.Fab': '848484',
             'Via.Outer': 'c2c2c2',
             'Via.Inner': '8c7827',
+            '*.Cu': '840000',
             'Default': 'FFFF00'
         }
 

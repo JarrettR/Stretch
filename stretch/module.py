@@ -191,10 +191,29 @@ class Module(object):
                 # text.From_PCB(item)
                 # self.fp_text.append(text)
                 
+            if item[0] == 'fp_arc':
+                arc = Arc()
+                arc.From_PCB(item)
+                self.fp_arc.append(arc)
+                
+            # if item[0] == 'fp_circle':
+            # if item[0] == 'fp_curve':
+            # if item[0] == 'fp_rect':
+                
             if item[0] == 'fp_line':
                 line = Line()
                 line.From_PCB(item)
                 self.fp_line.append(line)
+                
+            # if item[0] == 'fp_poly':
+            
+            if item[0] == 'pad':
+                pad = Pad()
+                pad.From_PCB(item)
+                self.pad.append(pad)
+            # if item[0] == 'model':
+            # if item[0] == 'zone':
+            # if item[0] == 'group':
 
 
 
@@ -207,17 +226,6 @@ class Module(object):
                 # #rotate
                 # svg.g['model'] += item[4][1][1] + ',' + item[4][1][2] + ',' + item[4][1][3] + ';'
 
-            # if item[0] == 'fp_line':
-                # tag = BeautifulSoup(self.Convert_Gr_Line_To_SVG(item, str(id) + '-' + str(a)), 'html.parser')
-                # svg.g.append(tag)
-
-            # if item[0] == 'fp_curve':
-                # tag = BeautifulSoup(self.Convert_Gr_Curve_To_SVG(item, str(id) + '-' + str(a)), 'html.parser')
-                # svg.g.append(tag)
-
-            # if item[0] == 'fp_text':
-                # tag = BeautifulSoup(self.Convert_Gr_Text_To_SVG(item, str(id) + '-' + str(a), rotate), 'html.parser')
-                # svg.g.append(tag)
 
             # elif item[0] == 'pad':
                 # tag = BeautifulSoup(self.Convert_Pad_To_SVG(item, str(id) + '-' + str(a), rotate), 'html.parser')
@@ -267,10 +275,29 @@ class Module(object):
 
         svg.g['transform'] = transform
             
+        # for item in self.fp_text:
+        
+        for item in self.fp_arc:
+            tag = BeautifulSoup(item.To_SVG(), 'html.parser')
+            svg.g.append(tag)
+            
+        # for item in self.fp_circle:
+        # for item in self.fp_curve:
+        # for item in self.fp_rect:
+        
         for item in self.fp_line:
             tag = BeautifulSoup(item.To_SVG(), 'html.parser')
-            layer = item.layer
             svg.g.append(tag)
+            
+        # for item in self.fp_poly:
+        
+        for item in self.pad:
+            tag = BeautifulSoup(item.To_SVG(), 'html.parser')
+            svg.g.append(tag)
+            
+        # if self.model != '':
+        # if self.zone != '':
+        # if self.group != '':
             
 
 
@@ -282,24 +309,6 @@ class Module(object):
                 # svg.g['model'] += item[3][1][1] + ',' + item[3][1][2] + ',' + item[3][1][3] + ';'
                 # #rotate
                 # svg.g['model'] += item[4][1][1] + ',' + item[4][1][2] + ',' + item[4][1][3] + ';'
-
-            # if item[0] == 'fp_line':
-                # tag = BeautifulSoup(self.Convert_Gr_Line_To_SVG(item, str(id) + '-' + str(a)), 'html.parser')
-                # svg.g.append(tag)
-
-            # if item[0] == 'fp_curve':
-                # tag = BeautifulSoup(self.Convert_Gr_Curve_To_SVG(item, str(id) + '-' + str(a)), 'html.parser')
-                # svg.g.append(tag)
-
-            # if item[0] == 'fp_text':
-                # tag = BeautifulSoup(self.Convert_Gr_Text_To_SVG(item, str(id) + '-' + str(a), rotate), 'html.parser')
-                # svg.g.append(tag)
-
-            # elif item[0] == 'pad':
-                # tag = BeautifulSoup(self.Convert_Pad_To_SVG(item, str(id) + '-' + str(a), rotate), 'html.parser')
-                # svg.g.append(tag)
-
-            # a += 1
 
         return svg
 
