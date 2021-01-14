@@ -1,3 +1,4 @@
+import json
 
 class Metadata(object):
 

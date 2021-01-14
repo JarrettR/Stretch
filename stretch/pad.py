@@ -165,7 +165,6 @@ class Pad(object):
         svg = ''
         svgsize = ''
         roundcorners = ''
-        first = True
         
         if self.shape == 'rect':
             parameters += '<rect style="stroke:none;stroke-linecap:round;stroke-linejoin:miter;fill-opacity:1'
@@ -217,9 +216,7 @@ class Pad(object):
         parameters += net
         parameters += rotate
         parameters += drill
-        if first == True:
-            parameters += 'first="True" '
-            parameters += 'layers="' + ','.join(self.layers) + '" '
+        parameters += 'layers="' + ','.join(self.layers) + '" '
         parameters += '/>'
 
         svg += parameters

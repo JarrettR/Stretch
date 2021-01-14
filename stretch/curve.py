@@ -1,9 +1,106 @@
 
+from .colour import Colour
+
+# 0 gr_curve
+# 1
+#   0 pts
+#   1
+#       0 xy
+#       1 99.99
+#       2 99.99
+#   2
+#       0 xy
+#       1 99.99
+#       2 99.99
+#   3
+#       0 xy
+#       1 99.99
+#       2 99.99
+#   4
+#       0 xy
+#       1 99.99
+#       2 99.99
+# 2
+#   0 layer
+#   1 Edge.Cuts
+# 3
+#   0 width
+#   1 0.05
+# 4
+#   0 tstamp
+#   1 5E451B20
+
+pxToMM = 96 / 25.4
+
+
 class Curve(object):
 
     def __init__(self):
+        self.pts = []
+        self.width = 0
+        self.layer = ''
+        self.fill = ''
         self.tstamp = ''
-        
+        self.status = ''
+      
+    def From_PCB(self, input):
+
+        for item in input:
+            if item[0] == 'pts':
+                for xy in item:
+                    if xy[0] == 'xy':
+                        self.pts.append([xy[1], xy[2]])
+
+            if item[0] == 'layer':
+                self.layer = item[1]
+
+            if item[0] == 'width':
+                self.width = item[1]
+                
+            if item[0] == 'fill':
+                self.fill = item[1]
+
+            if item[0] == 'tstamp':
+                self.tstamp = item[1]
+                
+            if item[0] == 'status':
+                self.status = item[1]
+                
+                
+    def To_SVG(self):
+
+        points = []
+        tstamp = ''
+        status = ''
+
+        #This might have a problem with random list ordering in certain versions of Python
+        for xy in self.pts:
+            points.append(float(xy[1]))
+            points.append(float(xy[2]))
+
+        if self.tstamp != '':
+            tstamp = 'tstamp="' + self.tstamp + '" '
+        if self.status != '':
+            status = 'status="' + self.status + '" '
+
+
+        parameters = '<path style="fill:none;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1'
+        parameters += ';stroke:#' + Colour.Assign(self.layer)
+        parameters += ';stroke-width:' + self.width + 'mm'
+        parameters += '" '
+        parameters += 'd="M ' + str(points[0] * pxToMM) + ',' + str(points[1] * pxToMM) + ' C '
+        parameters += str(points[2] * pxToMM) + ',' + str(points[3] * pxToMM) + ' '
+        parameters += str(points[4] * pxToMM) + ',' + str(points[5] * pxToMM) + ' '
+        parameters += str(points[6] * pxToMM) + ',' + str(points[7] * pxToMM) + '" '
+        parameters += 'layer="' + self.layer + '" '
+        parameters += 'type="gr_curve" '
+        parameters += tstamp
+        parameters += status
+        parameters += '/>'
+
+        return parameters
+
+  
         
     def Parse_Curves(self, tag, segments):
         # 0 gr_curve
@@ -87,76 +184,4 @@ class Curve(object):
             data.append(['tstamp', tag['tstamp']])
         
         return data
-
-
-    def Convert_Gr_Curve_To_SVG(self, input, id):
-        # 0 gr_curve
-        # 1
-        #   0 pts
-        #   1
-        #       0 xy
-        #       1 99.99
-        #       2 99.99
-        #   2
-        #       0 xy
-        #       1 99.99
-        #       2 99.99
-        #   3
-        #       0 xy
-        #       1 99.99
-        #       2 99.99
-        #   4
-        #       0 xy
-        #       1 99.99
-        #       2 99.99
-        # 2
-        #   0 layer
-        #   1 Edge.Cuts
-        # 3
-        #   0 width
-        #   1 0.05
-        # 4
-        #   0 tstamp
-        #   1 5E451B20
-
-        points = []
-        
-        for item in input:
-            if type(item) == str:
-                #if item == 'gr_curve' or item == 'fp_curve':
-                continue
-
-            #This might have a problem with random list ordering in certain versions of Python
-            if item[0] == 'pts':
-                for xy in item:
-                    if xy[0] == 'xy':
-                        points.append(float(xy[1]))
-                        points.append(float(xy[2]))
-
-            if item[0] == 'layer':
-                layer = item[1]
-
-            if item[0] == 'width':
-                width = item[1]
-
-            tstamp = ''
-            if item[0] == 'tstamp':
-                tstamp = 'tstamp="' + item[1] + '" '
-
-
-        parameters = '<path style="fill:none;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1'
-        parameters += ';stroke:#' + self.Assign_Layer_Colour(layer)
-        parameters += ';stroke-width:' + width + 'mm'
-        parameters += '" '
-        parameters += 'd="M ' + str(points[0] * pxToMM) + ',' + str(points[1] * pxToMM) + ' C '
-        parameters += str(points[2] * pxToMM) + ',' + str(points[3] * pxToMM) + ' '
-        parameters += str(points[4] * pxToMM) + ',' + str(points[5] * pxToMM) + ' '
-        parameters += str(points[6] * pxToMM) + ',' + str(points[7] * pxToMM) + '" '
-        parameters += 'id="path' + str(id) + '" '
-        parameters += 'layer="' + layer + '" '
-        parameters += 'type="gr_curve" '
-        parameters += tstamp
-        parameters += '/>'
-
-        return parameters
 
