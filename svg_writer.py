@@ -58,9 +58,6 @@ class SvgWrite(object):
             else:
                 print(item[0])
 
-
-
-
     def Run_Standalone(self):
         dic = self.Load()
         

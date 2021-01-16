@@ -44,7 +44,7 @@ class Board(object):
         self.general = ''
         self.paper = ''
         self.title_block = ''
-        # self.layers = ''
+        self.layers = ''
         self.setup = ''
         self.property = ''
         self.net = ''
@@ -65,6 +65,8 @@ class Board(object):
         self.via = []
         self.zone = []
         self.target = ''
+        
+        self.metadata = []
         
         
     def From_PCB(self, pcb):
@@ -123,10 +125,6 @@ class Board(object):
                     zone = Zone()
                     zone.From_PCB(item)
                     self.zone.append(zone)
-                    # tag = BeautifulSoup(self.Convert_Zone_To_SVG(item, i), 'html.parser')
-                    # layer = tag.path['layer']
-                    # if layer:
-                        # base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
 
                 elif item[0] == 'via':
                     via = Via()
@@ -134,14 +132,13 @@ class Board(object):
                     self.via.append(via)
                     
                 else:
-                    print(item[0])
-                    # svg = self.Convert_Metadata_To_SVG(item)
-                    # base.svg.kicad.append(BeautifulSoup(svg, 'html.parser'))
+                    self.metadata.append(item)
                     
                     
     def To_SVG(self):
 
         base.svg.append(BeautifulSoup('<kicad />', 'html.parser'))
+
 
         layers = self.layers.To_SVG()
        
@@ -149,14 +146,7 @@ class Board(object):
             tag = BeautifulSoup(layer, 'html.parser')
             base.svg.append(tag)
                              
-        # for item in items:
-            # if type(item) is str:
-                # print(item)
-            # else:
-                # if item[0] == 'module':
-                    # base.svg.append(self.Convert_Module_To_SVG(item, i))
-            # i = i + 1
-            
+
         base.svg.append(BeautifulSoup('<g inkscape:label="Vias" inkscape:groupmode="layer" id="layervia" user="True" />', 'html.parser'))
 
 
@@ -204,55 +194,18 @@ class Board(object):
             layer = item.layer
             if layer:
                 base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
+                
+        for item in self.metadata:
+            tag = BeautifulSoup(Metadata().Convert_Metadata_To_SVG(item), 'html.parser')
+            base.svg.kicad.append(tag)
             
         
-        # for item in items:
-            # if type(item) is str:
-                # print(item)
-            # else:
-                # # print(item[0])
-
-                # elif item[0] == 'gr_line':
-                    # tag = BeautifulSoup(self.Convert_Gr_Line_To_SVG(item, i), 'html.parser')
-                    # layer = tag.path['layer']
-                    # base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
-                    
-                # elif item[0] == 'gr_poly':
-                    # tag = BeautifulSoup(self.Convert_Gr_Poly_To_SVG(item, i), 'html.parser')
-                    # layer = tag.path['layer']
-                    # base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
-
-                # elif item[0] == 'gr_arc':
-                    # tag = BeautifulSoup(self.Convert_Gr_Arc_To_SVG(item, i), 'html.parser')
-                    # layer = tag.path['layer']
-                    # base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
-
-                # elif item[0] == 'gr_curve':
-                    # tag = BeautifulSoup(self.Convert_Gr_Curve_To_SVG(item, i), 'html.parser')
-                    # layer = tag.path['layer']
-                    # base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
 
                 # elif item[0] == 'gr_text':
                     # tag = BeautifulSoup(self.Convert_Gr_Text_To_SVG(item, i), 'html.parser')
                     # layer = tag.find('text')['layer']
                     # base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
 
-                # elif item[0] == 'zone':
-                    # tag = BeautifulSoup(self.Convert_Zone_To_SVG(item, i), 'html.parser')
-                    # layer = tag.path['layer']
-                    # if layer:
-                        # base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
-
-                # elif item[0] == 'via':
-                    # tag = BeautifulSoup(self.Convert_Via_To_SVG(item, i), 'html.parser')
-                    # base.svg.find('g', {'inkscape:label': 'Vias'}, recursive=False).append(tag)
-                    
-                # elif item[0] != 'layers' and item[0] != 'module':
-                    # # Already handled above
-                    # svg = self.Convert_Metadata_To_SVG(item)
-                    # base.svg.kicad.append(BeautifulSoup(svg, 'html.parser'))
-                    
-            # i = i + 1
 
         if debug == True:
             svg = base.prettify("utf-8")

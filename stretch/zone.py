@@ -97,9 +97,6 @@ class Zone(object):
      
     def From_PCB(self, input):
 
-        xy_text = ''
-        additional = ''
-
         for item in input:
                 
             if item[0] == 'layer':
@@ -109,13 +106,17 @@ class Zone(object):
                 self.hatch = item[1:]
                 
             elif item[0] == 'polygon':
-                for xy in item:
-                    if item[0] == 'pts':
-                        for xy in item:
-                            self.polygon.append([xy[0], xy[1]])
+                for xy in item[1]:
+                    if xy[0] == 'xy':
+                        self.polygon.append([xy[1], xy[2]])
+                
+            elif item[0] == 'filled_polygon':
+                for xy in item[1]:
+                    if xy[0] == 'xy':
+                        self.filled_polygon.append([xy[1], xy[2]])
                         
             else:
-                self.metadata.append(item)       
+                self.metadata.append(item)
 
 
     def To_SVG(self):
@@ -123,9 +124,14 @@ class Zone(object):
         xy_text = ''
         additional = ''
 
-        for xy in self.polygon:
-            xy_text += ' ' + str(float(xy[0]) * pxToMM)
-            xy_text += ',' + str(float(xy[1]) * pxToMM)
+        if len(self.polygon) > 0:
+            for xy in self.polygon:
+                xy_text += ' ' + str(float(xy[0]) * pxToMM)
+                xy_text += ',' + str(float(xy[1]) * pxToMM)
+        elif len(self.filled_polygon) > 0:
+            for xy in self.filled_polygon:
+                xy_text += ' ' + str(float(xy[0]) * pxToMM)
+                xy_text += ',' + str(float(xy[1]) * pxToMM)
                         
         
         additional += Metadata().Convert_Metadata_To_SVG(self.metadata)
