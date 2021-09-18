@@ -73,6 +73,18 @@ class Line(object):
             if item[0] == 'status':
                 self.status = item[1]
 
+    def To_PCB(self):
+        pcb = ['gr_line']
+
+        pcb.append(['start'] + self.start)
+        pcb.append(['end'] + self.end)
+        pcb.append(['width', self.width])
+        pcb.append(['layer', self.layer])
+        pcb.append(['fill', self.fill])
+        pcb.append(['tstamp', self.tstamp])
+        pcb.append(['status', self.status])
+            
+        return pcb
         
     def To_SVG(self):
         tstamp = ''

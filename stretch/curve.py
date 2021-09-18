@@ -65,7 +65,24 @@ class Curve(object):
                 
             if item[0] == 'status':
                 self.status = item[1]
-                
+               
+    def To_PCB(self):
+        pcb = ['gr_curve']
+
+        pts = ['pts']
+
+        for item in self.pts:
+            xy = ['xy'] + item
+            pts += [xy]
+
+        pcb.append([pts])
+        pcb.append(['width', self.width])
+        pcb.append(['layer', self.layer])
+        pcb.append(['fill', self.fill])
+        pcb.append(['tstamp', self.tstamp])
+        pcb.append(['status', self.status])
+                        
+        return pcb 
                 
     def To_SVG(self):
 

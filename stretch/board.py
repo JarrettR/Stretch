@@ -133,7 +133,45 @@ class Board(object):
                     
                 else:
                     self.metadata.append(item)
-                    
+                   
+    def To_PCB(self):
+
+        pcb = self.layers.To_PCB()
+        # pcb = self.module.To_PCB() # TODO
+        
+        for item in self.segment:
+            pcb = item.To_PCB()
+        
+        for item in self.gr_arc:
+            pcb = item.To_PCB()
+        
+        for item in self.gr_line:
+            pcb = item.To_PCB()
+        
+        for item in self.gr_circle:
+            pcb = item.To_PCB()
+        
+        for item in self.gr_poly:
+            pcb = item.To_PCB()
+        
+        for item in self.gr_curve:
+            pcb = item.To_PCB()
+        
+        # for item in self.gr_text:
+        #     pcb = item.To_PCB()
+        
+        for item in self.zone:
+            pcb = item.To_PCB()
+
+        for item in self.via:
+            pcb = item.To_PCB()
+
+        for item in self.metadata:
+            pcb = item.To_PCB()
+
+        print(pcb)
+        return pcb
+           
                     
     def To_SVG(self):
 
@@ -214,6 +252,73 @@ class Board(object):
         
         return svg
         
+        
+    def From_SVG(self, svg):
+    
+        for item in pcb:
+            if type(item) is str:
+                print(item)
+            else:
+            
+                if item[0] == 'layers':
+                    self.layers = Layers()
+                    self.layers.From_PCB(item)
+                    
+                elif item[0] == 'module':
+                    module = Module()
+                    module.From_PCB(item)
+                    self.module.append(module)
+
+                elif item[0] == 'segment':
+                    segment = Segment()
+                    segment.From_PCB(item)
+                    self.segment.append(segment)
+                    
+                elif item[0] == 'gr_arc':
+                    arc = Arc()
+                    arc.From_PCB(item)
+                    self.gr_arc.append(arc)
+                    
+                elif item[0] == 'gr_line':
+                    line = Line()
+                    line.From_PCB(item)
+                    self.gr_line.append(line)
+                    
+                elif item[0] == 'gr_circle':
+                    circle = Circle()
+                    circle.From_PCB(item)
+                    self.gr_circle.append(circle)
+                    
+                elif item[0] == 'gr_poly':
+                    poly = Poly()
+                    poly.From_PCB(item)
+                    self.gr_poly.append(poly)
+                    
+                elif item[0] == 'gr_curve':
+                    curve = Curve()
+                    curve.From_PCB(item)
+                    self.gr_curve.append(curve)
+                    
+                elif item[0] == 'gr_text':
+                    print(item[0])
+                    # tag = BeautifulSoup(self.Convert_Gr_Text_To_SVG(item, i), 'html.parser')
+                    # layer = tag.find('text')['layer']
+                    # base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
+
+                elif item[0] == 'zone':
+                    zone = Zone()
+                    zone.From_PCB(item)
+                    self.zone.append(zone)
+
+                elif item[0] == 'via':
+                    via = Via()
+                    via.From_PCB(item)
+                    self.via.append(via)
+                    
+                else:
+                    self.metadata.append(item)
+                    
+                  
         
 base = BeautifulSoup('''
     <?xml version="1.0" encoding="UTF-8" standalone="no"?>

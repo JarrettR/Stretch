@@ -78,6 +78,19 @@ class Circle(object):
             if item[0] == 'status':
                 self.status = item[1]
 
+    def To_PCB(self):
+        pcb = ['gr_line']
+
+        pcb.append(['center'] + self.center)
+        pcb.append(['end'] + self.end)
+        pcb.append(['width', self.width])
+        pcb.append(['angle', self.angle])
+        pcb.append(['layer', self.layer])
+        pcb.append(['fill', self.fill])
+        pcb.append(['tstamp', self.tstamp])
+        pcb.append(['status', self.status])
+            
+        return pcb
         
     def To_SVG(self):
         tstamp = ''

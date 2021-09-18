@@ -80,6 +80,20 @@ class Arc(object):
                 self.status = item[1]
 
 
+    def To_PCB(self):
+        pcb = ['gr_arc']
+
+        pcb.append(['start'] + self.start)
+        pcb.append(['end'] + self.end)
+        pcb.append(['angle', self.angle])
+        pcb.append(['width', self.width])
+        pcb.append(['layer', self.layer])
+        pcb.append(['fill', self.fill])
+        pcb.append(['tstamp', self.tstamp])
+        pcb.append(['status', self.status])
+            
+        return pcb
+
     def To_SVG(self):
         # m 486.60713,151.00183 a 9.5535717,9.5535717 0 0 1 -9.55357,9.55357
         # (rx ry x-axis-rotation large-arc-flag sweep-flag x y)

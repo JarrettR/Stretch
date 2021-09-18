@@ -16,9 +16,6 @@ class Layers(object):
         
         
     def From_PCB(self, pcblist):
-        i = 0
-        layers = []
-        #print(input)
     
         if pcblist[0] != 'layers':
             assert False,"Layers: Not a layer"
@@ -42,6 +39,17 @@ class Layers(object):
                 attribs.append('power')
                 
             self.attribs[item[0]] = attribs
+     
+    def To_PCB(self):
+
+        layers = ['layers']
+
+        for number in self.names:
+            layer = [str(number), self.names[number]]
+            layer += self.attribs[number]
+            layers.append(layer)
+
+        return layers
      
     def To_SVG(self):
         layers = []

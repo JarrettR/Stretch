@@ -80,29 +80,18 @@ class Segment(object):
         #return segments, gr_lines, gr_arcs, gr_curves
     
     def To_PCB(self):
-        width = ['width', self.width]
+        pcb = ['segment']
 
-        segments = []
-        for path in paths:
-            segment = []
-            start = ['start', str(self.start[0]), str(self.start[1])]
-            end = ['end', str(self.end[0]), str(self.end[1])]
-
-            segment = [ start, end, width, self.layer]
-
-            if self.net != 0:
-                segment.append(['net', self.net])
-                
-            if self.status != 0:
-                segment.append(['status', self.status])
-                
-            if self.tstamp != '':
-                segment.append(['tstamp', self.tstamp])
-
-            segment = ['segment'] + segment
-            segments.append(segment)
+        pcb.append(['start'] + self.start)
+        pcb.append(['end'] + self.end)
+        pcb.append(['width', self.width])
+        pcb.append(['layer', self.layer])
+        pcb.append(['net', self.net])
+        pcb.append(['tstamp', self.tstamp])
+        pcb.append(['status', self.status])
+        pcb.append(['locked', self.locked])
             
-        return segments
+        return pcb
 
     def From_PCB(self, pcblist):
         if pcblist[0] != 'segment':
