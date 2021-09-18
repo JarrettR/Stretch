@@ -3,14 +3,15 @@ from bs4 import BeautifulSoup
 import json
 import math
 import cmath
-import stretch
 
 #Running KiCad Linux vs. standalone requires different imports
 try:
+    from .stretch import Board
     from .parser_base import ParserBase
     from .sexpressions_parser import parse_sexpression
     from .sexpressions_writer import SexpressionWriter
 except:
+    from stretch import Board
     from parser_base import ParserBase
     from sexpressions_parser import parse_sexpression
     from sexpressions_writer import SexpressionWriter
@@ -69,7 +70,7 @@ class SvgWrite(object):
             base = BeautifulSoup(contents, 'html.parser')
         
 
-        board = stretch.Board()
+        board = Board()
         board.From_PCB(dic)
         
         svg = board.To_SVG()
