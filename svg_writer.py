@@ -65,9 +65,9 @@ class SvgWrite(object):
         #Save JSON file, for development
         #self.Convert(dic, True)
 
-        with open(self.filename_base, "r") as f:
-            contents = f.read()
-            base = BeautifulSoup(contents, 'html.parser')
+        # with open(self.filename_base, "r") as f:
+        #     contents = f.read()
+        #     base = BeautifulSoup(contents, 'html.parser')
         
 
         board = Board()

@@ -119,6 +119,38 @@ class Zone(object):
                 self.metadata.append(item)
 
 
+    def To_PCB(self):
+        pcb = ['zone']
+
+        pcb.append(['net', self.net])
+        pcb.append(['net_name', self.net_name])
+        pcb.append(['layer', self.layer])
+        pcb.append(['layers', self.layers])
+        pcb.append(['tstamp', self.tstamp])
+        pcb.append(['hatch', self.hatch])
+        pcb.append(['priority', self.priority])
+        pcb.append(['connect_pads', self.connect_pads])
+        pcb.append(['min_thickness', self.min_thickness])
+        pcb.append(['filled_areas_thickness', self.filled_areas_thickness])
+        pcb.append(['fill', self.fill])
+        pcb.append(['keepout', self.keepout])
+
+        filled_polygon = ['filled_polygon']
+        for item in self.filled_polygon:
+            xy = ['xy'] + item
+            filled_polygon += [xy]
+        pcb.append([filled_polygon])
+
+        filled_segments = ['filled_segments']
+        for item in self.filled_segments:
+            xy = ['xy'] + item
+            filled_segments += [xy]
+        pcb.append([filled_segments])
+
+        pcb.append(['name', self.name])
+
+        return pcb
+        
     def To_SVG(self):
 
         xy_text = ''

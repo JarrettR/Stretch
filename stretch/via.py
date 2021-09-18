@@ -77,6 +77,30 @@ class Via(object):
         if tag.has_attr('free'):
             self.free = True
 
+    def To_PCB(self):
+        pcb = ['zone']
+
+        pcb.append(['blind', self.blind])
+        pcb.append(['micro', self.micro])
+        pcb.append(['at'] + self.at)
+        pcb.append(['size', self.size])
+        pcb.append(['drill', self.drill])
+
+        layers = ['filled_polygon']
+        for item in self.layers:
+            xy = ['xy'] + item
+            layers += [xy]
+        pcb.append([layers])
+
+        pcb.append(['net', self.net])
+        pcb.append(['remove_unused_layers', self.remove_unused_layers])
+        pcb.append(['keep_end_layers', self.keep_end_layers])
+        pcb.append(['tstamp', self.tstamp])
+        pcb.append(['status', self.status])
+        pcb.append(['locked', self.locked])
+        pcb.append(['free', self.free])
+
+        return pcb
 
     def To_PCB(self):
         at = ['at'] + self.at

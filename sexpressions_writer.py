@@ -14,9 +14,9 @@ except:
 
 class SexpressionWriter(object):
     def __init__(self):
-        self.filename_in = os.path.join('example', 'out.svg')
-        self.filename_out = os.path.join('example', 'out.kicad_pcb')
-        self.filename_sexpression = os.path.join('example', 'complex.kicad_pcb')
+        self.filename_in = os.path.join('tests', 'out.svg')
+        self.filename_out = os.path.join('tests', 'out.kicad_pcb')
+        self.filename_sexpression = os.path.join('tests', 'complex.kicad_pcb')
 
     def Load(self):
         with open(self.filename_in, "r") as f:

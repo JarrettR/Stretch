@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+import json
 
 from .arc import Arc
 from .circle import Circle
@@ -44,7 +45,10 @@ class Board(object):
         self.general = ''
         self.paper = ''
         self.title_block = ''
-        self.layers = ''
+
+
+        self.layers = Layers()
+        # self.layers = ''
         self.setup = ''
         self.property = ''
         self.net = ''
@@ -137,39 +141,39 @@ class Board(object):
     def To_PCB(self):
 
         pcb = self.layers.To_PCB()
-        # pcb = self.module.To_PCB() # TODO
+        # pcb += self.module.To_PCB() # TODO
         
         for item in self.segment:
-            pcb = item.To_PCB()
+            pcb += item.To_PCB()
         
         for item in self.gr_arc:
-            pcb = item.To_PCB()
+            pcb += item.To_PCB()
         
         for item in self.gr_line:
-            pcb = item.To_PCB()
+            pcb += item.To_PCB()
         
         for item in self.gr_circle:
-            pcb = item.To_PCB()
+            pcb += item.To_PCB()
         
         for item in self.gr_poly:
-            pcb = item.To_PCB()
+            pcb += item.To_PCB()
         
         for item in self.gr_curve:
-            pcb = item.To_PCB()
+            pcb += item.To_PCB()
         
         # for item in self.gr_text:
-        #     pcb = item.To_PCB()
+        #     pcb += item.To_PCB()
         
         for item in self.zone:
-            pcb = item.To_PCB()
+            pcb += item.To_PCB()
 
         for item in self.via:
-            pcb = item.To_PCB()
+            pcb += item.To_PCB()
 
-        for item in self.metadata:
-            pcb = item.To_PCB()
+        # for item in self.metadata:
+        #     pcb += item.To_PCB()
 
-        print(pcb)
+        # print(pcb)
         return pcb
            
                     
@@ -254,71 +258,83 @@ class Board(object):
         
         
     def From_SVG(self, svg):
-    
-        for item in pcb:
-            if type(item) is str:
-                print(item)
-            else:
-            
-                if item[0] == 'layers':
-                    self.layers = Layers()
-                    self.layers.From_PCB(item)
-                    
-                elif item[0] == 'module':
-                    module = Module()
-                    module.From_PCB(item)
-                    self.module.append(module)
+        self.layers = Layers()
+        self.layers.From_SVG(svg)
+        
+    def From_SVG_old(self, svg):
+        content = svg.svg.kicad.contents[0][0:-1]
+        content = '[' + content + ' ]'
+        # self.Save(content)
+        meta = json.loads(content)
+        # meta.insert(0, 'kicad_pcb')
+        if meta[0] != 'kicad_pcb':
+            meta.insert(0, 'kicad_pcb')
 
-                elif item[0] == 'segment':
-                    segment = Segment()
-                    segment.From_PCB(item)
-                    self.segment.append(segment)
-                    
-                elif item[0] == 'gr_arc':
-                    arc = Arc()
-                    arc.From_PCB(item)
-                    self.gr_arc.append(arc)
-                    
-                elif item[0] == 'gr_line':
-                    line = Line()
-                    line.From_PCB(item)
-                    self.gr_line.append(line)
-                    
-                elif item[0] == 'gr_circle':
-                    circle = Circle()
-                    circle.From_PCB(item)
-                    self.gr_circle.append(circle)
-                    
-                elif item[0] == 'gr_poly':
-                    poly = Poly()
-                    poly.From_PCB(item)
-                    self.gr_poly.append(poly)
-                    
-                elif item[0] == 'gr_curve':
-                    curve = Curve()
-                    curve.From_PCB(item)
-                    self.gr_curve.append(curve)
-                    
-                elif item[0] == 'gr_text':
-                    print(item[0])
-                    # tag = BeautifulSoup(self.Convert_Gr_Text_To_SVG(item, i), 'html.parser')
-                    # layer = tag.find('text')['layer']
-                    # base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
+        lst = meta
 
-                elif item[0] == 'zone':
-                    zone = Zone()
-                    zone.From_PCB(item)
-                    self.zone.append(zone)
+        layers, chunk = self.Parse_Layers_Segments(svg)
+        # print(layers_segments)
 
-                elif item[0] == 'via':
-                    via = Via()
-                    via.From_PCB(item)
-                    self.via.append(via)
-                    
-                else:
-                    self.metadata.append(item)
-                    
+        lst.append(layers[::-1])
+        lst = lst + chunk
+
+        return lst
                   
+    def Parse_Layers_Segments(self, svg):
+        #This gets reversed after it returns
+        layers = []
+        modules = []
+        segments = []
+        gr_lines = []
+        gr_arcs = []
+        gr_curves = []
+        gr_polys = []
+        gr_text = []
+        zones = []
+
+        for tag in svg.svg.find_all('g'):
+            if tag['id'] == 'layervia':
+                vias = self.Parse_Vias(tag)
+
+            elif tag['id'].startswith('module'):
+                module = self.Parse_Module(tag)
+                modules.append(module)
+
+            elif tag['id'].startswith('layer'):
+                #This gets reversed later
+                layer = [ tag['number'] ]
+                layer.append(tag['inkscape:label'])
+
+                if tag.has_attr('user'):
+                    layer.append('user')
+                if tag.has_attr('signal'):
+                    layer.append('signal')
+                if tag.has_attr('power'):
+                    layer.append('power')
+                if tag.has_attr('hide'):
+                    layer.append('hide')
+
+                layers.append(layer)
+
+                for path in tag.find_all('path'):
+                    if path.has_attr('type') == True and path['type'] == 'zone':
+                        zones.append(self.Parse_Zone(path))
+                    elif path.has_attr('type') == True and path['type'] == 'gr_poly':
+                        gr_polys.append(self.Parse_Polys(path))
+                    else:
+                        segment, gr_line, gr_arc, gr_curve = self.Parse_Segment(path)
+                        segments += segment
+                        gr_lines += gr_line
+                        gr_arcs += gr_arc
+                        gr_curves += gr_curve
+                        
+                for text in tag.find_all('text'):
+                    gr_text.append(self.Parse_Text(text))
+
+
+        layers.append('layers')
+        chunk = modules + segments + gr_polys + gr_lines + gr_arcs + gr_curves + gr_text + vias + zones
+        return layers, chunk
         
 base = BeautifulSoup('''
     <?xml version="1.0" encoding="UTF-8" standalone="no"?>

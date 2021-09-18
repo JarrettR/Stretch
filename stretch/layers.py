@@ -50,6 +50,27 @@ class Layers(object):
             layers.append(layer)
 
         return layers
+
+    def From_SVG(self, svg):
+
+        for tag in svg.svg.find_all('g'):
+            if tag.has_attr('id') == True:
+                if tag['id'].startswith('layer'):
+                    if tag.has_attr('number') == True:
+                        self.names[tag['number']] = tag['inkscape:label']
+
+                        attribs = []
+                        if tag.has_attr('user'):
+                            attribs.append('user')
+                        if tag.has_attr('signal'):
+                            attribs.append('signal')
+                        if tag.has_attr('power'):
+                            attribs.append('power')
+                        if tag.has_attr('hide'):
+                            attribs.append('hide')
+
+                        self.attribs[tag['number']] = attribs
+
      
     def To_SVG(self):
         layers = []
