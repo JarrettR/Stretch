@@ -78,7 +78,7 @@ class Zone(object):
         self.net = ''
         self.net_name = ''
         self.layer = ''
-        self.layers = ''
+        self.layers = []
         self.tstamp = ''
         self.hatch = ''
         self.priority = 0
@@ -99,11 +99,45 @@ class Zone(object):
 
         for item in input:
                 
-            if item[0] == 'layer':
+            if item[0] == 'net':
+                self.net = item[1]
+
+            elif item[0] == 'net_name':
+                self.net_name = item[1]
+
+            elif item[0] == 'layer':
                 self.layer = item[1]
+
+            elif item[0] == 'layers':
+                for layer in item[1]:
+                    self.layers.append(layer)
                 
+            elif item[0] == 'tstamp':
+                self.tstamp = item[1]
+
             elif item[0] == 'hatch':
-                self.hatch = item[1:]
+                self.hatch = item[1]
+
+            elif item[0] == 'priority':
+                self.priority = item[1]
+
+            elif item[0] == 'connect_pads':
+                self.connect_pads = item[1]
+
+            elif item[0] == 'min_thickness':
+                self.min_thickness = item[1]
+
+            elif item[0] == 'filled_areas_thickness':
+                self.filled_areas_thickness = item[1]
+
+            elif item[0] == 'fill':
+                self.fill = item[1]
+
+            elif item[0] == 'keepout':
+                self.keepout = item[1]
+
+            elif item[0] == 'name':
+                self.name = item[1]
                 
             elif item[0] == 'polygon':
                 for xy in item[1]:
@@ -114,9 +148,12 @@ class Zone(object):
                 for xy in item[1]:
                     if xy[0] == 'xy':
                         self.filled_polygon.append([xy[1], xy[2]])
+                
+            elif item[0] == 'filled_segments':
+                for xy in item[1]:
+                    if xy[0] == 'xy':
+                        self.filled_segments.append([xy[1], xy[2]])
                         
-            else:
-                self.metadata.append(item)
 
 
     def To_PCB(self):
@@ -154,7 +191,6 @@ class Zone(object):
     def To_SVG(self):
 
         xy_text = ''
-        additional = ''
 
         if len(self.polygon) > 0:
             for xy in self.polygon:
@@ -166,7 +202,6 @@ class Zone(object):
                 xy_text += ',' + str(float(xy[1]) * pxToMM)
                         
         
-        additional += Metadata().Convert_Metadata_To_SVG(self.metadata)
             
         parameters = '<path style="fill:none;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1'
         parameters += ';stroke:#' + Colour.Assign(self.layer)
@@ -175,7 +210,6 @@ class Zone(object):
         parameters += 'd="M ' + xy_text + ' Z" '
         parameters += 'layer="' + self.layer + '" '
         parameters += 'type="zone">'
-        parameters += additional
         parameters += '</path>'
 
         # print(parameters)

@@ -77,7 +77,7 @@ class Via(object):
         if tag.has_attr('free'):
             self.free = True
 
-    def To_PCB(self):
+    def To_PCB_1(self):
         pcb = ['zone']
 
         pcb.append(['blind', self.blind])

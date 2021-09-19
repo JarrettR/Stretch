@@ -86,6 +86,38 @@ class Line(object):
             
         return pcb
         
+    def From_SVG(self, tag, path):
+        style = tag['style']
+
+        width = style[style.find('stroke-width:') + 13:]
+        self.width = width[0:width.find('mm')]
+
+        if tag.has_attr('layer'):
+            self.layer = tag['layer']
+        elif tag.parent.has_attr('inkscape:label'):
+            #XML metadata trashed, try to recover from parent tag
+            self.layer = tag.parent['inkscape:label']
+        else:
+            assert False, "Path not in layer"
+
+
+        self.start = [str(path.start.real / pxToMM), str(path.start.imag / pxToMM)]
+        self.end = [str(path.end.real / pxToMM), str(path.end.imag / pxToMM)]
+
+        style = tag['style']
+        self.width = style[style.find('stroke-width:') + 13:]
+            
+        if tag.has_attr('fill'):
+            self.fill = tag['fill']
+            
+        if tag.has_attr('status'):
+            self.status = tag['status']
+            
+        if tag.has_attr('tstamp'):
+            self.tstamp = tag['tstamp']
+
+
+
     def To_SVG(self):
         tstamp = ''
         status = ''

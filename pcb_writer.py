@@ -11,13 +11,11 @@ try:
     from .parser_base import ParserBase
     from .sexpressions_parser import parse_sexpression
     from .sexpressions_writer import SexpressionWriter
-    from .svgpath import parse_path
 except:
     from stretch import Board
     from parser_base import ParserBase
     from sexpressions_parser import parse_sexpression
     from sexpressions_writer import SexpressionWriter
-    from svgpath import parse_path
 
 pxToMM = 3.779528
 
@@ -63,6 +61,7 @@ class PcbWrite(object):
         board.From_SVG(svg)
 
         lst = board.To_PCB()
+        # print(lst)
 
         a = SexpressionWriter()
         

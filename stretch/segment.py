@@ -38,8 +38,7 @@ class Segment(object):
         self.status = 0
         self.locked = False
     
-    def From_SVG(self, tag):
-
+    def From_SVG(self, tag, path):
         style = tag['style']
 
         width = style[style.find('stroke-width:') + 13:]
@@ -53,31 +52,22 @@ class Segment(object):
         else:
             assert False, "Path not in layer"
 
-        paths = parse_path(tag['d'])
 
-        segments = []
+        self.start = [str(path.start.real / pxToMM), str(path.start.imag / pxToMM)]
+        self.end = [str(path.end.real / pxToMM), str(path.end.imag / pxToMM)]
 
-        for path in paths:
-            segment = []
-            start = ['start', str(path.start.real / pxToMM), str(path.start.imag / pxToMM)]
-            end = ['end', str(path.end.real / pxToMM), str(path.end.imag / pxToMM)]
-
-            segment = [ start, end, width, self.layer]
-
-            if tag.has_attr('net'):
-                segment.append(['net', tag['net']])
-                
-            if tag.has_attr('status'):
-                segment.append(['status', tag['status']])
-                
-            if tag.has_attr('tstamp'):
-                segment.append(['tstamp', tag['tstamp']])
-
-            segment = ['segment'] + segment
-            segments.append(segment)
+        if tag.has_attr('net'):
+            self.net = tag['net']
             
+        if tag.has_attr('status'):
+            self.status = tag['status']
+            
+        if tag.has_attr('tstamp'):
+            self.tstamp = tag['tstamp']
 
-        #return segments, gr_lines, gr_arcs, gr_curves
+        if tag.has_attr('locked'):
+            self.locked = True
+
     
     def To_PCB(self):
         pcb = ['segment']
@@ -87,9 +77,11 @@ class Segment(object):
         pcb.append(['width', self.width])
         pcb.append(['layer', self.layer])
         pcb.append(['net', self.net])
-        pcb.append(['tstamp', self.tstamp])
+        if self.tstamp:
+            pcb.append(['tstamp', self.tstamp])
         pcb.append(['status', self.status])
-        pcb.append(['locked', self.locked])
+        if self.locked:
+            pcb.append(['locked'])
             
         return pcb
 

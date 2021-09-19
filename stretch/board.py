@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 import json
+from svgpath import parse_path
 
 from .arc import Arc
 from .circle import Circle
@@ -139,39 +140,38 @@ class Board(object):
                     self.metadata.append(item)
                    
     def To_PCB(self):
+        pcb = self.metadata
 
-        pcb = self.layers.To_PCB()
+        pcb += self.layers.To_PCB()
         # pcb += self.module.To_PCB() # TODO
         
         for item in self.segment:
-            pcb += item.To_PCB()
+            pcb.append(item.To_PCB())
         
         for item in self.gr_arc:
-            pcb += item.To_PCB()
+            pcb.append(item.To_PCB())
         
         for item in self.gr_line:
-            pcb += item.To_PCB()
+            pcb.append(item.To_PCB())
         
         for item in self.gr_circle:
-            pcb += item.To_PCB()
+            pcb.append(item.To_PCB())
         
         for item in self.gr_poly:
-            pcb += item.To_PCB()
+            pcb.append(item.To_PCB())
         
         for item in self.gr_curve:
-            pcb += item.To_PCB()
+            pcb.append(item.To_PCB())
         
         # for item in self.gr_text:
-        #     pcb += item.To_PCB()
+            # pcb.append(item.To_PCB())
         
         for item in self.zone:
-            pcb += item.To_PCB()
+            pcb.append(item.To_PCB())
 
         for item in self.via:
-            pcb += item.To_PCB()
+            pcb.append(item.To_PCB())
 
-        # for item in self.metadata:
-        #     pcb += item.To_PCB()
 
         # print(pcb)
         return pcb
@@ -238,7 +238,7 @@ class Board(object):
                 base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
                 
         for item in self.metadata:
-            tag = BeautifulSoup(Metadata().Convert_Metadata_To_SVG(item), 'html.parser')
+            tag = BeautifulSoup(Metadata().To_SVG(item), 'html.parser')
             base.svg.kicad.append(tag)
             
         
@@ -260,6 +260,26 @@ class Board(object):
     def From_SVG(self, svg):
         self.layers = Layers()
         self.layers.From_SVG(svg)
+
+        for tag in svg.svg.find_all('path'):
+            if tag.has_attr('type') == True:
+                
+                if tag['type'] == "segment":
+                    paths = parse_path(tag['d'])
+
+                    for path in paths:
+                        segment = Segment()
+                        segment.From_SVG(tag, path)
+                        self.segment.append(segment)
+                
+                elif tag['type'] == "gr_line":
+                    paths = parse_path(tag['d'])
+
+                    for path in paths:
+                        line = Line()
+                        line.From_SVG(tag, path)
+                        self.gr_line.append(line)
+
         
     def From_SVG_old(self, svg):
         content = svg.svg.kicad.contents[0][0:-1]
