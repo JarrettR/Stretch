@@ -17,14 +17,12 @@ class Metadata(object):
 
        
         tag = input[0]
-        # print(tag)
         input = input[1:]
         
         body = json.dumps(input)
         svg = '<' + tag + '>'
         svg += body
         svg += '</' + tag + '>'
-        # print(svg)
 
         return svg
 
@@ -35,8 +33,8 @@ class Metadata(object):
 
         for tag in svg.svg.kicad.children:
             chunk = [tag.name]
-            chunk += tag.contents
-            pcb += chunk
+            chunk += json.loads(tag.decode_contents())
+            pcb += [chunk]
         # content = '[' + content + ' ]'
         # meta = json.loads(content)
         # print(meta)

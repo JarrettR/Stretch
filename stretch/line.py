@@ -36,7 +36,7 @@ class Line(object):
         self.layer = ''
         self.fill = ''
         self.tstamp = ''
-        self.status = 0
+        self.status = ''
         
         
     def From_PCB(self, input):
@@ -80,9 +80,12 @@ class Line(object):
         pcb.append(['end'] + self.end)
         pcb.append(['width', self.width])
         pcb.append(['layer', self.layer])
-        pcb.append(['fill', self.fill])
-        pcb.append(['tstamp', self.tstamp])
-        pcb.append(['status', self.status])
+        if self.fill:
+            pcb.append(['fill', self.fill])
+        if self.tstamp:
+            pcb.append(['tstamp', self.tstamp])
+        if self.status:
+            pcb.append(['status', self.status])
             
         return pcb
         
@@ -104,16 +107,14 @@ class Line(object):
         self.start = [str(path.start.real / pxToMM), str(path.start.imag / pxToMM)]
         self.end = [str(path.end.real / pxToMM), str(path.end.imag / pxToMM)]
 
-        style = tag['style']
-        self.width = style[style.find('stroke-width:') + 13:]
             
-        if tag.has_attr('fill'):
+        if tag.has_attr('fill') == True:
             self.fill = tag['fill']
             
-        if tag.has_attr('status'):
+        if tag.has_attr('status') == True:
             self.status = tag['status']
             
-        if tag.has_attr('tstamp'):
+        if tag.has_attr('tstamp') == True:
             self.tstamp = tag['tstamp']
 
 

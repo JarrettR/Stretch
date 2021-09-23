@@ -42,12 +42,15 @@ class Layers(object):
      
     def To_PCB(self):
 
-        layers = ['layers']
+        layers = []
 
         for number in self.names:
             layer = [str(number), self.names[number]]
             layer += self.attribs[number]
             layers.append(layer)
+
+        layers.append('layers')
+        layers.reverse()
 
         return layers
 
@@ -59,17 +62,19 @@ class Layers(object):
                     if tag.has_attr('number') == True:
                         self.names[tag['number']] = tag['inkscape:label']
 
-                        attribs = []
-                        if tag.has_attr('user'):
-                            attribs.append('user')
-                        if tag.has_attr('signal'):
-                            attribs.append('signal')
-                        if tag.has_attr('power'):
-                            attribs.append('power')
-                        if tag.has_attr('hide'):
-                            attribs.append('hide')
+                        if tag.has_attr('attribs'):
+                            self.attribs[tag['number']] = tag['attribs'].split(',')
+                        # if tag.has_attr('signal'):
+                        #     attribs.append('signal')
+                        # if tag.has_attr('power'):
+                        #     attribs.append('power')
+                        # if tag.has_attr('hide'):
+                        #     attribs.append('hide')
 
-                        self.attribs[tag['number']] = attribs
+                        # print('-')
+                        # print(tag)
+
+                        # self.attribs[tag['number']] = attribs
 
      
     def To_SVG(self):

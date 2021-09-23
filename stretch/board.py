@@ -140,10 +140,10 @@ class Board(object):
                     self.metadata.append(item)
                    
     def To_PCB(self):
-        pcb = []
+        pcb = ['kicad_pcb']
         pcb += self.metadata
 
-        pcb += self.layers.To_PCB()
+        pcb.append(self.layers.To_PCB())
         # pcb += self.module.To_PCB() # TODO
         
         for item in self.segment:
