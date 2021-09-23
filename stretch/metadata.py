@@ -18,16 +18,26 @@ class Metadata(object):
        
         tag = input[0]
         # print(tag)
-        #input = input[1:]
+        input = input[1:]
         
         body = json.dumps(input)
-        
         svg = '<' + tag + '>'
         svg += body
         svg += '</' + tag + '>'
+        # print(svg)
 
         return svg
 
 
     def From_SVG(self, svg):
-        print("a")
+        # content = svg.svg.kicad.contents[0][0:-1]
+        pcb = []
+
+        for tag in svg.svg.kicad.children:
+            chunk = [tag.name]
+            chunk += tag.contents
+            pcb += chunk
+        # content = '[' + content + ' ]'
+        # meta = json.loads(content)
+        # print(meta)
+        return pcb

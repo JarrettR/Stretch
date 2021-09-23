@@ -140,7 +140,8 @@ class Board(object):
                     self.metadata.append(item)
                    
     def To_PCB(self):
-        pcb = self.metadata
+        pcb = []
+        pcb += self.metadata
 
         pcb += self.layers.To_PCB()
         # pcb += self.module.To_PCB() # TODO
@@ -260,6 +261,9 @@ class Board(object):
     def From_SVG(self, svg):
         self.layers = Layers()
         self.layers.From_SVG(svg)
+
+        metadata = Metadata()
+        self.metadata = metadata.From_SVG(svg)
 
         for tag in svg.svg.find_all('path'):
             if tag.has_attr('type') == True:
