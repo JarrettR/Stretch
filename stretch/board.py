@@ -121,7 +121,9 @@ class Board(object):
                     self.gr_curve.append(curve)
                     
                 elif item[0] == 'gr_text':
-                    print(item[0])
+                    text = Text()
+                    text.From_PCB(item)
+                    self.gr_text.append(text)
                     # tag = BeautifulSoup(self.Convert_Gr_Text_To_SVG(item, i), 'html.parser')
                     # layer = tag.find('text')['layer']
                     # base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
@@ -228,6 +230,10 @@ class Board(object):
             layer = item.layer
             base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
             
+        for item in self.gr_text:
+            tag = BeautifulSoup(item.To_SVG(), 'html.parser')
+            # base.svg.find('g', {'inkscape:label': 'Vias'}, recursive=False).append(tag)
+        
         for item in self.via:
             tag = BeautifulSoup(item.To_SVG(), 'html.parser')
             base.svg.find('g', {'inkscape:label': 'Vias'}, recursive=False).append(tag)
@@ -241,15 +247,7 @@ class Board(object):
         for item in self.metadata:
             tag = BeautifulSoup(Metadata().To_SVG(item), 'html.parser')
             base.svg.kicad.append(tag)
-            
-        
-
-                # elif item[0] == 'gr_text':
-                    # tag = BeautifulSoup(self.Convert_Gr_Text_To_SVG(item, i), 'html.parser')
-                    # layer = tag.find('text')['layer']
-                    # base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
-
-
+    
         if debug == True:
             svg = base.prettify("utf-8")
         else:
