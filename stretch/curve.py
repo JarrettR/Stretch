@@ -92,8 +92,8 @@ class Curve(object):
 
         #This might have a problem with random list ordering in certain versions of Python
         for xy in self.pts:
+            points.append(float(xy[0]))
             points.append(float(xy[1]))
-            points.append(float(xy[2]))
 
         if self.tstamp != '':
             tstamp = 'tstamp="' + self.tstamp + '" '

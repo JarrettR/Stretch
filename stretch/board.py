@@ -166,8 +166,8 @@ class Board(object):
         for item in self.gr_curve:
             pcb.append(item.To_PCB())
         
-        # for item in self.gr_text:
-            # pcb.append(item.To_PCB())
+        for item in self.gr_text:
+            pcb.append(item.To_PCB())
         
         for item in self.zone:
             pcb.append(item.To_PCB())
@@ -232,7 +232,8 @@ class Board(object):
             
         for item in self.gr_text:
             tag = BeautifulSoup(item.To_SVG(), 'html.parser')
-            # base.svg.find('g', {'inkscape:label': 'Vias'}, recursive=False).append(tag)
+            layer = item.layer
+            base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
         
         for item in self.via:
             tag = BeautifulSoup(item.To_SVG(), 'html.parser')

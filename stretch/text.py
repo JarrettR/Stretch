@@ -183,11 +183,14 @@ class Text(object):
         #         else:
         #             effect_text = 'effects="' + ';'.join(effect) + '" '
                         
-        if len(transform) > 0:
-            transform = 'transform="' + transform + '" '
+        # if len(transform) > 0:
+        #     print(transform)
+        #     transform = 'transform="' + transform + '" '
             
-        if layer in self.hiddenLayers:
-            hidelayer = ';display:none'
+        hidelayer = ''
+        mirror = 1
+        # if self.layer in self.hiddenLayers:
+        #     hidelayer = ';display:none'
             
         parameters = '<text '
         parameters += 'xml:space="preserve" '
@@ -197,19 +200,21 @@ class Text(object):
         parameters += ';font-size:' + str(float(self.size[0]) * pxToMM) + 'px'
         parameters += ';fill:#' + Colour.Assign(self.layer)
         parameters += '" '
-        parameters += 'x="' + str(float(at[0]) * pxToMM * mirror) + '" '
-        parameters += 'y="' + str(float(at[1]) * pxToMM) + '" '
-        parameters += 'id="text' + str(id) + '" '
-        parameters += effect_text
-        parameters += mirror_text
-        parameters += 'layer="' + layer + '" '
+        parameters += 'x="' + str(float(self.at[0]) * pxToMM * mirror) + '" '
+        parameters += 'y="' + str(float(self.at[1]) * pxToMM) + '" '
+        # parameters += 'id="text' + str(id) + '" '
+        # parameters += self.effect_text
+        # parameters += self.mirror_text
+        parameters += 'layer="' + self.layer + '" '
         parameters += 'text-anchor="middle" '
-        parameters += 'thickness="' + thickness + '" '
-        parameters += 'type="' + type_text + '" '
-        parameters += tstamp
-        parameters += hide
-        parameters += transform
-        parameters += '>' + text
+        parameters += 'thickness="' + self.thickness + '" '
+        # parameters += 'type="' + self.type_text + '" '
+        parameters += 'tstamp="' + self.tstamp + '" '
+        # parameters += self.hide
+        # parameters += transform
+        parameters += '>' + self.text
         parameters += '</text>'
+
+        # print(parameters)
 
         return parameters

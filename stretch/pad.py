@@ -155,8 +155,8 @@ class Pad(object):
         if self.roundrect_rratio != '':
             roundrect_rratio = 'roundrect_rratio="' + self.roundrect_rratio + '" '
 
-        if len(self.drill) > 0:
-            drill = 'drill="' + self.drill[1] + '" '
+        if self.drill:
+            drill = 'drill="' + self.drill + '" '
 
         # if row[0] == 'net':
             # net = 'net="' + row[1] + '" '
