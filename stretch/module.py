@@ -84,7 +84,7 @@ class Module(object):
         self.property = ''
         self.path = ''
         self.autoplace_cost90 = ''
-        self.autoplace_cost180 = ''
+        self.autoplace_cost90 = ''
         self.solder_mask_margin = ''
         self.solder_paste_margin = ''
         self.solder_paste_ratio = ''
@@ -233,6 +233,83 @@ class Module(object):
 
 
 
+    def To_PCB(self):
+        module = ['module', self.symbol]
+        if self.version:
+            module.append(self.version)
+            
+        module.append(['layer', self.layer])
+
+        if self.version:
+            module.append(['version', self.version])
+
+        if self.generator:
+            module.append(['generator', self.generator])
+
+        module.append(self.at)
+
+        if self.locked == True:
+            module.append('locked')
+
+        if self.placed == True:
+            module.append('placed')
+
+        if self.tstamp:
+            module.append(['tstamp', self.tstamp])
+
+        if self.descr:
+            module.append(['descr', self.descr])
+
+        if self.tags:
+            module.append(['tags', self.tags])
+
+        if self.property:
+            module.append(['property', self.property])
+
+        # if self.path:
+        #     module.append(['tstamp', self.tstamp])
+
+        if self.autoplace_cost90:
+            module.append(['autoplace_cost90', self.autoplace_cost90])
+
+        if self.autoplace_cost90:
+            module.append(['autoplace_cost90', self.autoplace_cost90])
+
+        if self.solder_mask_margin:
+            module.solder_mask_margin(['solder_mask_margin', self.solder_mask_margin])
+
+        if self.solder_paste_margin:
+            module.append(['solder_paste_margin', self.solder_paste_margin])
+
+        if self.solder_paste_ratio:
+            module.append(['solder_paste_ratio', self.solder_paste_ratio])
+
+        if self.clearance:
+            module.append(['clearance', self.clearance])
+
+        if self.zone_connect:
+            module.append(['zone_connect', self.zone_connect])
+
+        if self.thermal_width:
+            module.append(['thermal_width', self.thermal_width])
+
+        if self.thermal_gap:
+            module.append(['thermal_gap', self.thermal_gap])
+
+        if self.attr:
+            module.append(attr)
+
+        if self.model:
+            module.append(['model', self.model])
+
+        if self.group:
+            module.append(['group', self.group])
+
+
+        return module
+
+
+
     def To_SVG(self):
         svg = BeautifulSoup('<g type="module" name="' + self.symbol + '">', 'html.parser')
         
@@ -313,6 +390,7 @@ class Module(object):
 
         
     def From_SVG(self, tag):
+        print(tag)
         transform = tag['transform']
         
         translate = transform[transform.find('translate(') + 10:]
@@ -328,6 +406,9 @@ class Module(object):
             rotate = float(rotate[0:-1]) * -1
 
         
+        if tag.has_attr('layer'):
+            self.layer = tag['layer']
+
         if tag.has_attr('tedit'):
             self.tedit = tag['tedit']
 
