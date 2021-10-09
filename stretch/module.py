@@ -184,10 +184,10 @@ class Module(object):
                 self.attr += item[1:]
                 
             if item[0] == 'fp_text':
-                # for fp_text in item:
-                text = Text()
-                # text.From_PCB(item)
-                # self.fp_text.append(text)
+                for fp_text in item:
+                    text = Text()
+                    text.From_PCB(item)
+                    self.fp_text.append(text)
                 
             if item[0] == 'fp_arc':
                 arc = Arc()
@@ -203,7 +203,10 @@ class Module(object):
                 line.From_PCB(item)
                 self.fp_line.append(line)
                 
-            # if item[0] == 'fp_poly':
+            if item[0] == 'fp_poly':
+                poly = Poly()
+                poly.From_PCB(item)
+                self.fp_poly.append(poly)
             
             if item[0] == 'pad':
                 pad = Pad()
@@ -350,7 +353,13 @@ class Module(object):
 
         svg.g['transform'] = transform
             
-        # for item in self.fp_text:
+        for item in self.fp_text:
+            # tag = BeautifulSoup(item.To_SVG(), 'html.parser')
+            # layer = item.layer
+            #  svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
+            tag = BeautifulSoup(item.To_SVG(), 'html.parser')
+            svg.g.append(tag)
+            #Todo: hide elements that are supposed to be on hiddenlayers
         
         for item in self.fp_arc:
             tag = BeautifulSoup(item.To_SVG(), 'html.parser')
@@ -364,7 +373,9 @@ class Module(object):
             tag = BeautifulSoup(item.To_SVG(), 'html.parser')
             svg.g.append(tag)
             
-        # for item in self.fp_poly:
+        for item in self.fp_poly:
+            tag = BeautifulSoup(item.To_SVG(), 'html.parser')
+            svg.g.append(tag)
         
         for item in self.pad:
             tag = BeautifulSoup(item.To_SVG(), 'html.parser')
@@ -459,106 +470,3 @@ class Module(object):
         #         gr_lines += gr_line
         #         gr_arcs += gr_arc
         #         gr_curves += gr_curve
-
-
-
-        
-    def Parse_Module(self, tag):
-        # print(tag['id'])
-        module = ['module', tag['name'], ['layer', tag['layer']]]
-        segments = []
-        gr_lines = []
-        gr_arcs = []
-        gr_curves = []
-        gr_polys = []
-        pads = []
-        zones = []
-        transform = tag['transform']
-        
-        translate = transform[transform.find('translate(') + 10:]
-        translate = translate[0:translate.find(')')]
-        x = translate[0:translate.find(',')]
-        y = translate[len(x) + 1:]
-        x = float(x) / pxToMM
-        y = float(y) / pxToMM
-
-        rotate = 0
-        if 'rotate(' in transform:
-            rotate = transform[transform.find('rotate(') + 7:]
-            rotate = float(rotate[0:-1]) * -1
-
-        
-        if tag.has_attr('tedit'):
-            module.append(['tedit', tag['tedit']])
-
-        if tag.has_attr('tstamp'):
-            module.append(['tstamp', tag['tstamp']])
-
-        at = ['at', str(x), str(y), str(rotate)]
-        module.append(at)
-        
-        if tag.has_attr('descr'):
-            module.append(['descr', tag['descr']])
-
-        if tag.has_attr('tags'):
-            module.append(['tags', tag['tags']])
-
-        if tag.has_attr('path'):
-            module.append(['path', tag['path']])
-
-        if tag.has_attr('attr'):
-            module.append(['attr', tag['attr']])
-            
-        for text in tag.find_all('text'):
-            module.append(self.Parse_Text(text))
-
-        if tag.has_attr('model'):
-            modeltag = tag['model']
-            model = ['model']
-            model.append(modeltag[0:modeltag.find(';')])
-            modeltag = modeltag[modeltag.find(';') + 1:]
-            offset = ['xyz'] + modeltag[0:modeltag.find(';')].split(',')
-            modeltag = modeltag[modeltag.find(';') + 1:]
-            scale = ['xyz'] + modeltag[0:modeltag.find(';')].split(',')
-            modeltag = modeltag[modeltag.find(';') + 1:]
-            rotate = ['xyz'] + modeltag[0:modeltag.find(';')].split(',')
-            model.append(['offset', offset])
-            model.append(['scale', scale])
-            model.append(['rotate', rotate])
-            
-            module.append(model)
-
-        for path in tag.find_all('path'):
-            if path.has_attr('type') == True and path['type'] == 'zone':
-                zones.append(self.Parse_Zone(path))
-            else:
-                segment, gr_line, gr_arc, gr_curve = self.Parse_Segment(path)
-                segments = segments + segment
-                gr_line[0][0] = 'fp_line'
-                gr_lines += gr_line
-                gr_arcs += gr_arc
-                gr_curves += gr_curve
-
-        for rect in tag.find_all('rect'):
-            pad = self.Parse_Pad(rect, 'rect')
-            if pad != None:
-                pads.append(pad)
-        for circle in tag.find_all('circle'):
-            pad = self.Parse_Pad(circle, 'circle')
-            if pad != None:
-                pads.append(pad)
-
-        if len(segments) > 0:
-            module.append(segments)
-        if len(pads) > 0:
-            module = module + pads
-            
-        gr_lines.reverse()
-        gr_arcs.reverse()
-        gr_curves.reverse()
-        gr_polys.reverse()
-        zones.reverse()
-            
-        module = module + gr_lines + gr_arcs + gr_curves + gr_polys + zones
-        return module
-

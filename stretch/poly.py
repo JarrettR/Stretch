@@ -78,8 +78,8 @@ class Poly(object):
         xy_text = ''
                 
         for xy in self.pts:
-            xy_text += ' ' + str(float(xy[1]) * pxToMM)
-            xy_text += ',' + str(float(xy[2]) * pxToMM)
+            xy_text += ' ' + str(float(xy[0]) * pxToMM)
+            xy_text += ',' + str(float(xy[1]) * pxToMM)
    
         parameters = '<path style="stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1'
         parameters += ';fill:#' + Colour.Assign(self.layer)

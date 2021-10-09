@@ -21,8 +21,8 @@ class SvgWrite(object):
     def __init__(self):
         print(os.path.dirname(os.path.realpath(__file__)) )
         currentdir = os.path.dirname(os.path.realpath(__file__))
-        self.filename_in = os.path.join(currentdir, 'tests', 'complex.kicad_pcb')
-        # self.filename_in = os.path.join(currentdir, 'tests', 'simple.kicad_pcb')
+        # self.filename_in = os.path.join(currentdir, 'tests', 'complex.kicad_pcb')
+        self.filename_in = os.path.join(currentdir, 'tests', 'simple.kicad_pcb')
         self.filename_json = os.path.join(currentdir, 'tests', 'out.json')
         self.filename_svg = os.path.join(currentdir, 'tests', 'out.svg')
         self.filename_base = os.path.join(currentdir, 'tests', 'base.svg')
