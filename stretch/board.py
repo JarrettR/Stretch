@@ -294,25 +294,6 @@ class Board(object):
                         self.gr_line.append(line)
 
         
-    def From_SVG_old(self, svg):
-        content = svg.svg.kicad.contents[0][0:-1]
-        content = '[' + content + ' ]'
-        # self.Save(content)
-        meta = json.loads(content)
-        # meta.insert(0, 'kicad_pcb')
-        if meta[0] != 'kicad_pcb':
-            meta.insert(0, 'kicad_pcb')
-
-        lst = meta
-
-        layers, chunk = self.Parse_Layers_Segments(svg)
-        # print(layers_segments)
-
-        lst.append(layers[::-1])
-        lst = lst + chunk
-
-        return lst
-                  
     def Parse_Layers_Segments(self, svg):
         #This gets reversed after it returns
         layers = []

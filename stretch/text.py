@@ -47,6 +47,7 @@ pxToMM = 96 / 25.4
 class Text(object):
 
     def __init__(self):
+        self.type = 'gr_text'
         self.reference = ''
         self.text = ''
         self.at = []
@@ -70,10 +71,12 @@ class Text(object):
         if input[0] == 'gr_text':
             self.reference = 'gr_text'
             self.text = input[1]
+            self.type = 'gr_text'
 
         elif input[0] == 'fp_text':
             self.reference = input[1]
             self.text = input[2]
+            self.type = 'fp_text'
 
         for item in input:
             if type(item) == str:
@@ -103,31 +106,45 @@ class Text(object):
 
 
     def To_PCB(self):
-        return 0
+        pcb = [self.type]
+
+        if self.reference != "":
+            pcb.append(self.reference)
+
+        pcb.append(self.text)
+
+        at = ['at'] + self.at
+
+        pcb.append(at)
+
+        pcb.append(self.layer)
+
+        # print(pcb)
+        return pcb
 
 
     def From_SVG(self, tag):
         text = []
         
-        if tag['type'] == 'gr_text':
-            text.append('gr_text')
-        else:
-            text.append('fp_text')
-            text.append(tag['type'])
+        if tag.has_attr('type'):
+            if tag['type'] == 'gr_text':
+                self.type = 'gr_text'
+            else:
+                self.type = 'fp_text'
+                self.reference = tag['reference']
             
-        text.append(tag.contents[0])
+        self.text = tag.contents[0]
+
         x = str(float(tag['x']) / pxToMM)
         y = str(float(tag['y']) / pxToMM)
-        
-        attribs  = ['justify']
-        
+                
         if tag.has_attr('mirrored'):
             if tag['mirrored'] == 'true':
-                attribs.append('mirror')
+                self.justify = ['mirror']
                 x = str(float(x) * -1.0)
             
             
-        text.append(['at', x, y])
+        self.at = [x, y]
         
         if tag.has_attr('layer'):
             layer = ['layer', tag['layer']]
@@ -136,16 +153,15 @@ class Text(object):
             layer = ['layer', tag.parent['inkscape:label']]
         else:
             assert False, "Text not in layer"
-            assert False, "Text not in layer"
             
-        text.append(layer)
+        self.layer = layer
         
         if tag.has_attr('hide'):
             if tag['hide'] == 'True':
-                text.append('hide')
+                self.hide = True
         
         if tag.has_attr('tstamp'):
-            text.append(['tstamp', tag['tstamp']])
+            self.tstamp = tag['tstamp']
         
         style = tag['style']
 
@@ -153,14 +169,15 @@ class Text(object):
         
         size = styletag[0:styletag.find('px')]
         size = str(float(size) / pxToMM)
+
+        self.size = [size, size]
+        self.thickness = tag['thickness']
+        if tag.has_attr('bold'):
+            self.bold = True
+        if tag.has_attr('italic'):
+            self.italic = True
         
-        font = ['font', ['size', size, size], ['thickness', tag['thickness']]]
-        
-        effects = ['effects', font, attribs]
-        
-        text.append(effects)
-        
-        return text
+                
 
     def To_SVG(self):
         #    transform += 'rotate(' + str(float(item[3]) + r_offset)+ ')'
@@ -191,6 +208,11 @@ class Text(object):
         mirror = 1
         # if self.layer in self.hiddenLayers:
         #     hidelayer = ';display:none'
+
+        hide = ''
+        if self.hide == True:
+            hide = 'hide="True" '
+            hidelayer = ';display:none'
             
         parameters = '<text '
         parameters += 'xml:space="preserve" '
@@ -208,9 +230,10 @@ class Text(object):
         parameters += 'layer="' + self.layer + '" '
         parameters += 'text-anchor="middle" '
         parameters += 'thickness="' + self.thickness + '" '
-        # parameters += 'type="' + self.type_text + '" '
+        parameters += 'type="' + self.type + '" '
         parameters += 'tstamp="' + self.tstamp + '" '
-        # parameters += self.hide
+        parameters += 'reference="' + self.reference + '" '
+        parameters += hide
         # parameters += transform
         parameters += '>' + self.text
         parameters += '</text>'

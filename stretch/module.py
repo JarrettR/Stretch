@@ -302,6 +302,11 @@ class Module(object):
         if self.attr:
             module.append(attr)
 
+        for text in self.fp_text:
+            # print(text)
+            # print(text.at)
+            module.append(text.To_PCB())
+
         if self.model:
             module.append(['model', self.model])
 
@@ -365,9 +370,17 @@ class Module(object):
             tag = BeautifulSoup(item.To_SVG(), 'html.parser')
             svg.g.append(tag)
             
-        # for item in self.fp_circle:
-        # for item in self.fp_curve:
-        # for item in self.fp_rect:
+        for item in self.fp_circle:
+            tag = BeautifulSoup(item.To_SVG(), 'html.parser')
+            svg.g.append(tag)
+
+        for item in self.fp_curve:
+            tag = BeautifulSoup(item.To_SVG(), 'html.parser')
+            svg.g.append(tag)
+
+        for item in self.fp_rect:
+            tag = BeautifulSoup(item.To_SVG(), 'html.parser')
+            svg.g.append(tag)
         
         for item in self.fp_line:
             tag = BeautifulSoup(item.To_SVG(), 'html.parser')
@@ -381,27 +394,25 @@ class Module(object):
             tag = BeautifulSoup(item.To_SVG(), 'html.parser')
             svg.g.append(tag)
             
-        # if self.model != '':
+        if self.model != '':
+            svg.g['model'] = item[1] + ';'
+            #offset
+            svg.g['model'] += item[2][1][1] + ',' + item[2][1][2] + ',' + item[2][1][3] + ';'
+            #scale
+            svg.g['model'] += item[3][1][1] + ',' + item[3][1][2] + ',' + item[3][1][3] + ';'
+            #rotate
+            svg.g['model'] += item[4][1][1] + ',' + item[4][1][2] + ',' + item[4][1][3] + ';'
+
         # if self.zone != '':
         # if self.group != '':
             
-
-
-            # if item[0] == 'model':
-                # svg.g['model'] = item[1] + ';'
-                # #offset
-                # svg.g['model'] += item[2][1][1] + ',' + item[2][1][2] + ',' + item[2][1][3] + ';'
-                # #scale
-                # svg.g['model'] += item[3][1][1] + ',' + item[3][1][2] + ',' + item[3][1][3] + ';'
-                # #rotate
-                # svg.g['model'] += item[4][1][1] + ',' + item[4][1][2] + ',' + item[4][1][3] + ';'
 
         return svg
 
 
         
     def From_SVG(self, tag):
-        print(tag)
+        # print(tag)
         transform = tag['transform']
         
         translate = transform[transform.find('translate(') + 10:]
@@ -441,24 +452,26 @@ class Module(object):
         if tag.has_attr('attr'):
             self.attr = tag['attr']
             
-        # for text in tag.find_all('text'):
-        #     self. = self.Parse_Text(text))
+        for text in tag.find_all('text'):
+            t = Text()
+            t.From_SVG(text)
+            self.fp_text.append(t)
 
-        # if tag.has_attr('model'):
-        #     modeltag = tag['model']
-        #     model = ['model']
-        #     model.append(modeltag[0:modeltag.find(';')])
-        #     modeltag = modeltag[modeltag.find(';') + 1:]
-        #     offset = ['xyz'] + modeltag[0:modeltag.find(';')].split(',')
-        #     modeltag = modeltag[modeltag.find(';') + 1:]
-        #     scale = ['xyz'] + modeltag[0:modeltag.find(';')].split(',')
-        #     modeltag = modeltag[modeltag.find(';') + 1:]
-        #     rotate = ['xyz'] + modeltag[0:modeltag.find(';')].split(',')
-        #     model.append(['offset', offset])
-        #     model.append(['scale', scale])
-        #     model.append(['rotate', rotate])
+        if tag.has_attr('model'):
+            modeltag = tag['model']
+            model = ['model']
+            model.append(modeltag[0:modeltag.find(';')])
+            modeltag = modeltag[modeltag.find(';') + 1:]
+            offset = ['xyz'] + modeltag[0:modeltag.find(';')].split(',')
+            modeltag = modeltag[modeltag.find(';') + 1:]
+            scale = ['xyz'] + modeltag[0:modeltag.find(';')].split(',')
+            modeltag = modeltag[modeltag.find(';') + 1:]
+            rotate = ['xyz'] + modeltag[0:modeltag.find(';')].split(',')
+            model.append(['offset', offset])
+            model.append(['scale', scale])
+            model.append(['rotate', rotate])
             
-        #     module.append(model)
+            self.model = model
 
         # for path in tag.find_all('path'):
         #     if path.has_attr('type') == True and path['type'] == 'zone':
