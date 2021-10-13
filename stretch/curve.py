@@ -66,8 +66,12 @@ class Curve(object):
             if item[0] == 'status':
                 self.status = item[1]
                
-    def To_PCB(self):
-        pcb = ['gr_curve']
+    def To_PCB(self, fp = False):
+        pcb = []
+        if fp:
+            pcb = ['fp_curve']
+        else:
+            pcb = ['gr_curve']
 
         pts = ['pts']
 
@@ -84,7 +88,12 @@ class Curve(object):
                         
         return pcb 
                 
-    def To_SVG(self):
+    def To_SVG(self, fp = False):
+        if fp:
+            polytype = 'fp_curve'
+        else:
+            polytype = 'gr_curve'
+        
 
         points = []
         tstamp = ''

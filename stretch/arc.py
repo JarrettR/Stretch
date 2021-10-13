@@ -1,5 +1,6 @@
 
 from .colour import Colour
+from svgpath import parse_path
 import math
 import cmath
 
@@ -41,6 +42,12 @@ class Arc(object):
         self.fill = ''
         self.tstamp = ''
         self.status = 0
+
+    def Get_Angle(self, centre, point):
+        vec1 = centre[0] + 1j * centre[1]
+        vec2 = point[0] + 1j * point[1]
+        vec3 = vec2 - vec1
+        return math.degrees(cmath.phase(vec3))
 
 
     def From_PCB(self, input):
@@ -88,13 +95,20 @@ class Arc(object):
         pcb.append(['angle', self.angle])
         pcb.append(['width', self.width])
         pcb.append(['layer', self.layer])
-        pcb.append(['fill', self.fill])
-        pcb.append(['tstamp', self.tstamp])
-        pcb.append(['status', self.status])
+        if self.fill:
+            pcb.append(['fill', self.fill])
+        if self.tstamp:
+            pcb.append(['tstamp', self.tstamp])
+        if self.status:
+            pcb.append(['status', self.status])
             
         return pcb
 
-    def To_SVG(self):
+    def To_SVG(self, fp = False):
+        if fp:
+            arctype = 'fp_arc'
+        else:
+            arctype = 'gr_arc'
         # m 486.60713,151.00183 a 9.5535717,9.5535717 0 0 1 -9.55357,9.55357
         # (rx ry x-axis-rotation large-arc-flag sweep-flag x y)
         
@@ -141,7 +155,7 @@ class Arc(object):
         parameters += 'd="M ' + str(start[0]) + ',' + str(start[1]) + ' ' + a + '" '
         # parameters += 'id="path' + str(id) + '" '
         parameters += 'layer="' + self.layer + '" '
-        parameters += 'type="gr_arc" '
+        parameters += 'type="' + arctype + '" '
         parameters += fill
         parameters += tstamp
         parameters += status
@@ -150,13 +164,25 @@ class Arc(object):
         return parameters
         
         
-    def Parse_Arcs(self, tag, segments):
+    def From_SVG(self, tag, segment):
 
         path = parse_path(tag['d'])
         radius = path[0].radius.real / pxToMM
         sweep = path[0].sweep
         large_arc = path[0].large_arc
+        
+        style = tag['style']
 
+        width = style[style.find('stroke-width:') + 13:]
+        self.width = width[0:width.find('mm')]
+        
+        if tag.has_attr('layer'):
+            self.layer = tag['layer']
+        elif tag.parent.has_attr('inkscape:label'):
+            #XML metadata trashed, try to recover from parent tag
+            self.layer = tag.parent['inkscape:label']
+        else:
+            assert False, "Arc not in layer"
 
         if bool(large_arc) == True:
             print("Handle this~!")
@@ -194,8 +220,8 @@ class Arc(object):
             x = x3 - math.sqrt(radius**2 - (q / 2) ** 2) * (start_complex.imag - end_complex.imag) / q
             y = y3 + math.sqrt(radius**2 - (q / 2) ** 2) * (start_complex.real - end_complex.real) / q
    
-        start_list = ['start', str(x), str(y)]
-        end_list = ['end', end[0], end[1]]
+        self.start = [str(x), str(y)]
+        self.end = [end[0], end[1]]
 
         start_angle = self.Get_Angle([x,y], [path[0].start.real / pxToMM, path[0].start.imag / pxToMM])
         end_angle = self.Get_Angle([x,y], [path[0].end.real / pxToMM, path[0].end.imag / pxToMM])
@@ -205,9 +231,14 @@ class Arc(object):
             angle = 360 - angle
         angle = "{:.6f}".format(round(angle, 6))
         
-        segments[0] = start_list
-        segments[1] = end_list
-        segments.insert(2, ([ 'angle', angle]))
-        segments.insert(0, 'gr_arc')
-        return segments
+        self.angle = angle
+            
+        if tag.has_attr('fill') == True:
+            self.fill = tag['fill']
+            
+        if tag.has_attr('status') == True:
+            self.status = tag['status']
+            
+        if tag.has_attr('tstamp') == True:
+            self.tstamp = tag['tstamp']
 

@@ -78,8 +78,12 @@ class Circle(object):
             if item[0] == 'status':
                 self.status = item[1]
 
-    def To_PCB(self):
-        pcb = ['gr_line']
+    def To_PCB(self, fp = False):
+        pcb = []
+        if fp:
+            pcb = ['fp_circle']
+        else:
+            pcb = ['gr_circle']
 
         pcb.append(['center'] + self.center)
         pcb.append(['end'] + self.end)

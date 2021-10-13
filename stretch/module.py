@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from svgpath import parse_path
 
 from .arc import Arc
 from .circle import Circle
@@ -368,23 +369,23 @@ class Module(object):
             #Todo: hide elements that are supposed to be on hiddenlayers
         
         for item in self.fp_arc:
-            tag = BeautifulSoup(item.To_SVG(), 'html.parser')
+            tag = BeautifulSoup(item.To_SVG(fp = True), 'html.parser')
             svg.g.append(tag)
             
         for item in self.fp_circle:
-            tag = BeautifulSoup(item.To_SVG(), 'html.parser')
+            tag = BeautifulSoup(item.To_SVG(fp = True), 'html.parser')
             svg.g.append(tag)
 
         for item in self.fp_curve:
-            tag = BeautifulSoup(item.To_SVG(), 'html.parser')
+            tag = BeautifulSoup(item.To_SVG(fp = True), 'html.parser')
             svg.g.append(tag)
 
         for item in self.fp_rect:
-            tag = BeautifulSoup(item.To_SVG(), 'html.parser')
+            tag = BeautifulSoup(item.To_SVG(fp = True), 'html.parser')
             svg.g.append(tag)
         
         for item in self.fp_line:
-            tag = BeautifulSoup(item.To_SVG(), 'html.parser')
+            tag = BeautifulSoup(item.To_SVG(fp = True), 'html.parser')
             svg.g.append(tag)
             
         for item in self.fp_poly:
@@ -474,14 +475,35 @@ class Module(object):
             
             self.model = model
 
-        for path in tag.find_all('path'):
+        for tag in tag.find_all('path'):
             # if path.has_attr('type') == True and path['type'] == 'zone':
             #     self.zone.append(Zone.From_Svg(path))
-            if path.has_attr('type') == True and path['type'] == 'fp_poly':
+            if tag.has_attr('type') == True and tag['type'] == 'fp_poly':
                 poly = Poly()
-                poly.From_SVG(path)
+                poly.From_SVG(tag)
                 self.fp_poly.append(poly)
-                # print(poly)
+            elif tag.has_attr('type') == True and tag['type'] == 'fp_line':
+                paths = parse_path(tag['d'])
+
+                for path in paths:
+                    line = Line()
+                    line.From_SVG(tag, path)
+                    self.fp_line.append(line)
+            elif tag.has_attr('type') == True and tag['type'] == 'fp_arc':
+                paths = parse_path(tag['d'])
+                print(paths)
+
+                for path in paths:
+                    arc = Arc()
+                    arc.From_SVG(tag, path)
+                    self.fp_arc.append(arc)
+                    print(arc)
+                    
+            elif tag.has_attr('type') == True and tag['type'] == 'fp_curve':
+                curve = Curve()
+                curve.From_SVG(path)
+                self.fp_curve.append(curve)
+                print(curve)
             # else:
                 # segment, gr_line, gr_arc, gr_curve = self.Parse_Segment(path)
                 # segments = segments + segment

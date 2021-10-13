@@ -292,6 +292,22 @@ class Board(object):
                         line = Line()
                         line.From_SVG(tag, path)
                         self.gr_line.append(line)
+                
+                elif tag['type'] == "gr_arc":
+                    paths = parse_path(tag['d'])
+
+                    for path in paths:
+                        arc = Arc()
+                        arc.From_SVG(tag, path)
+                        self.gr_arc.append(arc)
+                
+                elif tag['type'] == "gr_curve":
+                    paths = parse_path(tag['d'])
+
+                    for path in paths:
+                        curve = Curve()
+                        # curve.From_SVG(tag, path)
+                        # self.gr_curve.append(curve)
 
         
     def Parse_Layers_Segments(self, svg):

@@ -73,8 +73,12 @@ class Line(object):
             if item[0] == 'status':
                 self.status = item[1]
 
-    def To_PCB(self):
-        pcb = ['gr_line']
+    def To_PCB(self, fp = False):
+        pcb = []
+        if fp:
+            pcb = ['fp_line']
+        else:
+            pcb = ['gr_line']
 
         pcb.append(['start'] + self.start)
         pcb.append(['end'] + self.end)
@@ -119,7 +123,12 @@ class Line(object):
 
 
 
-    def To_SVG(self):
+    def To_SVG(self, fp = False):
+        if fp:
+            linetype = 'fp_line'
+        else:
+            linetype = 'gr_line'
+        
         tstamp = ''
         status = ''
         fill = ''
@@ -138,7 +147,7 @@ class Line(object):
         parameters += 'd="M ' + str(float(self.start[0]) * pxToMM) + ',' + str(float(self.start[1]) * pxToMM) + ' ' + str(float(self.end[0]) * pxToMM) + ',' + str(float(self.end[1]) * pxToMM) + '" '
         # parameters += 'id="path' + str(id) + '" '
         parameters += 'layer="' + self.layer + '" '
-        parameters += 'type="gr_line" '
+        parameters += 'type="' + linetype + '" '
         parameters += fill
         parameters += tstamp
         parameters += status
