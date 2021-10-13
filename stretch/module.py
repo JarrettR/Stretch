@@ -303,9 +303,10 @@ class Module(object):
             module.append(attr)
 
         for text in self.fp_text:
-            # print(text)
-            # print(text.at)
             module.append(text.To_PCB())
+
+        for poly in self.fp_poly:
+            module.append(poly.To_PCB(fp = True))
 
         if self.model:
             module.append(['model', self.model])
@@ -387,7 +388,7 @@ class Module(object):
             svg.g.append(tag)
             
         for item in self.fp_poly:
-            tag = BeautifulSoup(item.To_SVG(), 'html.parser')
+            tag = BeautifulSoup(item.To_SVG(fp = True), 'html.parser')
             svg.g.append(tag)
         
         for item in self.pad:
@@ -473,13 +474,18 @@ class Module(object):
             
             self.model = model
 
-        # for path in tag.find_all('path'):
-        #     if path.has_attr('type') == True and path['type'] == 'zone':
-        #         self.zone.append(Zone.From_Svg(path))
-        #     else:
-        #         segment, gr_line, gr_arc, gr_curve = self.Parse_Segment(path)
-        #         segments = segments + segment
-        #         gr_line[0][0] = 'fp_line'
-        #         gr_lines += gr_line
-        #         gr_arcs += gr_arc
-        #         gr_curves += gr_curve
+        for path in tag.find_all('path'):
+            # if path.has_attr('type') == True and path['type'] == 'zone':
+            #     self.zone.append(Zone.From_Svg(path))
+            if path.has_attr('type') == True and path['type'] == 'fp_poly':
+                poly = Poly()
+                poly.From_SVG(path)
+                self.fp_poly.append(poly)
+                # print(poly)
+            # else:
+                # segment, gr_line, gr_arc, gr_curve = self.Parse_Segment(path)
+                # segments = segments + segment
+                # gr_line[0][0] = 'fp_line'
+                # gr_lines += gr_line
+                # gr_arcs += gr_arc
+                # gr_curves += gr_curve

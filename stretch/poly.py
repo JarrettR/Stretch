@@ -1,5 +1,6 @@
 
 from .colour import Colour
+from svgpath import parse_path
 
 # 0 gr_poly
 # 1
@@ -55,8 +56,12 @@ class Poly(object):
             if item[0] == 'status':
                 self.status = item[1]
                 
-    def To_PCB(self):
-        pcb = ['gr_poly']
+    def To_PCB(self, fp = False):
+        pcb = []
+        if fp:
+            pcb = ['fp_poly']
+        else:
+            pcb = ['gr_poly']
 
         pts = ['pts']
 
@@ -64,16 +69,26 @@ class Poly(object):
             xy = ['xy'] + item
             pts += [xy]
 
-        pcb.append([pts])
-        pcb.append(['width', self.width])
+        pcb.append(pts)
+        if self.width != 0:
+            pcb.append(['width', self.width])
         pcb.append(['layer', self.layer])
-        pcb.append(['fill', self.fill])
-        pcb.append(['tstamp', self.tstamp])
-        pcb.append(['status', self.status])
+        if self.tstamp != '':
+            pcb.append(['fill', self.fill])
+        if self.tstamp != '':
+            pcb.append(['tstamp', self.tstamp])
+        if self.status != 0:
+            pcb.append(['status', self.status])
+
+        # print(pcb)
             
         return pcb
 
-    def To_SVG(self):
+    def To_SVG(self, fp = False):
+        if fp:
+            polytype = 'fp_poly'
+        else:
+            polytype = 'gr_poly'
         
         xy_text = ''
                 
@@ -88,33 +103,13 @@ class Poly(object):
         parameters += '" '
         parameters += 'd="M ' + xy_text + ' Z" '
         parameters += 'layer="' + self.layer + '" '
-        parameters += 'type="gr_poly" />'
+        parameters += 'type="' + polytype + '" />'
         
         # print(parameters)
         return parameters
         
 
-    def Parse_Polys(self, tag):
-        # 0 gr_poly
-        # 1
-        #   0 pts
-        #   1
-        #     0 xy
-        #     1 147.6375
-        #     2 120.9675
-        #   2
-        #     0 xy
-        #     1 147.6375
-        #     2 120.9675
-        #   3
-        #     ...
-        # 2
-        #   0 layer
-        #   1 B.Cu
-        # 3
-        #   0 width
-        #   1 0.1
-
+    def From_SVG(self, tag):
         data = [tag['type']]
         style = tag['style']
 
@@ -122,30 +117,22 @@ class Poly(object):
         width = styletag[0:styletag.find('mm')]
 
         if tag.has_attr('layer'):
-            layer = ['layer', tag['layer']]
+            layer = tag['layer']
         elif tag.parent.has_attr('inkscape:label'):
             #XML metadata trashed, try to recover from parent tag
-            layer = ['layer', tag.parent['inkscape:label']]
+            layer = tag.parent['inkscape:label']
         else:
             assert False, "Poly not in layer"
             
-            
         path = parse_path(tag['d'])
-        # print(tag)
-        # print(tag['d'])
-        # print(path)
         
-        pts = ['pts']
+        pts = []
         for point in path:
-            xy = ['xy']
+            xy = []
             xy.append(str(point.start.real / pxToMM))
             xy.append(str(point.start.imag / pxToMM))
             pts.append(xy)
 
-        data.append(pts)
-        data.append(layer)
-        data.append(['width', width])
-        
-                
-        return data
-
+        self.pts = pts
+        self.width = width
+        self.layer = layer
