@@ -258,6 +258,9 @@ class Module(object):
         if self.placed == True:
             module.append('placed')
 
+        if self.tedit:
+            module.append(['tedit', self.tedit])
+
         if self.tstamp:
             module.append(['tstamp', self.tstamp])
 
@@ -308,6 +311,18 @@ class Module(object):
 
         for poly in self.fp_poly:
             module.append(poly.To_PCB(fp = True))
+
+        for line in self.fp_line:
+            module.append(line.To_PCB(fp = True))
+
+        for arc in self.fp_arc:
+            module.append(arc.To_PCB(fp = True))
+
+        for curve in self.fp_curve:
+            module.append(curve.To_PCB(fp = True))
+
+        for circle in self.fp_circle:
+            module.append(circle.To_PCB(fp = True))
 
         if self.model:
             module.append(['model', self.model])
@@ -429,7 +444,8 @@ class Module(object):
             rotate = transform[transform.find('rotate(') + 7:]
             rotate = float(rotate[0:-1]) * -1
 
-        
+        self.symbol = tag['name']
+                
         if tag.has_attr('layer'):
             self.layer = tag['layer']
 
@@ -478,6 +494,7 @@ class Module(object):
         for tag in tag.find_all('path'):
             # if path.has_attr('type') == True and path['type'] == 'zone':
             #     self.zone.append(Zone.From_Svg(path))
+            # print(tag)
             if tag.has_attr('type') == True and tag['type'] == 'fp_poly':
                 poly = Poly()
                 poly.From_SVG(tag)
