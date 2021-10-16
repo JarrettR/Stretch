@@ -324,6 +324,9 @@ class Module(object):
         for circle in self.fp_circle:
             module.append(circle.To_PCB(fp = True))
 
+        for pad in self.pad:
+            module.append(pad.To_PCB())
+
         if self.model:
             module.append(['model', self.model])
 
@@ -491,36 +494,33 @@ class Module(object):
             
             self.model = model
 
-        for tag in tag.find_all('path'):
+        for tagpath in tag.find_all('path'):
             # if path.has_attr('type') == True and path['type'] == 'zone':
             #     self.zone.append(Zone.From_Svg(path))
             # print(tag)
-            if tag.has_attr('type') == True and tag['type'] == 'fp_poly':
+            if tagpath.has_attr('type') == True and tagpath['type'] == 'fp_poly':
                 poly = Poly()
-                poly.From_SVG(tag)
+                poly.From_SVG(tagpath)
                 self.fp_poly.append(poly)
-            elif tag.has_attr('type') == True and tag['type'] == 'fp_line':
-                paths = parse_path(tag['d'])
+            elif tagpath.has_attr('type') == True and tagpath['type'] == 'fp_line':
+                paths = parse_path(tagpath['d'])
 
                 for path in paths:
                     line = Line()
-                    line.From_SVG(tag, path)
+                    line.From_SVG(tagpath, path)
                     self.fp_line.append(line)
-            elif tag.has_attr('type') == True and tag['type'] == 'fp_arc':
-                paths = parse_path(tag['d'])
-                print(paths)
+            elif tagpath.has_attr('type') == True and tagpath['type'] == 'fp_arc':
+                paths = parse_path(tagpath['d'])
 
                 for path in paths:
                     arc = Arc()
-                    arc.From_SVG(tag, path)
+                    arc.From_SVG(tagpath, path)
                     self.fp_arc.append(arc)
-                    print(arc)
                     
-            elif tag.has_attr('type') == True and tag['type'] == 'fp_curve':
+            elif tagpath.has_attr('type') == True and tagpath['type'] == 'fp_curve':
                 curve = Curve()
                 curve.From_SVG(path)
                 self.fp_curve.append(curve)
-                print(curve)
             # else:
                 # segment, gr_line, gr_arc, gr_curve = self.Parse_Segment(path)
                 # segments = segments + segment
@@ -528,3 +528,14 @@ class Module(object):
                 # gr_lines += gr_line
                 # gr_arcs += gr_arc
                 # gr_curves += gr_curve
+        for tagpath in tag.find_all('rect'):
+            if tagpath.has_attr('type') == True and tagpath['type'] == 'pad':
+                pad = Pad()
+                pad.From_SVG(tagpath, 'rect')
+                self.pad.append(pad)
+
+        for tagpath in tag.find_all('circle'):
+            if tagpath.has_attr('type') == True and tagpath['type'] == 'pad':
+                pad = Pad()
+                pad.From_SVG(tagpath, 'circle')
+                self.pad.append(pad)

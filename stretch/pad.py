@@ -32,6 +32,7 @@ class Pad(object):
 
     def __init__(self):
         self.name = ''
+        #thru_hole, smd, connect, or np_thru_hole
         self.attribute = ''
         self.shape = ''
         self.size = []
@@ -39,7 +40,7 @@ class Pad(object):
         self.rect_delta = []
         self.drill = []
         self.layers = []
-        self.net = 0
+        self.net = []
         self.pinfunction = ''
         self.die_length = ''
         self.solder_mask_margin = ''
@@ -96,7 +97,7 @@ class Pad(object):
                 for layer in item[1:]:
                     self.layers.append(layer)
             if item[0] == 'net':
-                self.net = item[1] 
+                self.net = item[1:] 
             if item[0] == 'pinfunction':
                 self.pinfunction = item[1] 
             if item[0] == 'die_length':
@@ -134,6 +135,23 @@ class Pad(object):
             if item[0] == 'tstamp':
                 self.tstamp = item[1] 
 
+    def To_PCB(self):
+        pcb = ['pad']
+
+        pcb.append(self.name)
+        pcb.append(self.attribute)
+        pcb.append(self.shape)
+
+        pcb.append(['at'] + self.at)
+        pcb.append(['size'] + self.size)
+        pcb.append(['layers'] + self.layers)
+        pcb.append(['net'] + self.net)
+
+        if self.tstamp:
+            pcb.append(['tstamp', self.tstamp])
+            
+        return pcb
+        
 
 
     def To_SVG(self):
@@ -157,10 +175,6 @@ class Pad(object):
 
         if self.drill:
             drill = 'drill="' + self.drill + '" '
-
-        # if row[0] == 'net':
-            # net = 'net="' + row[1] + '" '
-            # net += 'netname="' + row[2] + '"'
 
         svg = ''
         svgsize = ''
@@ -213,7 +227,10 @@ class Pad(object):
         parameters += svgsize
         parameters += roundcorners
         parameters += roundrect_rratio
-        parameters += net
+        parameters += 'type="pad" '
+        parameters += 'attribute="' + self.attribute + '" '
+        parameters += 'netid="' + self.net[0] + '" '
+        parameters += 'netname="' + self.net[1] + '" '
         parameters += rotate
         parameters += drill
         parameters += 'layers="' + ','.join(self.layers) + '" '
@@ -224,14 +241,11 @@ class Pad(object):
         return svg
 
 
-    def Parse_Pad(self, tag, padtype):
-        # print(tag['id'])
+    def From_SVG(self, tag, padtype):
 
-        if tag.has_attr('first') == False:
-            return None
+        self.attribute = tag['attribute']
 
-        pin = tag['pin']
-        process = tag['process']
+        self.shape = padtype
 
         if padtype == 'rect':
 
@@ -242,36 +256,33 @@ class Pad(object):
             width = str(width)
             height = str(height)
 
-            size = ['size', width, height]
+            self.size = [width, height]
 
         elif padtype == 'circle':
             r = str((float(tag['r']) * 2) / pxToMM)
-            size = ['size', r, r]
+            self.size = [r, r]
             x = str(float(tag['cx']) / pxToMM)
             y = str(float(tag['cy']) / pxToMM)
 
 
-        at = ['at', x, y]
+        self.at = [x, y]
         if tag.has_attr('rotate'):
             at.append(tag['rotate'])
 
-        pad = ['pad', pin, process, padtype, at, size]
 
         if tag.has_attr('drill'):
-            pad.append(['drill',tag['drill']])
+            self.drill = tag['drill']
             
-        layers = ['layers'] + tag['layers'].split(',')
-        pad.append(layers)
+        self.layers = tag['layers'].split(',')
             
         if tag.has_attr('roundrect_rratio'):
-            pad.append(['roundrect_rratio',tag['roundrect_rratio']])
-            pad[3] = 'roundrect'
+            self.roundrect_rratio = tag['roundrect_rratio']
+            self.shape = 'roundrect'
 
-        if tag.has_attr('net'):
-            pad.append(['net',tag['net'],tag['netname']])
+        if tag.has_attr('netid'):
+            self.net = [tag['netid'], tag['netname']]
 
 
-        return pad
 
 
 
