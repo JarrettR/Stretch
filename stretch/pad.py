@@ -1,4 +1,3 @@
-
 from .colour import Colour
 
 # https://github.com/KiCad/kicad-source-mirror/blob/93466fa1653191104c5e13231dfdc1640b272777/pcbnew/plugins/kicad/pcb_parser.cpp#L3530
@@ -67,7 +66,6 @@ class Pad(object):
         layers = []
         roundrect_rratio = ''
         net = ''
-        drill = ''
         rotate = ''
 
         if input[0] != 'pad':
@@ -228,9 +226,11 @@ class Pad(object):
         parameters += roundcorners
         parameters += roundrect_rratio
         parameters += 'type="pad" '
+        parameters += 'name="' + self.name + '" '
         parameters += 'attribute="' + self.attribute + '" '
         parameters += 'netid="' + self.net[0] + '" '
         parameters += 'netname="' + self.net[1] + '" '
+        parameters += 'shape="' + self.shape + '" '
         parameters += rotate
         parameters += drill
         parameters += 'layers="' + ','.join(self.layers) + '" '
@@ -241,13 +241,15 @@ class Pad(object):
         return svg
 
 
-    def From_SVG(self, tag, padtype):
+    def From_SVG(self, tag):
 
+        self.name = tag['name']
         self.attribute = tag['attribute']
 
-        self.shape = padtype
+        if tag.has_attr('shape'):
+            self.shape = tag['shape']
 
-        if padtype == 'rect':
+        if self.shape == 'rect':
 
             width = float(tag['width']) / pxToMM
             height = float(tag['height']) / pxToMM
@@ -258,7 +260,7 @@ class Pad(object):
 
             self.size = [width, height]
 
-        elif padtype == 'circle':
+        elif self.shape == 'circle' or self.shape == 'oval':
             r = str((float(tag['r']) * 2) / pxToMM)
             self.size = [r, r]
             x = str(float(tag['cx']) / pxToMM)

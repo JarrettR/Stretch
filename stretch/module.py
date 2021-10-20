@@ -85,7 +85,7 @@ class Module(object):
         self.property = ''
         self.path = ''
         self.autoplace_cost90 = ''
-        self.autoplace_cost90 = ''
+        self.autoplace_cost180 = ''
         self.solder_mask_margin = ''
         self.solder_paste_margin = ''
         self.solder_paste_ratio = ''
@@ -93,7 +93,7 @@ class Module(object):
         self.zone_connect = ''
         self.thermal_width = ''
         self.thermal_gap = ''
-        self.attr = []
+        self.attr = ''
         self.fp_text = []
         self.fp_arc = []
         self.fp_circle = []
@@ -182,7 +182,7 @@ class Module(object):
                 self.thermal_gap = item[1]
                 
             if item[0] == 'attr':
-                self.attr += item[1:]
+                self.attr = ','.join(item[1:])
                 
             if item[0] == 'fp_text':
                 for fp_text in item:
@@ -279,8 +279,8 @@ class Module(object):
         if self.autoplace_cost90:
             module.append(['autoplace_cost90', self.autoplace_cost90])
 
-        if self.autoplace_cost90:
-            module.append(['autoplace_cost90', self.autoplace_cost90])
+        if self.autoplace_cost180:
+            module.append(['autoplace_cost180', self.autoplace_cost180])
 
         if self.solder_mask_margin:
             module.solder_mask_margin(['solder_mask_margin', self.solder_mask_margin])
@@ -303,8 +303,12 @@ class Module(object):
         if self.thermal_gap:
             module.append(['thermal_gap', self.thermal_gap])
 
+        if self.path:
+            module.append(['path', self.path])
+
         if self.attr:
-            module.append(attr)
+            attr = self.attr.split(',')
+            module.append(['attr'] + attr)
 
         for text in self.fp_text:
             module.append(text.To_PCB())
@@ -377,6 +381,48 @@ class Module(object):
             transform += ' rotate(' + str(-1 * rotate) + ')'
 
         svg.g['transform'] = transform
+
+        if self.descr != '':
+            svg.g['descr'] = self.descr
+
+        if self.tags != '':
+            svg.g['tags'] = self.tags
+
+        if self.property != '':
+            svg.g['property'] = self.property
+
+        if self.path != '':
+            svg.g['path'] = self.path
+
+        if self.autoplace_cost90 != '':
+            svg.g['autoplace_cost90'] = self.autoplace_cost90
+
+        if self.autoplace_cost180 != '':
+            svg.g['autoplace_cost180'] = self.autoplace_cost180
+
+        if self.solder_mask_margin != '':
+            svg.g['solder_mask_margin'] = self.solder_mask_margin
+
+        if self.solder_paste_margin != '':
+            svg.g['solder_paste_margin'] = self.solder_paste_margin
+
+        if self.solder_paste_ratio != '':
+            svg.g['solder_paste_ratio'] = self.solder_paste_ratio
+
+        if self.solder_paste_ratio != '':
+            svg.g['solder_paste_ratio'] = self.solder_paste_ratio
+
+        if self.zone_connect != '':
+            svg.g['zone_connect'] = self.zone_connect
+
+        if self.thermal_width != '':
+            svg.g['thermal_width'] = self.thermal_width
+
+        if self.thermal_gap != '':
+            svg.g['thermal_gap'] = self.thermal_gap
+
+        if self.attr != '':
+            svg.g['attr'] = self.attr
             
         for item in self.fp_text:
             # tag = BeautifulSoup(item.To_SVG(), 'html.parser')
@@ -501,26 +547,26 @@ class Module(object):
             if tagpath.has_attr('type') == True and tagpath['type'] == 'fp_poly':
                 poly = Poly()
                 poly.From_SVG(tagpath)
-                self.fp_poly.append(poly)
+                self.fp_poly.insert(0, poly)
             elif tagpath.has_attr('type') == True and tagpath['type'] == 'fp_line':
                 paths = parse_path(tagpath['d'])
 
                 for path in paths:
                     line = Line()
                     line.From_SVG(tagpath, path)
-                    self.fp_line.append(line)
+                    self.fp_line.insert(0, line)
             elif tagpath.has_attr('type') == True and tagpath['type'] == 'fp_arc':
                 paths = parse_path(tagpath['d'])
 
                 for path in paths:
                     arc = Arc()
                     arc.From_SVG(tagpath, path)
-                    self.fp_arc.append(arc)
+                    self.fp_arc.insert(0, arc)
                     
             elif tagpath.has_attr('type') == True and tagpath['type'] == 'fp_curve':
                 curve = Curve()
                 curve.From_SVG(path)
-                self.fp_curve.append(curve)
+                self.fp_curve.insert(0, curve)
             # else:
                 # segment, gr_line, gr_arc, gr_curve = self.Parse_Segment(path)
                 # segments = segments + segment
@@ -531,11 +577,11 @@ class Module(object):
         for tagpath in tag.find_all('rect'):
             if tagpath.has_attr('type') == True and tagpath['type'] == 'pad':
                 pad = Pad()
-                pad.From_SVG(tagpath, 'rect')
-                self.pad.append(pad)
+                pad.From_SVG(tagpath)
+                self.pad.insert(0, pad)
 
         for tagpath in tag.find_all('circle'):
             if tagpath.has_attr('type') == True and tagpath['type'] == 'pad':
                 pad = Pad()
-                pad.From_SVG(tagpath, 'circle')
-                self.pad.append(pad)
+                pad.From_SVG(tagpath)
+                self.pad.insert(0, pad)

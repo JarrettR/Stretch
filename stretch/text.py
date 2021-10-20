@@ -15,7 +15,7 @@ from .colour import Colour
 #   0 hide
 # 5
 #   0 tstamp
-#   1 F.SilkS
+#   1 5E451B20
 # 6
 #   0 effects
 #   1 
@@ -56,7 +56,7 @@ class Text(object):
         self.tstamp = ''
 
         #Effects params
-        self.size = []
+        self.size = [1.27, 1.27]
         self.thickness = 0
         self.bold = False
         self.italic = False
@@ -102,7 +102,6 @@ class Text(object):
                                 self.thickness = param[1]
                     elif effect[0] == 'justify':
                         self.justify = effect[1] 
-   
 
 
     def To_PCB(self):
@@ -119,7 +118,24 @@ class Text(object):
 
         pcb.append(self.layer)
 
-        # print(pcb)
+        if self.hide == True:
+            pcb.append("hide")
+
+        if self.tstamp:
+            pcb.append(['tstamp', self.tstamp])
+
+        font = ['font', ['size'] + self.size, ['thickness', self.thickness]]
+
+        effects = ['effects', font]
+
+        if self.justify:
+            justify = ['justify', self.justify]
+            effects.append(justify)
+            
+        pcb.append(effects)
+
+
+
         return pcb
 
 
@@ -172,6 +188,7 @@ class Text(object):
 
         self.size = [size, size]
         self.thickness = tag['thickness']
+        self.justify = tag['justify']
         if tag.has_attr('bold'):
             self.bold = True
         if tag.has_attr('italic'):
@@ -232,6 +249,7 @@ class Text(object):
         parameters += 'thickness="' + self.thickness + '" '
         parameters += 'type="' + self.type + '" '
         parameters += 'tstamp="' + self.tstamp + '" '
+        parameters += 'justify="' + self.justify + '" '
         parameters += 'reference="' + self.reference + '" '
         parameters += hide
         # parameters += transform
