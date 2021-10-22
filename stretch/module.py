@@ -457,7 +457,11 @@ class Module(object):
             svg.g.append(tag)
         
         for item in self.pad:
-            tag = BeautifulSoup(item.To_SVG(), 'html.parser')
+            angle = 0
+            if len(self.at) > 2:
+                angle = self.at[2]
+            print(angle)
+            tag = BeautifulSoup(item.To_SVG(angle), 'html.parser')
             svg.g.append(tag)
             
         if self.model != '':
@@ -577,11 +581,11 @@ class Module(object):
         for tagpath in tag.find_all('rect'):
             if tagpath.has_attr('type') == True and tagpath['type'] == 'pad':
                 pad = Pad()
-                pad.From_SVG(tagpath)
+                pad.From_SVG(tagpath, rotate)
                 self.pad.insert(0, pad)
 
         for tagpath in tag.find_all('circle'):
             if tagpath.has_attr('type') == True and tagpath['type'] == 'pad':
                 pad = Pad()
-                pad.From_SVG(tagpath)
+                pad.From_SVG(tagpath, rotate)
                 self.pad.insert(0, pad)

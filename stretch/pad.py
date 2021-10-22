@@ -152,7 +152,8 @@ class Pad(object):
         
 
 
-    def To_SVG(self):
+    def To_SVG(self, angle = 0):
+        angle = int(angle)
 
         layers = []
         roundrect_rratio = ''
@@ -166,7 +167,9 @@ class Pad(object):
         y = self.at[1] - float(self.size[1]) / 2
 
         if len(self.at) > 2:
-            rotate += 'transform="rotate(' + str(self.at[2]) + ', ' + str(self.at[0] * pxToMM) + ', ' + str(self.at[1] * pxToMM) + ')" '
+            angle += int(self.at[2])
+        if angle != 0:
+            rotate += 'transform="rotate(' + str(angle) + ', ' + str(self.at[0] * pxToMM) + ', ' + str(self.at[1] * pxToMM) + ')" '
                         
         if self.roundrect_rratio != '':
             roundrect_rratio = 'roundrect_rratio="' + self.roundrect_rratio + '" '
@@ -241,7 +244,7 @@ class Pad(object):
         return svg
 
 
-    def From_SVG(self, tag):
+    def From_SVG(self, tag, angle = 0):
 
         self.name = tag['name']
         self.attribute = tag['attribute']
@@ -269,7 +272,9 @@ class Pad(object):
 
         self.at = [x, y]
         if tag.has_attr('rotate'):
-            at.append(tag['rotate'])
+            angle -= tag['rotate']
+        if angle != 0:
+            self.at.append(str(angle))
 
 
         if tag.has_attr('drill'):
