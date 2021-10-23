@@ -185,10 +185,9 @@ class Module(object):
                 self.attr = ','.join(item[1:])
                 
             if item[0] == 'fp_text':
-                for fp_text in item:
-                    text = Text()
-                    text.From_PCB(item)
-                    self.fp_text.append(text)
+                text = Text()
+                text.From_PCB(item)
+                self.fp_text.append(text)
                 
             if item[0] == 'fp_arc':
                 arc = Arc()
@@ -213,28 +212,19 @@ class Module(object):
                 pad = Pad()
                 pad.From_PCB(item)
                 self.pad.append(pad)
-            # if item[0] == 'model':
+
+            if item[0] == 'model':
+                model = item[1] + ';'
+                #offset
+                model += item[2][1][1] + ',' + item[2][1][2] + ',' + item[2][1][3] + ';'
+                #scale
+                model += item[3][1][1] + ',' + item[3][1][2] + ',' + item[3][1][3] + ';'
+                #rotate
+                model += item[4][1][1] + ',' + item[4][1][2] + ',' + item[4][1][3] + ';'
+                self.model = model
+
             # if item[0] == 'zone':
             # if item[0] == 'group':
-
-
-
-            # if item[0] == 'model':
-                # svg.g['model'] = item[1] + ';'
-                # #offset
-                # svg.g['model'] += item[2][1][1] + ',' + item[2][1][2] + ',' + item[2][1][3] + ';'
-                # #scale
-                # svg.g['model'] += item[3][1][1] + ',' + item[3][1][2] + ',' + item[3][1][3] + ';'
-                # #rotate
-                # svg.g['model'] += item[4][1][1] + ',' + item[4][1][2] + ',' + item[4][1][3] + ';'
-
-
-            # elif item[0] == 'pad':
-                # tag = BeautifulSoup(self.Convert_Pad_To_SVG(item, str(id) + '-' + str(a), rotate), 'html.parser')
-                # svg.g.append(tag)
-
-            # a += 1
-
 
 
     def To_PCB(self):
@@ -332,7 +322,7 @@ class Module(object):
             module.append(pad.To_PCB())
 
         if self.model:
-            module.append(['model', self.model])
+            module.append(['model'] + self.model)
 
         if self.group:
             module.append(['group', self.group])
@@ -460,19 +450,11 @@ class Module(object):
             angle = 0
             if len(self.at) > 2:
                 angle = self.at[2]
-            print(angle)
             tag = BeautifulSoup(item.To_SVG(angle), 'html.parser')
             svg.g.append(tag)
             
         if self.model != '':
-            svg.g['model'] = item[1] + ';'
-            #offset
-            svg.g['model'] += item[2][1][1] + ',' + item[2][1][2] + ',' + item[2][1][3] + ';'
-            #scale
-            svg.g['model'] += item[3][1][1] + ',' + item[3][1][2] + ',' + item[3][1][3] + ';'
-            #rotate
-            svg.g['model'] += item[4][1][1] + ',' + item[4][1][2] + ',' + item[4][1][3] + ';'
-
+            svg.g['model'] = self.model
         # if self.zone != '':
         # if self.group != '':
             
@@ -525,23 +507,22 @@ class Module(object):
             
         for text in tag.find_all('text'):
             t = Text()
-            t.From_SVG(text)
+            t.From_SVG(text, rotate)
             self.fp_text.append(t)
 
         if tag.has_attr('model'):
             modeltag = tag['model']
-            model = ['model']
+            model = []
             model.append(modeltag[0:modeltag.find(';')])
             modeltag = modeltag[modeltag.find(';') + 1:]
             offset = ['xyz'] + modeltag[0:modeltag.find(';')].split(',')
             modeltag = modeltag[modeltag.find(';') + 1:]
             scale = ['xyz'] + modeltag[0:modeltag.find(';')].split(',')
             modeltag = modeltag[modeltag.find(';') + 1:]
-            rotate = ['xyz'] + modeltag[0:modeltag.find(';')].split(',')
+            modelrotate = ['xyz'] + modeltag[0:modeltag.find(';')].split(',')
             model.append(['offset', offset])
             model.append(['scale', scale])
-            model.append(['rotate', rotate])
-            
+            model.append(['rotate', modelrotate])
             self.model = model
 
         for tagpath in tag.find_all('path'):
@@ -582,10 +563,10 @@ class Module(object):
             if tagpath.has_attr('type') == True and tagpath['type'] == 'pad':
                 pad = Pad()
                 pad.From_SVG(tagpath, rotate)
-                self.pad.insert(0, pad)
+                self.pad.append(pad)
 
         for tagpath in tag.find_all('circle'):
             if tagpath.has_attr('type') == True and tagpath['type'] == 'pad':
                 pad = Pad()
                 pad.From_SVG(tagpath, rotate)
-                self.pad.insert(0, pad)
+                self.pad.append(pad)

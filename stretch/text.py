@@ -139,7 +139,8 @@ class Text(object):
         return pcb
 
 
-    def From_SVG(self, tag):
+    def From_SVG(self, tag, angle = 0):
+        angle = int(angle)
         text = []
         
         if tag.has_attr('type'):
@@ -171,6 +172,18 @@ class Text(object):
             assert False, "Text not in layer"
             
         self.layer = layer
+
+        rotate = 0
+        if tag.has_attr('transform'):
+            transform = tag['transform']
+            if 'rotate(' in transform:
+                rotate = transform[transform.find('rotate(') + 7:]
+                if ',' in rotate:
+                    rotate = rotate[:rotate.find(',')]
+                angle += float(rotate[0:-1]) * -1
+        
+        if angle != 0:
+            self.at.append(str(angle))
         
         if tag.has_attr('hide'):
             if tag['hide'] == 'True':
@@ -196,8 +209,13 @@ class Text(object):
         
                 
 
-    def To_SVG(self):
-        #    transform += 'rotate(' + str(float(item[3]) + r_offset)+ ')'
+    def To_SVG(self, angle = 0):
+        transform = ''
+        angle = int(angle)
+        if len(self.at) > 2:
+            angle += int(self.at[2])
+        if angle != 0:
+            transform += 'rotate(' + str(angle)+ ')'
         #    self.tstamp = 'tstamp="' + item[1] + '" '
         # if item[0] == 'effects':
         #     for effect in item[1:]:
@@ -217,9 +235,9 @@ class Text(object):
         #         else:
         #             effect_text = 'effects="' + ';'.join(effect) + '" '
                         
-        # if len(transform) > 0:
+        if len(transform) > 0:
         #     print(transform)
-        #     transform = 'transform="' + transform + '" '
+            transform = 'transform="' + transform + '" '
             
         hidelayer = ''
         mirror = 1
@@ -252,7 +270,7 @@ class Text(object):
         parameters += 'justify="' + self.justify + '" '
         parameters += 'reference="' + self.reference + '" '
         parameters += hide
-        # parameters += transform
+        parameters += transform
         parameters += '>' + self.text
         parameters += '</text>'
 
