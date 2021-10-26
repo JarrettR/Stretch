@@ -210,8 +210,9 @@ class Text(object):
                 
 
     def To_SVG(self, angle = 0):
+        # transform = 'scale(-1) '
         transform = ''
-        angle = int(angle)
+        angle = int(angle) + 180
         if len(self.at) > 2:
             angle += int(self.at[2])
         if angle != 0:

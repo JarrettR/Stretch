@@ -142,6 +142,8 @@ class Pad(object):
 
         pcb.append(['at'] + self.at)
         pcb.append(['size'] + self.size)
+        if len(self.drill) > 0:
+            pcb.append(['drill', self.drill])
         pcb.append(['layers'] + self.layers)
         pcb.append(['net'] + self.net)
 

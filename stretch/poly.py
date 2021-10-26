@@ -133,6 +133,11 @@ class Poly(object):
             xy.append(str(point.start.imag / pxToMM))
             pts.append(xy)
 
+        xy = []
+        xy.append(str(path[0].start.real / pxToMM))
+        xy.append(str(path[0].start.imag / pxToMM))
+        pts.append(xy)
+
         self.pts = pts
         self.width = width
         self.layer = layer
