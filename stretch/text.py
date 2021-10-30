@@ -152,8 +152,13 @@ class Text(object):
             
         self.text = tag.contents[0]
 
-        x = str(float(tag['x']) / pxToMM)
-        y = str(float(tag['y']) / pxToMM)
+        x = 0
+        y = 0
+
+        if tag.has_attr('x'):
+            x = float(tag['x']) / pxToMM
+        if tag.has_attr('y'): 
+            y = float(tag['y']) / pxToMM
                 
         if tag.has_attr('mirrored'):
             if tag['mirrored'] == 'true':
@@ -161,7 +166,6 @@ class Text(object):
                 x = str(float(x) * -1.0)
             
             
-        self.at = [x, y]
         
         if tag.has_attr('layer'):
             layer = ['layer', tag['layer']]
@@ -176,12 +180,20 @@ class Text(object):
         rotate = 0
         if tag.has_attr('transform'):
             transform = tag['transform']
+            if 'translate(' in transform:
+                translate = transform[transform.find('translate(') + 10:]
+                translate = translate[:translate.find(')')]
+                x_t, y_t = translate.split(',')
+                x += float(x_t)
+                y += float(y_t)
             if 'rotate(' in transform:
                 rotate = transform[transform.find('rotate(') + 7:]
                 if ',' in rotate:
                     rotate = rotate[:rotate.find(',')]
                 angle += float(rotate[0:-1]) * -1
         
+        self.at = [str(x), str(y)]
+
         if angle != 0:
             self.at.append(str(angle))
         
@@ -212,11 +224,13 @@ class Text(object):
     def To_SVG(self, angle = 0):
         # transform = 'scale(-1) '
         transform = ''
-        angle = int(angle) + 180
+        angle = int(angle)
+
+        transform += "translate(" + str(float(self.at[0]) * pxToMM) + "," + str(float(self.at[1]) * pxToMM)  + ")"
         if len(self.at) > 2:
             angle += int(self.at[2])
         if angle != 0:
-            transform += 'rotate(' + str(angle)+ ')'
+            transform += ' rotate(' + str(angle)+ ')'
         #    self.tstamp = 'tstamp="' + item[1] + '" '
         # if item[0] == 'effects':
         #     for effect in item[1:]:
@@ -258,8 +272,8 @@ class Text(object):
         parameters += ';font-size:' + str(float(self.size[0]) * pxToMM) + 'px'
         parameters += ';fill:#' + Colour.Assign(self.layer)
         parameters += '" '
-        parameters += 'x="' + str(float(self.at[0]) * pxToMM * mirror) + '" '
-        parameters += 'y="' + str(float(self.at[1]) * pxToMM) + '" '
+        # parameters += 'x="' + str(float(self.at[0]) * pxToMM * mirror) + '" '
+        # parameters += 'y="' + str(float(self.at[1]) * pxToMM) + '" '
         # parameters += 'id="text' + str(id) + '" '
         # parameters += self.effect_text
         # parameters += self.mirror_text
