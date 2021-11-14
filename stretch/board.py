@@ -317,6 +317,14 @@ class Board(object):
                         curve = Curve()
                         # curve.From_SVG(tag, path)
                         # self.gr_curve.append(curve)
+                
+                elif tag['type'] == "zone":
+                    paths = parse_path(tag['d'])
+
+                    for path in paths:
+                        zone = Zone()
+                        zone.From_SVG(tag, path)
+                        self.zone.append(zone)
 
         
     def Parse_Layers_Segments(self, svg):

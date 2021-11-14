@@ -105,7 +105,7 @@ class Poly(object):
         parameters += 'layer="' + self.layer + '" '
         parameters += 'type="' + polytype + '" />'
         
-        # print(parameters)
+        print(parameters)
         return parameters
         
 
