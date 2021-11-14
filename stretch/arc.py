@@ -138,6 +138,7 @@ class Arc(object):
 
         a = ' '.join(['a', radius + ',' + radius, '0', large, sweep, end_x + ',' + end_y])
 
+        print(a)
         tstamp = ''
         status = ''
         fill = ''
@@ -165,12 +166,7 @@ class Arc(object):
         
         
     def From_SVG(self, tag, segment):
-
         path = parse_path(tag['d'])
-        radius = path[0].radius.real / pxToMM
-        sweep = path[0].sweep
-        large_arc = path[0].large_arc
-        
         style = tag['style']
 
         width = style[style.find('stroke-width:') + 13:]
@@ -184,54 +180,12 @@ class Arc(object):
         else:
             assert False, "Arc not in layer"
 
-        if bool(large_arc) == True:
-            print("Handle this~!")
-
         #KiCad 'start' is actually centre, 'end' is actually svg start
         #SVG end is actual end, we need to calculate centre instead
-        # print('path', path[0].start, path[0].end)
+        self.start = [str(path[0].center.real / pxToMM), str(path[0].center.imag / pxToMM)]
+        self.end = [str(path[0].start.real / pxToMM), str(path[0].start.imag / pxToMM)]
 
-        end = [str(path[0].start.real / pxToMM), str(path[0].start.imag / pxToMM)]
-        end_complex = (path[0].start.real / pxToMM) + 1j * (path[0].start.imag / pxToMM)
-        start_complex = (path[0].end.real / pxToMM) + 1j * (path[0].end.imag / pxToMM)
-
-        q = math.sqrt((end_complex.real - start_complex.real)**2 + (end_complex.real - start_complex.real)**2)
-
-        x3 = (start_complex.real + end_complex.real) / 2
-        y3 = (start_complex.imag + end_complex.imag) / 2
-
-
-        if bool(large_arc) == True:
-            #hackhack / fix / whatever:
-            #figure out why this is larger than radius sometimes
-            print("hackhack: generating janky arc")
-            print(radius , q)
-            q = q / 2
-
-
-        if bool(sweep) == False:
-            # angle = -angle
-            angle = 1
-            x = x3 + math.sqrt(radius**2 - (q / 2) ** 2) * (start_complex.imag - end_complex.imag) / q
-            y = y3 - math.sqrt(radius**2 - (q / 2) ** 2) * (start_complex.real - end_complex.real) / q
-        else:
-            # angle = '90'
-            angle = -1
-            x = x3 - math.sqrt(radius**2 - (q / 2) ** 2) * (start_complex.imag - end_complex.imag) / q
-            y = y3 + math.sqrt(radius**2 - (q / 2) ** 2) * (start_complex.real - end_complex.real) / q
-   
-        self.start = [str(x), str(y)]
-        self.end = [end[0], end[1]]
-
-        start_angle = self.Get_Angle([x,y], [path[0].start.real / pxToMM, path[0].start.imag / pxToMM])
-        end_angle = self.Get_Angle([x,y], [path[0].end.real / pxToMM, path[0].end.imag / pxToMM])
-
-        angle = angle * (end_angle - start_angle)
-        if bool(sweep) == True:
-            angle = 360 - angle
-        angle = "{:.6f}".format(round(angle, 6))
-        
-        self.angle = angle
+        self.angle = str(path[0].delta)
             
         if tag.has_attr('fill') == True:
             self.fill = tag['fill']
