@@ -332,7 +332,7 @@ class Module(object):
 
 
 
-    def To_SVG(self):
+    def To_SVG(self, hiddenLayers = []):
         svg = BeautifulSoup('<g type="module" name="' + self.symbol + '">', 'html.parser')
         
 
@@ -418,7 +418,7 @@ class Module(object):
             # tag = BeautifulSoup(item.To_SVG(), 'html.parser')
             # layer = item.layer
             #  svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
-            tag = BeautifulSoup(item.To_SVG(rotate * -1), 'html.parser')
+            tag = BeautifulSoup(item.To_SVG(rotate * -1, hiddenLayers), 'html.parser')
             svg.g.append(tag)
             #Todo: hide elements that are supposed to be on hiddenlayers
         

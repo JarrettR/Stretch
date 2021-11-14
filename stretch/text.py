@@ -163,7 +163,7 @@ class Text(object):
         if tag.has_attr('mirrored'):
             if tag['mirrored'] == 'true':
                 self.justify = ['mirror']
-                x = str(float(x) * -1.0)
+                x = float(x) * -1.0
             
             
         
@@ -188,6 +188,7 @@ class Text(object):
                 y += float(y_t)
             if 'rotate(' in transform:
                 rotate = transform[transform.find('rotate(') + 7:]
+                rotate = rotate[:rotate.find(')')]
                 if ',' in rotate:
                     rotate = rotate[:rotate.find(',')]
                 angle += float(rotate[0:-1]) * -1
@@ -221,7 +222,7 @@ class Text(object):
         
                 
 
-    def To_SVG(self, angle = 0):
+    def To_SVG(self, angle = 0, hiddenLayers = []):
         # transform = 'scale(-1) '
         transform = ''
         angle = int(angle)
@@ -250,14 +251,17 @@ class Text(object):
         #         else:
         #             effect_text = 'effects="' + ';'.join(effect) + '" '
                         
+        mirror_text = ''
+        if self.justify == 'mirror':
+            transform += ' scale(-1,1)'
+            mirror_text = 'mirrored="true" '
+            
         if len(transform) > 0:
-        #     print(transform)
             transform = 'transform="' + transform + '" '
             
         hidelayer = ''
-        mirror = 1
-        # if self.layer in self.hiddenLayers:
-        #     hidelayer = ';display:none'
+        if self.layer in hiddenLayers:
+            hidelayer = ';display:none'
 
         hide = ''
         if self.hide == True:
@@ -276,7 +280,7 @@ class Text(object):
         # parameters += 'y="' + str(float(self.at[1]) * pxToMM) + '" '
         # parameters += 'id="text' + str(id) + '" '
         # parameters += self.effect_text
-        # parameters += self.mirror_text
+        parameters += mirror_text
         parameters += 'layer="' + self.layer + '" '
         parameters += 'text-anchor="middle" '
         parameters += 'thickness="' + self.thickness + '" '

@@ -145,7 +145,8 @@ class Pad(object):
         if len(self.drill) > 0:
             pcb.append(['drill', self.drill])
         pcb.append(['layers'] + self.layers)
-        pcb.append(['net'] + self.net)
+        if len(self.net) > 0:
+            pcb.append(['net'] + self.net)
 
         if self.tstamp:
             pcb.append(['tstamp', self.tstamp])
@@ -178,6 +179,10 @@ class Pad(object):
 
         if self.drill:
             drill = 'drill="' + self.drill + '" '
+
+        if len(self.net) > 1:
+            net = 'netid="' + self.net[0] + '" '
+            net += 'netname="' + self.net[1] + '" '
 
         svg = ''
         svgsize = ''
@@ -233,8 +238,7 @@ class Pad(object):
         parameters += 'type="pad" '
         parameters += 'name="' + self.name + '" '
         parameters += 'attribute="' + self.attribute + '" '
-        parameters += 'netid="' + self.net[0] + '" '
-        parameters += 'netname="' + self.net[1] + '" '
+        parameters += net
         parameters += 'shape="' + self.shape + '" '
         parameters += rotate
         parameters += drill
@@ -254,7 +258,7 @@ class Pad(object):
         if tag.has_attr('shape'):
             self.shape = tag['shape']
 
-        if self.shape == 'rect':
+        if self.shape == 'rect' or self.shape == 'roundrect':
 
             width = float(tag['width']) / pxToMM
             height = float(tag['height']) / pxToMM
@@ -270,6 +274,8 @@ class Pad(object):
             self.size = [r, r]
             x = str(float(tag['cx']) / pxToMM)
             y = str(float(tag['cy']) / pxToMM)
+        else:
+            print(self.shape)
 
 
         self.at = [x, y]
