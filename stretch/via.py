@@ -44,17 +44,12 @@ class Via(object):
 
 
     def From_SVG(self, tag):
-        if not tag.has_attr('type'):
-            return
-        if not tag['type'] == "via":
-            return
-            
         x = tag['x']
         y = tag['y']
-        self.at = [(float(x) / pxToMM), (float(y) / pxToMM)]
+        self.at = [str(float(x) / pxToMM), str(float(y) / pxToMM)]
 
-        self.size = float(tag['size']) / pxToMM
-        self.drill = float(tag['drill']) / pxToMM
+        self.size = str(float(tag['size']) / pxToMM)
+        self.drill = str(float(tag['drill']) / pxToMM)
 
         self.layers = tag['layers'].split(',')
 
@@ -91,9 +86,9 @@ class Via(object):
         if self.status != '':
             via.append(['status', self.status])
         if self.blind != False:
-            via.append(['blind'])
+            via.insert(1, 'blind')
         if self.micro != False:
-            via.append(['micro'])
+            via.insert(1, 'micro')
         if self.remove_unused_layers != False:
             via.append(['remove_unused_layers'])
         if self.keep_end_layers != False:
@@ -176,8 +171,8 @@ class Via(object):
         #parameters += 'id="via' + str(id) + '" '
         parameters += 'type="via" '
         parameters += 'layers="' + self.layers[0] + ',' + self.layers[1] + '" '
-        parameters += 'size="' + self.size + '" '
-        parameters += 'drill="' + self.drill + '" '
+        parameters += 'size="' + str(float(self.size) * pxToMM) + '" '
+        parameters += 'drill="' + str(float(self.drill) * pxToMM) + '" '
         parameters += 'net="' + self.net + '" '
         parameters += blind
         parameters += tstamp
