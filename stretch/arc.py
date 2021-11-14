@@ -43,13 +43,6 @@ class Arc(object):
         self.tstamp = ''
         self.status = 0
 
-    def Get_Angle(self, centre, point):
-        vec1 = centre[0] + 1j * centre[1]
-        vec2 = point[0] + 1j * point[1]
-        vec3 = vec2 - vec1
-        return math.degrees(cmath.phase(vec3))
-
-
     def From_PCB(self, input):
         start = []
         end = []
@@ -138,7 +131,6 @@ class Arc(object):
 
         a = ' '.join(['a', radius + ',' + radius, '0', large, sweep, end_x + ',' + end_y])
 
-        print(a)
         tstamp = ''
         status = ''
         fill = ''
