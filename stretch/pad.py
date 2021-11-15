@@ -170,7 +170,7 @@ class Pad(object):
         y = self.at[1] - float(self.size[1]) / 2
 
         if len(self.at) > 2:
-            angle += int(self.at[2])
+            angle -= int(self.at[2])
         if angle != 0:
             rotate += 'transform="rotate(' + str(angle) + ', ' + str(self.at[0] * pxToMM) + ', ' + str(self.at[1] * pxToMM) + ')" '
                         
@@ -213,16 +213,17 @@ class Pad(object):
             svgsize += 'height="' + str(float(self.size[1])  * pxToMM) + '" '
             
         elif self.shape == 'oval':
-            parameters += '<circle style="stroke:none;stroke-linecap:round;stroke-linejoin:miter;fill-opacity:1'
+            parameters += '<ellipse style="stroke:none;stroke-linecap:round;stroke-linejoin:miter;fill-opacity:1'
             svgsize += 'cx="' + str(self.at[0] * pxToMM) + '" '
             svgsize += 'cy="' + str(self.at[1] * pxToMM) + '" '
-            svgsize += 'r="' + str(float(self.size[0])  * (pxToMM / 2)) + '" '
-            svgsize += 'height="' + str(float(self.size[1])  * pxToMM) + '" '
+            svgsize += 'rx="' + str(float(self.size[0])  * (pxToMM / 2)) + '" '
+            svgsize += 'ry="' + str(float(self.size[1])  * (pxToMM / 2)) + '" '
             
         elif self.shape == 'custom':
             parameters += '<rect style="stroke:none;stroke-linecap:round;stroke-linejoin:miter;fill-opacity:1'
             svgsize += 'x="' + str(x * pxToMM) + '" '
             svgsize += 'y="' + str(y * pxToMM) + '" '
+            svgsize += 'width="' + str(float(self.size[0])  * pxToMM) + '" '
             svgsize += 'width="' + str(float(self.size[0])  * pxToMM) + '" '
             svgsize += 'height="' + str(float(self.size[1])  * pxToMM) + '" '
             
@@ -269,9 +270,16 @@ class Pad(object):
 
             self.size = [width, height]
 
-        elif self.shape == 'circle' or self.shape == 'oval':
+        elif self.shape == 'circle':
             r = str((float(tag['r']) * 2) / pxToMM)
             self.size = [r, r]
+            x = str(float(tag['cx']) / pxToMM)
+            y = str(float(tag['cy']) / pxToMM)
+
+        elif self.shape == 'oval':
+            rx = str((float(tag['rx']) * 2) / pxToMM)
+            ry = str((float(tag['ry']) * 2) / pxToMM)
+            self.size = [rx, ry]
             x = str(float(tag['cx']) / pxToMM)
             y = str(float(tag['cy']) / pxToMM)
         else:
@@ -279,8 +287,15 @@ class Pad(object):
 
 
         self.at = [x, y]
-        if tag.has_attr('rotate'):
-            angle -= tag['rotate']
+        if tag.has_attr('transform'):
+            transform = tag['transform']
+            if 'rotate(' in transform:
+                rotate = transform[transform.find('rotate(') + 7:]
+                rotate = rotate[:rotate.find(')')]
+                if ',' in rotate:
+                    rotate = rotate[:rotate.find(',')]
+                angle += float(rotate) * -1
+
         if angle != 0:
             self.at.append(str(angle))
 

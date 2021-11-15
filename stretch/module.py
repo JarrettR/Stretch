@@ -567,3 +567,9 @@ class Module(object):
                 pad = Pad()
                 pad.From_SVG(tagpath, rotate)
                 self.pad.append(pad)
+
+        for tagpath in tag.find_all('ellipse'):
+            if tagpath.has_attr('type') == True and tagpath['type'] == 'pad':
+                pad = Pad()
+                pad.From_SVG(tagpath, rotate)
+                self.pad.append(pad)
