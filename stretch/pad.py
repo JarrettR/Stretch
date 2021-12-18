@@ -294,7 +294,7 @@ class Pad(object):
                 rotate = rotate[:rotate.find(')')]
                 if ',' in rotate:
                     rotate = rotate[:rotate.find(',')]
-                angle += float(rotate) * -1
+                angle += (float(rotate) * -1) + 180
 
         if angle != 0:
             self.at.append(str(angle))
