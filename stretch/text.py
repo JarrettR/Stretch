@@ -220,9 +220,7 @@ class Text(object):
             self.bold = True
         if tag.has_attr('italic'):
             self.italic = True
-
-        # print(self.text)
-        
+       
                 
 
     def To_SVG(self, angle = 0, hiddenLayers = []):
@@ -295,7 +293,5 @@ class Text(object):
         parameters += transform
         parameters += '>' + self.text
         parameters += '</text>'
-
-        print(parameters)
 
         return parameters

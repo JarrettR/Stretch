@@ -207,15 +207,11 @@ class Board(object):
             layer = item.layer
             base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
             
-        text = ''
         for item in self.module:
-            text += ' ' + item.fp_text[0].text
             tag = item.To_SVG(hiddenLayers = hiddenLayers)
             layer = item.layer
             base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
             
-        print(text)
-
         for item in self.gr_line:
             tag = BeautifulSoup(item.To_SVG(), 'html.parser')
             layer = item.layer
@@ -327,8 +323,8 @@ class Board(object):
 
                     for path in paths:
                         curve = Curve()
-                        # curve.From_SVG(tag, path)
-                        # self.gr_curve.append(curve)
+                        curve.From_SVG(tag)
+                        self.gr_curve.append(curve)
                 
                 elif tag['type'] == "zone":
                     paths = parse_path(tag['d'])
