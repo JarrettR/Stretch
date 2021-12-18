@@ -88,6 +88,7 @@ class Board(object):
                 elif item[0] == 'module':
                     module = Module()
                     module.From_PCB(item)
+                    # print(module.fp_text[0].text)
                     self.module.append(module)
 
                 elif item[0] == 'segment':
@@ -206,11 +207,15 @@ class Board(object):
             layer = item.layer
             base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
             
+        text = ''
         for item in self.module:
+            text += ' ' + item.fp_text[0].text
             tag = item.To_SVG(hiddenLayers = hiddenLayers)
             layer = item.layer
             base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
             
+        print(text)
+
         for item in self.gr_line:
             tag = BeautifulSoup(item.To_SVG(), 'html.parser')
             layer = item.layer
@@ -278,10 +283,17 @@ class Board(object):
                         via.From_SVG(viatag)
                         self.via.append(via)
                 
-                if tag['type'] == "module":
+                elif tag['type'] == "module":
                     module = Module()
                     module.From_SVG(tag)
                     self.module.append(module)
+
+        for tag in svg.svg.find_all('text'):
+            if tag.has_attr('type') == True:
+                if tag['type'] == "gr_text":
+                    t = Text()
+                    t.From_SVG(tag)
+                    self.gr_text.append(t)
 
         for tag in svg.svg.find_all('path'):
             if tag.has_attr('type') == True:

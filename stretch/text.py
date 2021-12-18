@@ -151,6 +151,7 @@ class Text(object):
                 self.reference = tag['reference']
             
         self.text = tag.contents[0]
+        # print(tag.contents)
 
         x = 0
         y = 0
@@ -184,14 +185,14 @@ class Text(object):
                 translate = transform[transform.find('translate(') + 10:]
                 translate = translate[:translate.find(')')]
                 x_t, y_t = translate.split(',')
-                x += float(x_t)
-                y += float(y_t)
+                x += float(x_t) / pxToMM
+                y += float(y_t) / pxToMM
             if 'rotate(' in transform:
                 rotate = transform[transform.find('rotate(') + 7:]
                 rotate = rotate[:rotate.find(')')]
                 if ',' in rotate:
                     rotate = rotate[:rotate.find(',')]
-                angle += float(rotate[0:-1]) * -1
+                angle += float(rotate)
         
         self.at = [str(x), str(y)]
 
@@ -219,6 +220,8 @@ class Text(object):
             self.bold = True
         if tag.has_attr('italic'):
             self.italic = True
+
+        # print(self.text)
         
                 
 
@@ -293,6 +296,6 @@ class Text(object):
         parameters += '>' + self.text
         parameters += '</text>'
 
-        # print(parameters)
+        print(parameters)
 
         return parameters
