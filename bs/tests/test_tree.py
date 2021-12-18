@@ -37,6 +37,7 @@ from bs4.testing import (
     SoupTest,
     skipIf,
 )
+from soupsieve import SelectorSyntaxError
 
 XML_BUILDER_PRESENT = (builder_registry.lookup("xml") is not None)
 LXML_PRESENT = (builder_registry.lookup("lxml") is not None)
@@ -1008,6 +1009,15 @@ class TestTreeModification(SoupTest):
         soup.a.extend(l)
         self.assertEqual("<a><g></g><f></f><e></e><d></d><c></c><b></b></a>", soup.decode())
 
+    def test_extend_with_another_tags_contents(self):
+        data = '<body><div id="d1"><a>1</a><a>2</a><a>3</a><a>4</a></div><div id="d2"></div></body>'
+        soup = self.soup(data)
+        d1 = soup.find('div', id='d1')
+        d2 = soup.find('div', id='d2')
+        d2.extend(d1)
+        self.assertEqual(u'<div id="d1"></div>', d1.decode())
+        self.assertEqual(u'<div id="d2"><a>1</a><a>2</a><a>3</a><a>4</a></div>', d2.decode())
+        
     def test_move_tag_to_beginning_of_parent(self):
         data = "<a><b></b><c></c><d></d></a>"
         soup = self.soup(data)
@@ -2018,7 +2028,7 @@ class TestSoupSelector(TreeTest):
         self.assertEqual(len(self.soup.select('del')), 0)
 
     def test_invalid_tag(self):
-        self.assertRaises(SyntaxError, self.soup.select, 'tag%t')
+        self.assertRaises(SelectorSyntaxError, self.soup.select, 'tag%t')
 
     def test_select_dashed_tag_ids(self):
         self.assertSelects('custom-dashed-tag', ['dash1', 'dash2'])
@@ -2209,7 +2219,7 @@ class TestSoupSelector(TreeTest):
             NotImplementedError, self.soup.select, "a:no-such-pseudoclass")
 
         self.assertRaises(
-            SyntaxError, self.soup.select, "a:nth-of-type(a)")
+            SelectorSyntaxError, self.soup.select, "a:nth-of-type(a)")
 
     def test_nth_of_type(self):
         # Try to select first paragraph
@@ -2265,7 +2275,7 @@ class TestSoupSelector(TreeTest):
         self.assertEqual([], self.soup.select('#inner ~ h2'))
 
     def test_dangling_combinator(self):
-        self.assertRaises(SyntaxError, self.soup.select, 'h1 >')
+        self.assertRaises(SelectorSyntaxError, self.soup.select, 'h1 >')
 
     def test_sibling_combinator_wont_select_same_tag_twice(self):
         self.assertSelects('p[lang] ~ p', ['lang-en-gb', 'lang-en-us', 'lang-fr'])
@@ -2296,8 +2306,8 @@ class TestSoupSelector(TreeTest):
         self.assertSelects('div x,y,  z', ['xid', 'yid', 'zida', 'zidb', 'zidab', 'zidac'])
 
     def test_invalid_multiple_select(self):
-        self.assertRaises(SyntaxError, self.soup.select, ',x, y')
-        self.assertRaises(SyntaxError, self.soup.select, 'x,,y')
+        self.assertRaises(SelectorSyntaxError, self.soup.select, ',x, y')
+        self.assertRaises(SelectorSyntaxError, self.soup.select, 'x,,y')
 
     def test_multiple_select_attrs(self):
         self.assertSelects('p[lang=en], p[lang=en-gb]', ['lang-en', 'lang-en-gb'])

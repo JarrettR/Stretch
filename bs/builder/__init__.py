@@ -334,11 +334,11 @@ class SAXTreeBuilder(TreeBuilder):
 
     def startElement(self, name, attrs):
         attrs = dict((key[1], value) for key, value in list(attrs.items()))
-        #print "Start %s, %r" % (name, attrs)
+        #print("Start %s, %r" % (name, attrs))
         self.soup.handle_starttag(name, attrs)
 
     def endElement(self, name):
-        #print "End %s" % name
+        #print("End %s" % name)
         self.soup.handle_endtag(name)
 
     def startElementNS(self, nsTuple, nodeName, attrs):
@@ -476,8 +476,7 @@ class HTMLTreeBuilder(TreeBuilder):
 
 def register_treebuilders_from(module):
     """Copy TreeBuilders from the given module into this module."""
-    # I'm fairly sure this is not the best way to do this.
-    this_module = sys.modules['bs4.builder']
+    this_module = sys.modules[__name__]
     for name in module.__all__:
         obj = getattr(module, name)
 
