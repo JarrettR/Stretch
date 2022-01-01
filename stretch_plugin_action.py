@@ -1,8 +1,12 @@
 import pcbnew
 import os
 
-from .svg_writer import SvgWrite 
-from .pcb_writer import PcbWrite 
+try:
+    from .svg_writer import SvgWrite 
+    # from .pcb_writer import PcbWrite
+except:
+    from svg_writer import SvgWrite 
+    # from .pcb_writer import PcbWrite
 
 class StretchPluginAction(pcbnew.ActionPlugin):
     def __init__(self, tool):
@@ -29,23 +33,23 @@ class StretchPluginAction(pcbnew.ActionPlugin):
         b = pcbnew.GetBoard()
         pcb_filename = b.GetFileName()
         
-        #If BS4 not installed:
-        try:
-            import bs4
-        except ImportError:
-            pcbnew._pcbnew.ProcessExecute('pip install bs4')
-        #todo: test!
+        # #If BS4 not installed:
+        # try:
+        #     import bs4
+        # except ImportError:
+        #     pcbnew._pcbnew.ProcessExecute('pip install bs4')
+        # #todo: test!
 
-        if self.tool == "to_svg":
-            a = SvgWrite()
-            a.Run_Plugin(pcb_filename, self.svg_file_name)
-        elif self.tool == "to_pcb":
-            a = PcbWrite()
-            a.Run_Plugin(pcb_filename, self.svg_file_name)
-            pcbnew.Refresh()
+        # if self.tool == "to_svg":
+        #     a = SvgWrite()
+            # a.Run_Plugin(pcb_filename, self.svg_file_name)
+        # elif self.tool == "to_pcb":
+        #     a = PcbWrite()
+        #     a.Run_Plugin(pcb_filename, self.svg_file_name)
+        #     pcbnew.Refresh()
 
 #Only run using when issuing the following command, for testing the environment  
 # D:\Programs\KiCad\bin\python.exe .\stretch_plugin_action.py
 if __name__ == '__main__':
-    a = PcbWrite()
-    a.Run_Plugin('D:\\Projects\\git\\test\\what.kicad_pcb', 'out.svg')
+    a = SvgWrite()
+    a.Run_Plugin('tests/simple.kicad_pcb', 'out.svg')

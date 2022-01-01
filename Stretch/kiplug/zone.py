@@ -2,7 +2,7 @@
 
 from .colour import Colour
 from .metadata import Metadata
-from svgpath import parse_path
+from .svgpath import parse_path
 
 
 # 0 zone

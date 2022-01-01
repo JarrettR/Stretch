@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 import json
-from svgpath import parse_path
+from .svgpath import parse_path
 
 from .arc import Arc
 from .circle import Circle

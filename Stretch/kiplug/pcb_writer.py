@@ -7,12 +7,12 @@ import cmath
 
 #Running KiCad Linux vs. standalone requires different imports
 try:
-    from .stretch import Board
+    # from .stretch import Board
     from .parser_base import ParserBase
     from .sexpressions_parser import parse_sexpression
     from .sexpressions_writer import SexpressionWriter
 except:
-    from stretch import Board
+    # from stretch import Board
     from parser_base import ParserBase
     from sexpressions_parser import parse_sexpression
     from sexpressions_writer import SexpressionWriter
@@ -70,16 +70,22 @@ class PcbWrite(object):
         # self.Save(sexpression)
 
     def Run_Plugin(self, pcb_filename, svg_filename):
+        from .board import Board
+        from .board import Board
         
         infile = os.path.join(os.path.dirname(pcb_filename),svg_filename)
 
         svg = self.Load(infile)
-        lst = self.Svg_To_List(svg)
+
+        board = Board()
+        board.From_SVG(svg)
+
+        lst = board.To_PCB()
+
         a = SexpressionWriter()
         
         sexpression = a.List_To_Sexpression(lst)
         a.Save(sexpression, pcb_filename)
-        # self.Save(sexpression)
         
 
 if __name__ == '__main__':

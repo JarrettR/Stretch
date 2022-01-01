@@ -1,6 +1,6 @@
 
 from .colour import Colour
-from svgpath import parse_path
+from .svgpath import parse_path
 import math
 import cmath
 
@@ -80,8 +80,11 @@ class Arc(object):
                 self.status = item[1]
 
 
-    def To_PCB(self):
-        pcb = ['gr_arc']
+    def To_PCB(self, fp = False):
+        if fp:
+            pcb = ['fp_arc']
+        else:
+            pcb = ['gr_arc']
 
         pcb.append(['start'] + self.start)
         pcb.append(['end'] + self.end)

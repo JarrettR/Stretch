@@ -6,16 +6,35 @@ import cmath
 
 #Running KiCad Linux vs. standalone requires different imports
 try:
-    from .stretch import Board
+    # from .stretch import Board
     from .parser_base import ParserBase
     from .sexpressions_parser import parse_sexpression
     from .sexpressions_writer import SexpressionWriter
 except:
-    from stretch import Board
+    # from stretch import Board
     from parser_base import ParserBase
     from sexpressions_parser import parse_sexpression
     from sexpressions_writer import SexpressionWriter
 
+
+# import stretch
+# from .board import Board
+
+# try:
+#     from .board import Board
+# except:
+#     from board import Board
+
+# from stretch.what import What
+# print(dir())
+# print('--')
+# print(dir('.'))
+# print('--')
+# print(dir('aaa'))
+# print('--')
+# print(dir('stretch'))
+# print('--')
+# print(dir('.stretch'))
 
 class SvgWrite(object):
     def __init__(self):
@@ -79,16 +98,15 @@ class SvgWrite(object):
 
    
     def Run_Plugin(self, filename, outfilename):
+        from .board import Board
         dic = self.Load(filename)
-        
-        with open(self.filename_base, "r") as f:
-    
-            contents = f.read()
-            base = BeautifulSoup(contents, 'html.parser')
-        
+
         outfile = os.path.join(os.path.dirname(filename), outfilename)
 
-        svg = self.Handle_Headings(dic, base)
+        board = Board()
+        board.From_PCB(dic)
+        
+        svg = board.To_SVG()
 
         self.Save(svg, outfile)
 

@@ -1,6 +1,6 @@
 
 from .colour import Colour
-from svgpath import parse_path
+from .svgpath import parse_path
 
 # 0 gr_curve
 # 1
