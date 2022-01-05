@@ -6,10 +6,10 @@ import re
 #Running KiCad Linux vs. standalone requires different imports
 try:
     from .parser_base import ParserBase
-    from .sexpressions_parser import parse_sexpression
+    # from .sexpressions_parser import parse_sexpression
 except:
     from parser_base import ParserBase
-    from sexpressions_parser import parse_sexpression
+    # from sexpressions_parser import parse_sexpression
 
 
 class SexpressionWriter(object):
@@ -27,7 +27,7 @@ class SexpressionWriter(object):
 
     def Load_Sexpression(self):
         with io.open(self.filename_sexpression, 'r', encoding='utf-8') as f:
-            sexpression = parse_sexpression(f.read())
+            sexpression = ParserBase.parse_sexpression(f.read())
         return sexpression
 
 

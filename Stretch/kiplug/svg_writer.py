@@ -5,16 +5,16 @@ import math
 import cmath
 
 #Running KiCad Linux vs. standalone requires different imports
-try:
-    # from .stretch import Board
-    from .parser_base import ParserBase
-    from .sexpressions_parser import parse_sexpression
-    from .sexpressions_writer import SexpressionWriter
-except:
-    # from stretch import Board
-    from parser_base import ParserBase
-    from sexpressions_parser import parse_sexpression
-    from sexpressions_writer import SexpressionWriter
+# try:
+    # # from .stretch import Board
+    # from .parser_base import ParserBase
+    # from .sexpressions_parser import parse_sexpression
+    # from .sexpressions_writer import SexpressionWriter
+# except:
+    # # from stretch import Board
+    # from parser_base import ParserBase
+    # from sexpressions_parser import parse_sexpression
+    # from sexpressions_writer import SexpressionWriter
 
 
 # import stretch
@@ -25,16 +25,6 @@ except:
 # except:
 #     from board import Board
 
-# from stretch.what import What
-# print(dir())
-# print('--')
-# print(dir('.'))
-# print('--')
-# print(dir('aaa'))
-# print('--')
-# print(dir('stretch'))
-# print('--')
-# print(dir('.stretch'))
 
 class SvgWrite(object):
     def __init__(self):
@@ -50,11 +40,18 @@ class SvgWrite(object):
 
 
     def Load(self, filename = None):
+        
+        # try:
+            # from .sexpressions_parser import parse_sexpression
+        # except:
+            # from sexpressions_parser import parse_sexpression
+        from .parser_base import ParserBase
+
         if filename is None:
             filename = self.filename_in
 
         with io.open(filename, 'r', encoding='utf-8') as f:
-            sexpression = parse_sexpression(f.read())
+            sexpression = ParserBase().parse_sexpression(f.read())
         return sexpression
 
     def Convert(self, obj, save = False):
@@ -79,7 +76,7 @@ class SvgWrite(object):
                 print(item[0])
 
     def Run_Standalone(self):
-        dic = self.Load()
+        # dic = self.Load()
         
         #Save JSON file, for development
         #self.Convert(dic, True)
@@ -109,7 +106,6 @@ class SvgWrite(object):
         svg = board.To_SVG()
 
         self.Save(svg, outfile)
-
 
 
 if __name__ == '__main__':
