@@ -1,7 +1,9 @@
 
 class Colour(object):
 
-    def Assign(layername):
+    def Assign(self, layername):
+        if type(layername) == unicode:
+			layername = str(layername)
         colours = {
             'F.Cu': '840000',
             'In1.Cu': 'C2C200',

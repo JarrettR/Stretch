@@ -231,7 +231,7 @@ class Pad(object):
             assert False,"Pad: Unfamiliar shape: " + shape
             return None
 
-        parameters += ';fill:#' + Colour.Assign(self.layers[0])
+        parameters += ';fill:#' + Colour().Assign(self.layers[0])
         parameters += '" '
         parameters += svgsize
         parameters += roundcorners

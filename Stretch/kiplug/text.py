@@ -226,11 +226,11 @@ class Text(object):
     def To_SVG(self, angle = 0, hiddenLayers = []):
         # transform = 'scale(-1) '
         transform = ''
-        angle = int(angle)
+        angle = float(angle)
 
         transform += "translate(" + str(float(self.at[0]) * pxToMM) + "," + str(float(self.at[1]) * pxToMM)  + ")"
         if len(self.at) > 2:
-            angle += int(self.at[2])
+            angle += float(self.at[2])
         if angle != 0:
             transform += ' rotate(' + str(angle)+ ')'
         #    self.tstamp = 'tstamp="' + item[1] + '" '
@@ -275,7 +275,7 @@ class Text(object):
         parameters += ';fill-opacity:1;stroke:none'
         parameters += hidelayer
         parameters += ';font-size:' + str(float(self.size[0]) * pxToMM) + 'px'
-        parameters += ';fill:#' + Colour.Assign(self.layer)
+        parameters += ';fill:#' + Colour().Assign(self.layer)
         parameters += '" '
         # parameters += 'x="' + str(float(self.at[0]) * pxToMM * mirror) + '" '
         # parameters += 'y="' + str(float(self.at[1]) * pxToMM) + '" '

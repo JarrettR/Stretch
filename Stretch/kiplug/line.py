@@ -141,7 +141,7 @@ class Line(object):
             status = 'status="' + str(self.status) + '" '
 
         parameters = '<path style="fill:none;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1'
-        parameters += ';stroke:#' + Colour.Assign(self.layer)
+        parameters += ';stroke:#' + Colour().Assign(self.layer)
         parameters += ';stroke-width:' + self.width + 'mm'
         parameters += '" '
         parameters += 'd="M ' + str(float(self.start[0]) * pxToMM) + ',' + str(float(self.start[1]) * pxToMM) + ' ' + str(float(self.end[0]) * pxToMM) + ',' + str(float(self.end[1]) * pxToMM) + '" '

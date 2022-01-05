@@ -109,8 +109,12 @@ class Module(object):
         
     def From_PCB(self, pcblist):
 
+		# Why is this necessary?
+        if type(pcblist[1]) == unicode:
+			pcblist[1] = str(pcblist[1])
+			
         if type(pcblist[1]) != str:
-            assert False,"Module: Expected symbol"
+            assert False,"Module: Unexpected symbol type {}: {}".format(type(pcblist[1]), pcblist[1])
             return None
 
         self.symbol = pcblist[1]
