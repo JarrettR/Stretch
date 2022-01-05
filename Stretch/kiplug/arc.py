@@ -122,7 +122,11 @@ class Arc(object):
         end_from_origin = cmath.rect(cmath.polar(r)[0], endangle)
         end = end_from_origin - r
         
-        sweep = str(int(((angle / abs(angle)) + 1) / 2))
+        if angle != 0:
+            sweep = str(int(((angle / abs(angle)) + 1) / 2))
+        else:
+            sweep = '1'
+
         if angle > cmath.pi:
             large = '1'
         else:
