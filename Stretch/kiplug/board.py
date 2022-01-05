@@ -195,9 +195,9 @@ class Board(object):
             base.svg.append(tag)
                              
         hiddenLayers = []
-        for attrib in self.layers.attribs:
-            if 'hide' in self.layers.attribs[attrib]:
-                hiddenLayers.append(self.layers.names[attrib])
+        for layer in self.layers.layer:
+            if 'hide' in layer[2:]:
+                hiddenLayers.append(layer[1])
 
         base.svg.append(BeautifulSoup('<g inkscape:label="Vias" inkscape:groupmode="layer" type="layervia" user="True" />', 'html.parser'))
 

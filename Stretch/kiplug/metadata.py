@@ -14,14 +14,17 @@ class Metadata(object):
     def To_SVG(self, input):
         # This will just take whatever data and store it in an XML tag as JSON
         # Hacky, but we don't care about it other than to be able to load it back in later
-
-       
-        tag = input[0]
+        
+        
+        if type(input) == unicode:
+            return ''
+            
+        tag = str(input[0])
         input = input[1:]
         
         body = json.dumps(input)
         svg = '<' + tag + '>'
-        svg += body
+        svg += str(body)
         svg += '</' + tag + '>'
 
         return svg
@@ -32,9 +35,14 @@ class Metadata(object):
         pcb = []
 
         for tag in svg.svg.kicad.children:
-            chunk = [tag.name]
-            chunk += json.loads(tag.decode_contents())
-            pcb += [chunk]
+            if tag.name != None:
+                chunk = [tag.name]
+                try:
+                    chunk += json.loads(tag.decode_contents())
+                except:
+                    assert False,"Bad metadata {}: {} - {}".format(type(tag), tag, chunk)
+                    
+                pcb += [chunk]
         # content = '[' + content + ' ]'
         # meta = json.loads(content)
         # print(meta)

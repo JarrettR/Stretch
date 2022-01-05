@@ -198,6 +198,8 @@ class Pad(object):
         elif self.shape == 'roundrect':
 
             parameters += '<rect style="stroke:none;stroke-linecap:round;stroke-linejoin:miter;fill-opacity:1'
+            if self.roundrect_rratio  == '':
+                self.roundrect_rratio = 0
             roundcorners += 'rx="' + str(float(self.size[0]) * float(self.roundrect_rratio)  * pxToMM) + '" '
             roundcorners += 'ry="' + str(float(self.size[1]) * float(self.roundrect_rratio)  * pxToMM) + '" '
             svgsize += 'x="' + str(x * pxToMM) + '" '

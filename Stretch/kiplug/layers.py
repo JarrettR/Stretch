@@ -11,8 +11,7 @@
 class Layers(object):
 
     def __init__(self):
-        self.names = {}
-        self.attribs = {}
+        self.layer = []
         
         
     def From_PCB(self, pcblist):
@@ -26,27 +25,26 @@ class Layers(object):
             if item == 'layers':
                 continue
                 
-            self.names[item[0]] = item[1]
+            layer = [str(item[0]), item[1]]
 
-            attribs = []
             if 'user' in item:
-                attribs.append('user')
+                layer.append('user')
             if 'hide' in item:
-                attribs.append('hide')
+                layer.append('hide')
             if 'signal' in item:
-                attribs.append('signal')
+                layer.append('signal')
             if 'power' in item:
-                attribs.append('power')
+                layer.append('power')
                 
-            self.attribs[item[0]] = attribs
+            self.layer.append(layer)
      
     def To_PCB(self):
 
         layers = []
 
-        for number in self.names:
-            layer = [str(number), self.names[number]]
-            layer += self.attribs[number]
+        for layer in self.layer:
+            # layer = layername
+            # layer += self.attribs[layernum]
             layers.append(layer)
 
         layers.append('layers')
@@ -60,34 +58,26 @@ class Layers(object):
             if tag.has_attr('id') == True:
                 if tag['id'].startswith('layer'):
                     if tag.has_attr('number') == True:
-                        self.names[tag['number']] = tag['inkscape:label']
+                        layer = [tag['number'], tag['inkscape:label']]
 
                         if tag.has_attr('attribs'):
-                            self.attribs[tag['number']] = tag['attribs'].split(',')
-                        # if tag.has_attr('signal'):
-                        #     attribs.append('signal')
-                        # if tag.has_attr('power'):
-                        #     attribs.append('power')
-                        # if tag.has_attr('hide'):
-                        #     attribs.append('hide')
-
-                        # print('-')
-                        # print(tag)
-
-                        # self.attribs[tag['number']] = attribs
+                            attribs = tag['attribs'].split(',')
+                            layer += attribs
+                            
+                        self.layer.append(layer)
 
      
     def To_SVG(self):
         layers = []
         
-        for item in self.names:
+        for item in self.layer:
 
             parameters = '<g '
-            parameters += 'inkscape:label="' + self.names[item] + '" '
+            parameters += 'inkscape:label="' + item[1] + '" '
             parameters += 'inkscape:groupmode="layer" '
-            parameters += 'id="layer' + item + '"'
-            parameters += 'number="' + item + '"'
-            parameters += 'attribs="' + ','.join(self.attribs[item]) + '"'
+            parameters += 'id="layer' + item[0] + '"'
+            parameters += 'number="' + item[0] + '"'
+            parameters += 'attribs="' + ','.join(item[2:]) + '"'
             parameters += '/>'
 
             layers.insert(0, parameters)
