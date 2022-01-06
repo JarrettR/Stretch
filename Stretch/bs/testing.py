@@ -513,7 +513,7 @@ Hello, world!
         # Whitespace separating the values of a multi-valued attribute
         # should be ignored.
 
-        markup = '<div class=" foo bar	 "></a>'
+        markup = '<div class=" foo bar     "></a>'
         soup = self.soup(markup)
         self.assertEqual(['foo', 'bar'], soup.div['class'])
 
