@@ -1,9 +1,11 @@
+import sys
 
 class Colour(object):
 
     def Assign(self, layername):
-        if type(layername) == unicode:
-            layername = str(layername)
+        if sys.version_info[0] != 3:
+            if type(layername) == unicode:
+                layername = str(layername)
         colours = {
             'F.Cu': '840000',
             'In1.Cu': 'C2C200',
