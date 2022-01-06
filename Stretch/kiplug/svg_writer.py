@@ -4,6 +4,8 @@ import json
 import math
 import cmath
 
+from datetime import datetime
+
 #Running KiCad Linux vs. standalone requires different imports
 # try:
     # # from .stretch import Board
@@ -30,9 +32,10 @@ class SvgWrite(object):
     def __init__(self):
         print(os.path.dirname(os.path.realpath(__file__)) )
         currentdir = os.path.dirname(os.path.realpath(__file__))
+        testdir = os.path.dirname(os.path.dirname(currentdir))
         self.filename_in = os.path.join(currentdir, 'tests', 'complex.kicad_pcb')
         # self.filename_in = os.path.join(currentdir, 'tests', 'simple.kicad_pcb')
-        self.filename_json = os.path.join(currentdir, 'tests', 'out.json')
+        self.filename_json = os.path.join(testdir, 'tests', 'out.json')
         self.filename_svg = os.path.join(currentdir, 'tests', 'out.svg')
         self.filename_base = os.path.join(currentdir, 'tests', 'base.svg')
         
@@ -57,13 +60,19 @@ class SvgWrite(object):
     def Convert(self, obj, save = False):
         js = json.dumps(obj)
         if save:
-            with open(self.filename_json, 'wb') as f:
+            with open(self.filename_json, 'w') as f:
                 f.write(js)
         return js
 
     def Save(self, svg, filename = None):
         if filename is None:
             filename = self.filename_svg
+
+        # dt = datetime.now()
+        # ts = datetime.timestamp(dt)
+        # timestamp = str(int(ts))
+
+        # filename = filename + timestamp
 
         with open(filename, 'wb') as f:
             f.write(svg)
@@ -97,6 +106,7 @@ class SvgWrite(object):
     def Run_Plugin(self, filename, outfilename):
         from .board import Board
         dic = self.Load(filename)
+        # dic = self.Convert(dic, True)
 
         outfile = os.path.join(os.path.dirname(filename), outfilename)
 
@@ -106,6 +116,7 @@ class SvgWrite(object):
         svg = board.To_SVG()
 
         self.Save(svg, outfile)
+
 
 
 if __name__ == '__main__':

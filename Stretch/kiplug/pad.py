@@ -155,8 +155,8 @@ class Pad(object):
         
 
 
-    def To_SVG(self, angle = 0):
-        angle = int(angle)
+    def To_SVG(self, angle = 0.0):
+        angle = float(angle)
 
         layers = []
         roundrect_rratio = ''
@@ -170,8 +170,8 @@ class Pad(object):
         y = self.at[1] - float(self.size[1]) / 2
 
         if len(self.at) > 2:
-            angle -= int(self.at[2])
-        if angle != 0:
+            angle += float(self.at[2])
+        if angle != 0.0:
             rotate += 'transform="rotate(' + str(angle) + ', ' + str(self.at[0] * pxToMM) + ', ' + str(self.at[1] * pxToMM) + ')" '
                         
         if self.roundrect_rratio != '':
