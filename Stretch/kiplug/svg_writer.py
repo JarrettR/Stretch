@@ -96,6 +96,7 @@ class SvgWrite(object):
         
 
         board = Board()
+        board.clear()
         board.From_PCB(dic)
         
         svg = board.To_SVG()
@@ -116,7 +117,6 @@ class SvgWrite(object):
         svg = board.To_SVG()
 
         self.Save(svg, outfile)
-
 
 
 if __name__ == '__main__':

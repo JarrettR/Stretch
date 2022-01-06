@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 import json
+import sys
 from .svgpath import parse_path
 
 from .arc import Arc
@@ -43,6 +44,9 @@ debug = False
 class Board(object):
 
     def __init__(self):
+        self.clear()
+
+    def clear(self):
         self.general = ''
         self.paper = ''
         self.title_block = ''
@@ -70,13 +74,15 @@ class Board(object):
         self.via = []
         self.zone = []
         self.target = ''
-        
         self.metadata = []
         
         
     def From_PCB(self, pcb):
     
         for item in pcb:
+            if sys.version_info[0] != 3:
+                if type(item) == unicode:
+                    item = str(item)
             if type(item) is str:
                 print(item)
             else:
@@ -184,6 +190,8 @@ class Board(object):
            
                     
     def To_SVG(self):
+
+        base = BeautifulSoup(base_proto, 'html.parser')
 
         base.svg.append(BeautifulSoup('<kicad />', 'html.parser'))
 
@@ -389,7 +397,7 @@ class Board(object):
         chunk = modules + segments + gr_polys + gr_lines + gr_arcs + gr_curves + gr_text + vias + zones
         return layers, chunk
         
-base = BeautifulSoup('''
+base_proto = '''
     <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
@@ -441,4 +449,4 @@ base = BeautifulSoup('''
     </rdf:RDF>
   </metadata>
 </svg>
-''', 'html.parser')
+'''

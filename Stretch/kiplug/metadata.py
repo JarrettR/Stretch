@@ -1,5 +1,4 @@
 import json
-import sys
 
 class Metadata(object):
 
@@ -15,12 +14,7 @@ class Metadata(object):
     def To_SVG(self, input):
         # This will just take whatever data and store it in an XML tag as JSON
         # Hacky, but we don't care about it other than to be able to load it back in later
-        
-        
-        if sys.version_info[0] != 3:
-            if type(input) == unicode:
-                return ''
-            
+
         tag = str(input[0])
         input = input[1:]
         
