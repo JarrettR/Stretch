@@ -184,7 +184,11 @@ class Text(object):
             if 'translate(' in transform:
                 translate = transform[transform.find('translate(') + 10:]
                 translate = translate[:translate.find(')')]
-                x_t, y_t = translate.split(',')
+                if ',' in translate:
+                    x_t, y_t = translate.split(',')
+                else:
+                    x_t = translate
+                    y_t = 0
                 x += float(x_t) / pxToMM
                 y += float(y_t) / pxToMM
             if 'rotate(' in transform:
