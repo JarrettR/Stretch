@@ -29,12 +29,12 @@ class Layers(object):
 
             if 'user' in item:
                 layer.append('user')
-            if 'hide' in item:
-                layer.append('hide')
             if 'signal' in item:
                 layer.append('signal')
             if 'power' in item:
                 layer.append('power')
+            if 'hide' in item:
+                layer.append('hide')
                 
             self.layer.append(layer)
      
