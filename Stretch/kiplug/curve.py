@@ -115,7 +115,7 @@ class Curve(object):
 
 
         parameters = '<path style="fill:none;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1'
-        parameters += ';stroke:#' + Colour.Assign(self.layer)
+        parameters += ';stroke:#' + Colour().Assign(self.layer)
         parameters += ';stroke-width:' + self.width + 'mm'
         parameters += '" '
         parameters += 'd="M ' + str(points[0] * pxToMM) + ',' + str(points[1] * pxToMM) + ' C '

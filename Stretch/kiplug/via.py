@@ -185,7 +185,7 @@ class Via(object):
         parameters += '>'
 
         hole = '<circle style="stroke:none;stroke-linecap:round;stroke-linejoin:miter;fill-opacity:1'
-        hole += ';fill:#' + Colour.Assign('Via.Inner')
+        hole += ';fill:#' + Colour().Assign('Via.Inner')
         hole += '" '
         hole += 'cx="' + str(float(self.at[0]) * pxToMM) + '" '
         hole += 'cy="' + str(float(self.at[1]) * pxToMM) + '" '
@@ -195,7 +195,7 @@ class Via(object):
         hole += '/>'
 
         parameters += '<circle style="stroke:none;stroke-linecap:round;stroke-linejoin:miter;fill-opacity:1'
-        parameters += ';fill:#' + Colour.Assign('Via.Outer')
+        parameters += ';fill:#' + Colour().Assign('Via.Outer')
         parameters += '" '
         parameters += 'cx="' + str(float(self.at[0]) * pxToMM) + '" '
         parameters += 'cy="' + str(float(self.at[1]) * pxToMM) + '" '

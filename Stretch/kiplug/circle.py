@@ -111,7 +111,7 @@ class Circle(object):
         r = abs(math.hypot(self.center[0] - self.end[0], self.center[1] - self.end[1]))
 
         parameters = '<circle style="stroke:none;stroke-linecap:round;stroke-linejoin:miter;fill-opacity:1'
-        parameters += ';stroke:#' + Colour.Assign(self.layer)
+        parameters += ';stroke:#' + Colour().Assign(self.layer)
         parameters += ';stroke-width:' + self.width + 'mm'
         parameters += '" '
         parameters += 'cx="' + str(self.center[0] * pxToMM) + '" '

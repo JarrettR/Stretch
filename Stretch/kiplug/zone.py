@@ -275,7 +275,7 @@ class Zone(object):
             name = 'name="' + self.name + '" '
             
         parameters = '<path style="fill:none;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1'
-        parameters += ';stroke:#' + Colour.Assign(self.layer)
+        parameters += ';stroke:#' + Colour().Assign(self.layer)
         parameters += ';stroke-width:1mm'
         parameters += '" '
         parameters += 'd="M ' + xy_text + ' Z" '
