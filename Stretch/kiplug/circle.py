@@ -33,12 +33,11 @@ class Circle(object):
     def __init__(self):
         self.center = []
         self.end = []
-        self.width = 0
-        self.angle = 0
+        self.width = '0'
         self.layer = ''
         self.fill = ''
         self.tstamp = ''
-        self.status = 0
+        self.status = ''
         
         
     def From_PCB(self, input):
@@ -59,9 +58,9 @@ class Circle(object):
                 self.end.append(float(item[1]))
                 self.end.append(float(item[2]))
 
-            if item[0] == 'angle':
-                self.angle = item[1]
-                assert False,"Gr_circle: Please report this! Never seen before."
+            # if item[0] == 'angle':
+                # self.angle = item[1]
+                # assert False,"Gr_circle: Please report this! Never seen before."
 
             if item[0] == 'layer':
                 self.layer = item[1]
@@ -88,15 +87,20 @@ class Circle(object):
         pcb.append(['center'] + self.center)
         pcb.append(['end'] + self.end)
         pcb.append(['width', self.width])
-        pcb.append(['angle', self.angle])
+        # pcb.append(['angle', self.angle])
         pcb.append(['layer', self.layer])
-        pcb.append(['fill', self.fill])
+        if self.fill != '':
+            pcb.append(['fill', self.fill])
         pcb.append(['tstamp', self.tstamp])
         pcb.append(['status', self.status])
             
         return pcb
         
-    def To_SVG(self):
+    def To_SVG(self, fp = False):
+        if fp:
+            circletype = 'fp_circle'
+        else:
+            circletype = 'gr_circle'
         tstamp = ''
         status = ''
         fill = ''
@@ -118,11 +122,44 @@ class Circle(object):
         parameters += 'cy="' + str(self.center[1] * pxToMM) + '" '
         parameters += 'r="' + str(r * pxToMM) + '" '
         parameters += 'layer="' + self.layer + '" '
-        parameters += 'type="gr_circle" '
+        parameters += 'type="' + circletype + '" '
         parameters += fill
         parameters += tstamp
         parameters += status
         parameters += '/>'
 
         return parameters
+
+        
+        
+    def From_SVG(self, tag):
+        style = tag['style']
+
+        width = style[style.find('stroke-width:') + 13:]
+        self.width = width[0:width.find('mm')]
+        
+        if tag.has_attr('layer'):
+            self.layer = tag['layer']
+        elif tag.parent.has_attr('inkscape:label'):
+            #XML metadata trashed, try to recover from parent tag
+            self.layer = tag.parent['inkscape:label']
+        else:
+            assert False, "Circle not in layer"
+
+
+        r = str((float(tag['r']) +float(tag['cx'] )) / pxToMM)
+        x = str(float(tag['cx']) / pxToMM)
+        y = str(float(tag['cy']) / pxToMM)
+        self.center = [x, y]
+        self.end = [r, y]
+            
+        if tag.has_attr('fill') == True:
+            self.fill = tag['fill']
+            
+        if tag.has_attr('status') == True:
+            self.status = tag['status']
+            
+        if tag.has_attr('tstamp') == True:
+            self.tstamp = tag['tstamp']
+
 

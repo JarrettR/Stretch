@@ -200,6 +200,11 @@ class Module(object):
                 arc.From_PCB(item)
                 self.fp_arc.append(arc)
                 
+            if item[0] == 'fp_circle':
+                circle = Circle()
+                circle.From_PCB(item)
+                self.fp_circle.append(circle)
+                
             # if item[0] == 'fp_circle':
             # if item[0] == 'fp_curve':
             # if item[0] == 'fp_rect':
@@ -573,6 +578,10 @@ class Module(object):
                 pad = Pad()
                 pad.From_SVG(tagpath, rotate)
                 self.pad.append(pad)
+            elif tagpath.has_attr('type') == True and tagpath['type'] == 'fp_circle':
+                circle = Circle()
+                circle.From_SVG(tagpath)
+                self.fp_circle.append(circle)
 
         for tagpath in tag.find_all('ellipse'):
             if tagpath.has_attr('type') == True and tagpath['type'] == 'pad':

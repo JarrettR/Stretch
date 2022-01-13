@@ -207,19 +207,19 @@ class Pad(object):
             svgsize += 'width="' + str(float(self.size[0])  * pxToMM) + '" '
             svgsize += 'height="' + str(float(self.size[1])  * pxToMM) + '" '
             
-        elif self.shape == 'circle':
-            parameters += '<circle style="stroke:none;stroke-linecap:round;stroke-linejoin:miter;fill-opacity:1'
-            svgsize += 'cx="' + str(self.at[0] * pxToMM) + '" '
-            svgsize += 'cy="' + str(self.at[1] * pxToMM) + '" '
-            svgsize += 'r="' + str(float(self.size[0])  * (pxToMM / 2)) + '" '
-            svgsize += 'height="' + str(float(self.size[1])  * pxToMM) + '" '
-            
         elif self.shape == 'oval':
             parameters += '<ellipse style="stroke:none;stroke-linecap:round;stroke-linejoin:miter;fill-opacity:1'
             svgsize += 'cx="' + str(self.at[0] * pxToMM) + '" '
             svgsize += 'cy="' + str(self.at[1] * pxToMM) + '" '
             svgsize += 'rx="' + str(float(self.size[0])  * (pxToMM / 2)) + '" '
             svgsize += 'ry="' + str(float(self.size[1])  * (pxToMM / 2)) + '" '
+            
+        elif self.shape == 'circle':
+            parameters += '<circle style="stroke:none;stroke-linecap:round;stroke-linejoin:miter;fill-opacity:1'
+            svgsize += 'cx="' + str(self.at[0] * pxToMM) + '" '
+            svgsize += 'cy="' + str(self.at[1] * pxToMM) + '" '
+            svgsize += 'r="' + str(float(self.size[0])  * (pxToMM / 2)) + '" '
+            svgsize += 'height="' + str(float(self.size[1])  * pxToMM) + '" '
             
         elif self.shape == 'custom':
             parameters += '<rect style="stroke:none;stroke-linecap:round;stroke-linejoin:miter;fill-opacity:1'

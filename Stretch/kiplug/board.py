@@ -241,12 +241,12 @@ class Board(object):
             # layer = item.layer
             base.svg.find('g', {'inkscape:label': 'Modules'}, recursive=False).append(tag)
             
-        for item in self.gr_line:
+        for item in self.gr_poly:
             tag = BeautifulSoup(item.To_SVG(), 'html.parser')
             layer = item.layer
             base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
             
-        for item in self.gr_poly:
+        for item in self.gr_line:
             tag = BeautifulSoup(item.To_SVG(), 'html.parser')
             layer = item.layer
             base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
