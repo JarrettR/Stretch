@@ -223,6 +223,7 @@ class Board(object):
                 hiddenLayers.append(layer[1])
 
         base.svg.append(BeautifulSoup('<g inkscape:label="Vias" inkscape:groupmode="layer" type="layervia" user="True" />', 'html.parser'))
+        base.svg.append(BeautifulSoup('<g inkscape:label="Modules" inkscape:groupmode="layer" type="module" user="True" />', 'html.parser'))
 
 
         for item in self.segment:
@@ -237,8 +238,8 @@ class Board(object):
             
         for item in self.module:
             tag = item.To_SVG(hiddenLayers = hiddenLayers)
-            layer = item.layer
-            base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
+            # layer = item.layer
+            base.svg.find('g', {'inkscape:label': 'Modules'}, recursive=False).append(tag)
             
         for item in self.gr_line:
             tag = BeautifulSoup(item.To_SVG(), 'html.parser')
@@ -308,9 +309,10 @@ class Board(object):
                         self.via.append(via)
                 
                 elif tag['type'] == "module":
-                    module = Module()
-                    module.From_SVG(tag)
-                    self.module.append(module)
+                    for moduletag in tag.find_all('g'):
+                        module = Module()
+                        module.From_SVG(moduletag)
+                        self.module.append(module)
 
         for tag in svg.svg.find_all('text'):
             if tag.has_attr('type') == True:
@@ -368,63 +370,7 @@ class Board(object):
                     zone.From_SVG(tag, paths)
                     self.zone.append(zone)
 
-        
-    def Parse_Layers_Segments(self, svg):
-        #This gets reversed after it returns
-        layers = []
-        modules = []
-        segments = []
-        gr_lines = []
-        gr_arcs = []
-        gr_curves = []
-        gr_polys = []
-        gr_text = []
-        zones = []
-
-        for tag in svg.svg.find_all('g'):
-            if tag['id'] == 'layervia':
-                vias = self.Parse_Vias(tag)
-
-            elif tag['id'].startswith('module'):
-                module = self.Parse_Module(tag)
-                modules.append(module)
-
-            elif tag['id'].startswith('layer'):
-                #This gets reversed later
-                layer = [ tag['number'] ]
-                layer.append(tag['inkscape:label'])
-
-                if tag.has_attr('user'):
-                    layer.append('user')
-                if tag.has_attr('signal'):
-                    layer.append('signal')
-                if tag.has_attr('power'):
-                    layer.append('power')
-                if tag.has_attr('hide'):
-                    layer.append('hide')
-
-                layers.append(layer)
-
-                for path in tag.find_all('path'):
-                    if path.has_attr('type') == True and path['type'] == 'zone':
-                        zones.append(self.Parse_Zone(path))
-                    elif path.has_attr('type') == True and path['type'] == 'gr_poly':
-                        gr_polys.append(self.Parse_Polys(path))
-                    else:
-                        segment, gr_line, gr_arc, gr_curve = self.Parse_Segment(path)
-                        segments += segment
-                        gr_lines += gr_line
-                        gr_arcs += gr_arc
-                        gr_curves += gr_curve
-                        
-                for text in tag.find_all('text'):
-                    gr_text.append(self.Parse_Text(text))
-
-
-        layers.append('layers')
-        chunk = modules + segments + gr_polys + gr_lines + gr_arcs + gr_curves + gr_text + vias + zones
-        return layers, chunk
-        
+       
 base_proto = '''
     <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->

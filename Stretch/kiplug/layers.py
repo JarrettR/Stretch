@@ -33,6 +33,8 @@ class Layers(object):
                 layer.append('signal')
             if 'power' in item:
                 layer.append('power')
+            if 'mixed' in item:
+                layer.append('mixed')
             if 'hide' in item:
                 layer.append('hide')
                 
@@ -71,10 +73,15 @@ class Layers(object):
         layers = []
         
         for item in self.layer:
+        
+            hiddenlayer = ''
+            if 'hide' in item[2:]:
+                hiddenlayer = "style=display:none "
 
             parameters = '<g '
             parameters += 'inkscape:label="' + item[1] + '" '
             parameters += 'inkscape:groupmode="layer" '
+            parameters += hiddenlayer
             parameters += 'id="layer' + item[0] + '"'
             parameters += 'number="' + item[0] + '"'
             parameters += 'attribs="' + ','.join(item[2:]) + '"'
