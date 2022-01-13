@@ -91,16 +91,28 @@ class Board(object):
                     self.layers = Layers()
                     self.layers.From_PCB(item)
                     
+                elif item[0] == 'footprint':
+                    # This is the new name of modules
+                    # KiCad 6 supports "module" as a legacy option
+                    # So that's what we will use.
+                    module = Module()
+                    module.From_PCB(item)
+                    self.module.append(module)
+                    
                 elif item[0] == 'module':
                     module = Module()
                     module.From_PCB(item)
-                    # print(module.fp_text[0].text)
                     self.module.append(module)
 
                 elif item[0] == 'segment':
                     segment = Segment()
                     segment.From_PCB(item)
                     self.segment.append(segment)
+                    
+                elif item[0] == 'arc':
+                    arc = Arc()
+                    arc.From_PCB(item)
+                    self.arc.append(arc)
                     
                 elif item[0] == 'gr_arc':
                     arc = Arc()
@@ -160,6 +172,9 @@ class Board(object):
         for item in self.segment:
             pcb.append(item.To_PCB())
         
+        for item in self.arc:
+            pcb.append(item.To_PCB())
+        
         for item in self.gr_arc:
             pcb.append(item.To_PCB())
         
@@ -211,6 +226,11 @@ class Board(object):
 
 
         for item in self.segment:
+            tag = BeautifulSoup(item.To_SVG(), 'html.parser')
+            layer = item.layer
+            base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
+                        
+        for item in self.arc:
             tag = BeautifulSoup(item.To_SVG(), 'html.parser')
             layer = item.layer
             base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
@@ -309,6 +329,14 @@ class Board(object):
                         segment = Segment()
                         segment.From_SVG(tag, path)
                         self.segment.append(segment)
+                        
+                elif tag['type'] == "arc":
+                    paths = parse_path(tag['d'])
+
+                    for path in paths:
+                        arc = Arc()
+                        arc.From_SVG(tag, path)
+                        self.arc.append(arc)
                 
                 elif tag['type'] == "gr_line":
                     paths = parse_path(tag['d'])

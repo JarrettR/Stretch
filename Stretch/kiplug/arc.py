@@ -41,6 +41,7 @@ class Arc(object):
         self.layer = ''
         self.fill = ''
         self.tstamp = ''
+        self.net = ''
         self.status = 0
 
     def From_PCB(self, input):
@@ -75,6 +76,9 @@ class Arc(object):
 
             if item[0] == 'tstamp':
                 self.tstamp = item[1]
+                
+            if item[0] == 'net':
+                self.net = item[1]
                 
             if item[0] == 'status':
                 self.status = item[1]
