@@ -93,6 +93,7 @@ class Zone(object):
         self.filled_polygon = []
         self.filled_segments = []
         self.name = ''
+        self.island = False
         
         # Most of these don't need to be handled
         self.metadata = []
@@ -139,6 +140,9 @@ class Zone(object):
             elif item[0] == 'keepout':
                 self.keepout = item[1]
 
+            elif item[0] == 'island':
+                self.island = True
+
             elif item[0] == 'name':
                 self.name = item[1]
                 
@@ -170,6 +174,8 @@ class Zone(object):
             pcb.append(['layer', self.layer])
         if len(self.layers) > 0:
             pcb.append(['layers', self.layers])
+        if self.island:
+            pcb.append(['island'])
         if self.tstamp:
             pcb.append(['tstamp', self.tstamp])
         if self.hatch:
@@ -270,6 +276,10 @@ class Zone(object):
         if self.keepout != '':
             keepout = 'keepout="' + self.keepout + '" '
         
+        island = ''
+        if self.island == True:
+            island = 'island="True" '
+        
         name = ''
         if self.name != '':
             name = 'name="' + self.name + '" '
@@ -290,6 +300,7 @@ class Zone(object):
         parameters += filled_areas_thickness
         parameters += fill
         parameters += keepout
+        parameters += island
         parameters += name
         parameters += 'type="zone">'
         parameters += '</path>'
@@ -347,6 +358,8 @@ class Zone(object):
             self.filled_areas_thickness = tag['filled_areas_thickness']
         if tag.has_attr('fill'):
             self.fill = tag['fill']
+        if tag.has_attr('island'):
+            self.fill = True
         if tag.has_attr('keepout'):
             self.keepout = tag['keepout']
         if tag.has_attr('name'):
