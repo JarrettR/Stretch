@@ -159,6 +159,7 @@ class Board(object):
                     
                 else:
                     self.metadata.append(item)
+
                    
     def To_PCB(self):
         pcb = ['kicad_pcb']
@@ -224,6 +225,7 @@ class Board(object):
 
         base.svg.append(BeautifulSoup('<g inkscape:label="Vias" inkscape:groupmode="layer" type="layervia" user="True" />', 'html.parser'))
         base.svg.append(BeautifulSoup('<g inkscape:label="Modules" inkscape:groupmode="layer" type="module" user="True" />', 'html.parser'))
+        base.svg.append(BeautifulSoup('<g inkscape:label="Zones" inkscape:groupmode="layer" type="zone" user="True" />', 'html.parser'))
 
 
         for item in self.segment:
@@ -280,6 +282,8 @@ class Board(object):
             layer = item.layer
             if layer:
                 base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
+            else: #KiCad 6 zones
+                base.svg.find('g', {'inkscape:label': 'Zones'}, recursive=False).append(tag)
                 
         for item in self.metadata:
             tag = BeautifulSoup(Metadata().To_SVG(item), 'html.parser')

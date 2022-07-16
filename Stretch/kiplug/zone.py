@@ -80,7 +80,7 @@ class Zone(object):
         self.net = ''
         self.net_name = ''
         self.layer = ''
-        self.layers = []
+        self.layers = ''
         self.tstamp = ''
         self.hatch = ''
         self.priority = 0
@@ -114,7 +114,7 @@ class Zone(object):
 
             elif item[0] == 'layers':
                 for layer in item[1]:
-                    self.layers.append(layer)
+                    self.layers += layer
                 
             elif item[0] == 'tstamp':
                 self.tstamp = item[1]
@@ -268,6 +268,14 @@ class Zone(object):
         if self.filled_areas_thickness != '':
             filled_areas_thickness = 'filled_areas_thickness="' + self.filled_areas_thickness + '" '
         
+        layer = ''
+        if self.layer != '':
+            layer = 'layer="' + self.layer + '" '
+        
+        layers = ''
+        if self.layers != '':
+            layers = 'layers="' + self.layers + '" '
+
         fill = ''
         if self.fill != '':
             fill = 'fill="' + self.fill + '" '
@@ -289,7 +297,8 @@ class Zone(object):
         parameters += ';stroke-width:1mm'
         parameters += '" '
         parameters += 'd="M ' + xy_text + ' Z" '
-        parameters += 'layer="' + self.layer + '" '
+        parameters += layer
+        parameters += layers
         parameters += net
         parameters += net_name
         parameters += tstamp
@@ -322,8 +331,6 @@ class Zone(object):
         elif tag.parent.has_attr('inkscape:label'):
             #XML metadata trashed, try to recover from parent tag
             layer = tag.parent['inkscape:label']
-        else:
-            assert False, "Zone not in layer"
             
         path = parse_path(tag['d'])
         
@@ -339,9 +346,10 @@ class Zone(object):
         xy.append(str(path[0].start.imag / pxToMM))
         pts.append(xy)
 
-
         if tag.has_attr('net'):
             self.net = tag['net']
+        if tag.has_attr('layers'):
+            self.layers = tag['layers']
         if tag.has_attr('net_name'):
             self.net_name = tag['net_name']
         if tag.has_attr('tstamp'):

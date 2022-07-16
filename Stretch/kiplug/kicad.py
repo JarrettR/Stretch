@@ -2,6 +2,7 @@ import os
 from datetime import datetime
 
 import pcbnew
+import sys
 
 class Stretch(pcbnew.ActionPlugin, object):
 
@@ -29,6 +30,9 @@ class Stretch(pcbnew.ActionPlugin, object):
         b = pcbnew.GetBoard()
         pcb_filename = b.GetFileName()
 
+        sys.stdout = open(os.path.join(os.path.dirname(pcb_filename), "out.log"), 'w')
+        print('Begin Stretch debug')
+
         #If BS4 not installed:
         try:
             import bs4
@@ -45,6 +49,7 @@ class Stretch(pcbnew.ActionPlugin, object):
             a = PcbWrite()
             a.Run_Plugin(pcb_filename, self.svg_file_name)
             pcbnew.Refresh()
+        sys.stdout.close()
    
 
 
