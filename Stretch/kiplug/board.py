@@ -225,7 +225,7 @@ class Board(object):
 
         base.svg.append(BeautifulSoup('<g inkscape:label="Vias" inkscape:groupmode="layer" type="layervia" user="True" />', 'html.parser'))
         base.svg.append(BeautifulSoup('<g inkscape:label="Modules" inkscape:groupmode="layer" type="module" user="True" />', 'html.parser'))
-        base.svg.append(BeautifulSoup('<g inkscape:label="Zones" inkscape:groupmode="layer" type="zone" user="True" />', 'html.parser'))
+        base.svg.append(BeautifulSoup('<g inkscape:label="Zones" inkscape:groupmode="layer" type="layerzone" user="True" />', 'html.parser'))
 
 
         for item in self.segment:
@@ -317,6 +317,12 @@ class Board(object):
                         module = Module()
                         module.From_SVG(moduletag)
                         self.module.append(module)
+                
+                elif tag['type'] == "layerzone":
+                    for zonetag in tag.find_all('g'):
+                        zone = Zone()
+                        zone.From_SVG(zonetag)
+                        self.zone.append(zone)
 
         for tag in svg.svg.find_all('text'):
             if tag.has_attr('type') == True:
@@ -353,6 +359,8 @@ class Board(object):
                         self.gr_line.append(line)
                 
                 elif tag['type'] == "gr_arc":
+
+                    print(tag)
                     paths = parse_path(tag['d'])
 
                     for path in paths:
@@ -364,6 +372,7 @@ class Board(object):
                     paths = parse_path(tag['d'])
 
                     for path in paths:
+                        print(path)
                         curve = Curve()
                         curve.From_SVG(tag)
                         self.gr_curve.append(curve)

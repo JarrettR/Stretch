@@ -1,10 +1,9 @@
-
 from .colour import Colour
 from .svgpath import parse_path
 import math
 import cmath
 
-# https://github.com/KiCad/kicad-source-mirror/blob/93466fa1653191104c5e13231dfdc1640b272777/pcbnew/plugins/kicad/pcb_parser.cpp#L2119
+# https://gitlab.com/kicad/code/kicad/-/blob/14c5f744ff2edd527dec17653fd7795cb6a74299/pcbnew/plugins/kicad/pcb_parser.cpp#L4765
 
 # 0 gr_arc
 # 1
@@ -12,12 +11,13 @@ import cmath
 #   1 66.66
 #   2 99.99
 # 2
-#   0 end
+#   0 mid
 #   1 66.66
 #   2 99.99
 # 3
-#   0 angle
-#   1 -90
+#   0 end
+#   1 66.66
+#   2 99.99
 # 4
 #   0 layer
 #   1 Edge.Cuts
@@ -35,8 +35,8 @@ class Arc(object):
 
     def __init__(self):
         self.start = []
+        self.mid = []
         self.end = []
-        self.angle = 0
         self.width = 0
         self.layer = ''
         self.fill = ''
@@ -58,12 +58,13 @@ class Arc(object):
                 self.start.append(item[1])
                 self.start.append(item[2])
 
+            if item[0] == 'mid':
+                self.mid.append(item[1])
+                self.mid.append(item[2])
+
             if item[0] == 'end':
                 self.end.append(item[1])
                 self.end.append(item[2])
-
-            if item[0] == 'angle':
-                self.angle = float(item[1])
 
             if item[0] == 'layer':
                 self.layer = item[1]
@@ -91,8 +92,8 @@ class Arc(object):
             pcb = ['gr_arc']
 
         pcb.append(['start'] + self.start)
+        pcb.append(['mid'] + self.mid)
         pcb.append(['end'] + self.end)
-        pcb.append(['angle', self.angle])
         pcb.append(['width', self.width])
         pcb.append(['layer', self.layer])
         if self.fill:
@@ -115,32 +116,11 @@ class Arc(object):
         #What KiCad calls 'start' is actually the arc centre,
         #'end' is actually arc/svg start
         #SVG end is actual end, we need to calculate centre instead
-        centre = [(float(self.start[0]) * pxToMM), (float(self.start[1]) * pxToMM)]
-        start = [(float(self.end[0]) * pxToMM), (float(self.end[1]) * pxToMM)]
-  
-        r = (start[0] - centre[0]) + ((centre[1] - start[1]) * 1j)
+        start = [(float(self.start[0]) * pxToMM), (float(self.start[1]) * pxToMM)]
+        mid = [(float(self.mid[0]) * pxToMM), (float(self.start[1]) * pxToMM)]
+        end = [(float(self.end[0]) * pxToMM), (float(self.end[1]) * pxToMM)]
 
-        angle = math.radians(self.angle)
-        endangle = cmath.phase(r) - angle
-
-        end_from_origin = cmath.rect(cmath.polar(r)[0], endangle)
-        end = end_from_origin - r
-        
-        if angle != 0:
-            sweep = str(int(((angle / abs(angle)) + 1) / 2))
-        else:
-            sweep = '1'
-
-        if angle > cmath.pi:
-            large = '1'
-        else:
-            large = '0'
-
-        radius = "{:.6f}".format(round(cmath.polar(r)[0], 6))
-        end_x = "{:.6f}".format(round(end.real, 6))
-        end_y = "{:.6f}".format(round(-end.imag, 6))
-
-        a = ' '.join(['a', radius + ',' + radius, '0', large, sweep, end_x + ',' + end_y])
+        a = self.calcCirclePath(start, end, mid)
 
         tstamp = ''
         status = ''
@@ -156,7 +136,7 @@ class Arc(object):
         parameters += ';stroke:#' + Colour().Assign(self.layer)
         parameters += ';stroke-width:' + self.width + 'mm'
         parameters += '" '
-        parameters += 'd="M ' + str(start[0]) + ',' + str(start[1]) + ' ' + a + '" '
+        parameters += 'd="' + a + '" '
         # parameters += 'id="path' + str(id) + '" '
         parameters += 'layer="' + self.layer + '" '
         parameters += 'type="' + arctype + '" '
@@ -183,12 +163,9 @@ class Arc(object):
         else:
             assert False, "Arc not in layer"
 
-        #KiCad 'start' is actually centre, 'end' is actually svg start
-        #SVG end is actual end, we need to calculate centre instead
-        self.start = [str(path[0].center.real / pxToMM), str(path[0].center.imag / pxToMM)]
-        self.end = [str(path[0].start.real / pxToMM), str(path[0].start.imag / pxToMM)]
-
-        self.angle = str(path[0].delta)
+        self.start = [str(path[0].start.real / pxToMM), str(path[0].start.imag / pxToMM)]
+        self.mid = [str(path[0].point(0.5).real / pxToMM), str(path[0].point(0.5).imag / pxToMM)]
+        self.end = [str(path[0].point(1).real / pxToMM), str(path[0].point(1).imag / pxToMM)]
             
         if tag.has_attr('fill') == True:
             self.fill = tag['fill']
@@ -199,3 +176,35 @@ class Arc(object):
         if tag.has_attr('tstamp') == True:
             self.tstamp = tag['tstamp']
 
+    # Thx Adam Pearce https://stackoverflow.com/a/43825818
+    def calcCirclePath(self, a, b, c):
+        def dist(a, b):
+            return math.sqrt(math.pow(a[0] - b[0], 2) + math.pow(a[1] - b[1], 2))
+
+
+        A = dist(b, c)
+        B = dist(c, a)
+        C = dist(a, b)
+
+        angle = math.acos((A*A + B*B - C*C)/(2*A*B))
+
+        #calc radius of circle
+        K = 0.5*A*B*math.sin(angle)
+        r = A*B*C/4/K
+        # r = math.round(r*1000)/1000
+
+        #large arc flag
+        if math.pi/2 > angle:
+            laf = '1'
+        else:
+            laf = '0'
+
+        #sweep flag
+        if ((b[0] - a[0])*(c[1] - a[1]) - (b[1] - a[1])*(c[0] - a[0])) < 0:
+            saf = '1'
+        else:
+            saf = '0'
+
+        svg = ' '.join(['M', str(a[0]), str(a[1]), 'A', str(r), str(r), '0', laf, saf, str(b[0]), str(b[1])])
+
+        return svg

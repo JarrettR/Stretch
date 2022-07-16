@@ -266,7 +266,7 @@ class Module(object):
             module.append(['tstamp', self.tstamp])
 
         if self.descr:
-            module.append(['descr', self.descr])
+            module.append(['descr', self.descr.replace('"', '\\"')])
 
         if self.tags:
             module.append(['tags', self.tags])

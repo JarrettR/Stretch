@@ -79,7 +79,6 @@ class Zone(object):
     def __init__(self):
         self.net = ''
         self.net_name = ''
-        self.layer = ''
         self.layers = ''
         self.tstamp = ''
         self.hatch = ''
@@ -109,12 +108,9 @@ class Zone(object):
             elif item[0] == 'net_name':
                 self.net_name = item[1]
 
-            elif item[0] == 'layer':
-                self.layer = item[1]
-
             elif item[0] == 'layers':
                 for layer in item[1]:
-                    self.layers += layer
+                    self.layers += layer + ' '
                 
             elif item[0] == 'tstamp':
                 self.tstamp = item[1]
@@ -170,9 +166,7 @@ class Zone(object):
             pcb.append(['net', self.net])
         if self.net_name:
             pcb.append(['net_name', self.net_name])
-        if self.layer:
-            pcb.append(['layer', self.layer])
-        if len(self.layers) > 0:
+        if self.layers:
             pcb.append(['layers', self.layers])
         if self.island:
             pcb.append(['island'])
@@ -187,7 +181,7 @@ class Zone(object):
         if self.min_thickness:
             pcb.append(['min_thickness', self.min_thickness])
         if self.filled_areas_thickness:
-            cb.append(['filled_areas_thickness', self.filled_areas_thickness])
+            pcb.append(['filled_areas_thickness', self.filled_areas_thickness])
         if self.fill:
             pcb.append(['fill', self.fill])
         if self.keepout:
@@ -268,9 +262,6 @@ class Zone(object):
         if self.filled_areas_thickness != '':
             filled_areas_thickness = 'filled_areas_thickness="' + self.filled_areas_thickness + '" '
         
-        layer = ''
-        if self.layer != '':
-            layer = 'layer="' + self.layer + '" '
         
         layers = ''
         if self.layers != '':
@@ -297,7 +288,6 @@ class Zone(object):
         parameters += ';stroke-width:0.1mm'
         parameters += '" '
         parameters += 'd="M ' + xy_text + ' Z" '
-        parameters += layer
         parameters += layers
         parameters += net
         parameters += net_name
@@ -325,12 +315,6 @@ class Zone(object):
 
         styletag = style[style.find('stroke-width:') + 13:]
         width = styletag[0:styletag.find('mm')]
-
-        if tag.has_attr('layer'):
-            layer = tag['layer']
-        elif tag.parent.has_attr('inkscape:label'):
-            #XML metadata trashed, try to recover from parent tag
-            layer = tag.parent['inkscape:label']
             
         path = parse_path(tag['d'])
         
@@ -346,10 +330,10 @@ class Zone(object):
         xy.append(str(path[0].start.imag / pxToMM))
         pts.append(xy)
 
-        if tag.has_attr('net'):
-            self.net = tag['net']
         if tag.has_attr('layers'):
             self.layers = tag['layers']
+        if tag.has_attr('net'):
+            self.net = tag['net']
         if tag.has_attr('net_name'):
             self.net_name = tag['net_name']
         if tag.has_attr('tstamp'):
@@ -375,4 +359,3 @@ class Zone(object):
 
         self.polygon = pts
         self.width = width
-        self.layer = layer
