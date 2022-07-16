@@ -279,11 +279,7 @@ class Board(object):
         
         for item in self.zone:
             tag = BeautifulSoup(item.To_SVG(), 'html.parser')
-            layer = item.layer
-            if layer:
-                base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
-            else: #KiCad 6 zones
-                base.svg.find('g', {'inkscape:label': 'Zones'}, recursive=False).append(tag)
+            base.svg.find('g', {'inkscape:label': 'Zones'}, recursive=False).append(tag)
                 
         for item in self.metadata:
             tag = BeautifulSoup(Metadata().To_SVG(item), 'html.parser')

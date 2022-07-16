@@ -109,7 +109,7 @@ class Zone(object):
                 self.net_name = item[1]
 
             elif item[0] == 'layers':
-                for layer in item[1]:
+                for layer in item[1:]:
                     self.layers += layer + ' '
                 
             elif item[0] == 'tstamp':
@@ -167,7 +167,7 @@ class Zone(object):
         if self.net_name:
             pcb.append(['net_name', self.net_name])
         if self.layers:
-            pcb.append(['layers', self.layers])
+            pcb.append(['layers'] + self.layers.split())
         if self.island:
             pcb.append(['island'])
         if self.tstamp:
@@ -222,10 +222,16 @@ class Zone(object):
             for xy in self.polygon:
                 xy_text += ' ' + str(float(xy[0]) * pxToMM)
                 xy_text += ',' + str(float(xy[1]) * pxToMM)
-        elif len(self.filled_polygon) > 0:
-            for xy in self.filled_polygon:
-                xy_text += ' ' + str(float(xy[0]) * pxToMM)
-                xy_text += ',' + str(float(xy[1]) * pxToMM)
+
+
+        
+        # We don't really care about accurate fill zones in SVG
+        # elif len(self.filled_polygon) > 0:
+        #     for filled_polygon in self.filled_polygon:
+        #         xy_text = ''
+        #         for xy in filled_polygon:
+        #             xy_text += ' ' + str(float(xy[0]) * pxToMM)
+        #             xy_text += ',' + str(float(xy[1]) * pxToMM)
                         
         
         
@@ -284,7 +290,7 @@ class Zone(object):
             name = 'name="' + self.name + '" '
             
         parameters = '<path style="fill:none;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1'
-        parameters += ';stroke:#' + Colour().Assign(self.layer)
+        parameters += ';stroke:#' + Colour().Assign('')
         parameters += ';stroke-width:0.1mm'
         parameters += '" '
         parameters += 'd="M ' + xy_text + ' Z" '
