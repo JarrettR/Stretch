@@ -350,6 +350,7 @@ class Board(object):
                         arc.From_SVG(tag, path)
                         self.arc.append(arc)
                 
+                
                 elif tag['type'] == "gr_line":
                     paths = parse_path(tag['d'])
 
@@ -376,6 +377,12 @@ class Board(object):
                         curve = Curve()
                         curve.From_SVG(tag)
                         self.gr_curve.append(curve)
+                
+                elif tag['type'] == "gr_poly":
+                    paths = parse_path(tag['d'])
+                    poly = Poly()
+                    poly.From_SVG(tag)
+                    self.gr_poly.append(poly)
                 
                 elif tag['type'] == "zone":
                     paths = parse_path(tag['d'])
