@@ -23,6 +23,12 @@ from .colour import Colour
 #   0 net
 #   1 16
 #   2 Net-(D4-Pad1)
+# 8
+#   0 pinfunction
+#   1 "A"
+# 9
+#   0 pintype
+#   1 "passive"
        
 
 pxToMM = 96 / 25.4 
@@ -41,6 +47,7 @@ class Pad(object):
         self.layers = []
         self.net = []
         self.pinfunction = ''
+        self.pintype = ''
         self.die_length = ''
         self.solder_mask_margin = ''
         self.solder_paste_margin = ''
@@ -98,6 +105,8 @@ class Pad(object):
                 self.net = item[1:] 
             if item[0] == 'pinfunction':
                 self.pinfunction = item[1] 
+            if item[0] == 'pintype':
+                self.pintype = item[1] 
             if item[0] == 'die_length':
                 self.die_length = item[1] 
             if item[0] == 'solder_mask_margin':
@@ -147,6 +156,10 @@ class Pad(object):
         pcb.append(['layers'] + self.layers)
         if len(self.net) > 0:
             pcb.append(['net'] + self.net)
+        if len(self.pinfunction) > 0:
+            pcb.append(['pinfunction', self.pinfunction])
+        if len(self.pintype) > 0:
+            pcb.append(['pintype', self.pintype])
 
         if self.tstamp:
             pcb.append(['tstamp', self.tstamp])
@@ -179,6 +192,14 @@ class Pad(object):
 
         if self.drill:
             drill = 'drill="' + self.drill + '" '
+
+        pintype = ''
+        if self.pintype:
+            pintype = 'pintype="' + self.pintype + '" '
+
+        pinfunction = ''
+        if self.pinfunction:
+            pinfunction = 'pinfunction="' + self.pinfunction + '" '
 
         if len(self.net) > 1:
             net = 'netid="' + self.net[0] + '" '
@@ -245,6 +266,8 @@ class Pad(object):
         parameters += 'shape="' + self.shape + '" '
         parameters += rotate
         parameters += drill
+        parameters += pinfunction
+        parameters += pintype
         parameters += 'layers="' + ','.join(self.layers) + '" '
         parameters += '/>'
 
@@ -304,6 +327,12 @@ class Pad(object):
 
         if tag.has_attr('drill'):
             self.drill = tag['drill']
+
+        if tag.has_attr('pintype'):
+            self.pintype = tag['pintype']
+
+        if tag.has_attr('pinfunction'):
+            self.pinfunction = tag['pinfunction']
             
         self.layers = tag['layers'].split(',')
             
