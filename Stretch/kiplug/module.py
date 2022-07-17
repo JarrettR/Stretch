@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 import sys
+import base64
 from .svgpath import parse_path
 
 from .arc import Arc
@@ -83,7 +84,7 @@ class Module(object):
         self.at = []
         self.descr = ''
         self.tags = ''
-        self.property = ''
+        self.property = []
         self.path = ''
         self.autoplace_cost90 = ''
         self.autoplace_cost180 = ''
@@ -155,7 +156,7 @@ class Module(object):
                 self.tags = item[1]
                 
             if item[0] == 'property':
-                self.property = item[1]
+                self.property.append(item[1:])
                 
             if item[0] == 'path':
                 self.path = item[1]
@@ -272,7 +273,8 @@ class Module(object):
             module.append(['tags', self.tags])
 
         if self.property:
-            module.append(['property', self.property])
+            for prop in self.property:
+                module.append(['property'] + prop)
 
         # if self.path:
         #     module.append(['tstamp', self.tstamp])
@@ -389,8 +391,11 @@ class Module(object):
         if self.tags != '':
             svg.g['tags'] = self.tags
 
-        if self.property != '':
-            svg.g['property'] = self.property
+        if len(self.property) > 0:
+            propstr = ''
+            for prop in self.property:
+                propstr += "{}:{} ".format(str(base64.b64encode(prop[0].encode("utf-8")), "utf-8"), str(base64.b64encode(prop[1].encode("utf-8")), "utf-8"))
+            svg.g['property'] = propstr
 
         if self.path != '':
             svg.g['path'] = self.path
@@ -494,6 +499,12 @@ class Module(object):
 
         if tag.has_attr('tedit'):
             self.tedit = tag['tedit']
+
+        if tag.has_attr('property'):
+            proplist = tag['property'].split()
+            for prop in proplist:
+                k, v = prop.split(":")
+                self.property.append([str(base64.b64decode(k), "utf-8"), str(base64.b64decode(v), "utf-8")])
 
         if tag.has_attr('tstamp'):
             self.tstamp = tag['tstamp']
