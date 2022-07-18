@@ -174,6 +174,15 @@ class Arc(object):
             self.tstamp = tag['tstamp']
 
     def calcCirclePath(self, a, b, c):
+        def dist(a, b):
+            return math.sqrt(math.pow(a[0] - b[0], 2) + math.pow(a[1] - b[1], 2))
+
+
+        A = dist(b, c)
+        B = dist(c, a)
+        C = dist(a, b)
+
+        angle = math.acos((A*A + B*B - C*C)/(2*A*B))
 
         center = [0,0]
         
@@ -189,11 +198,14 @@ class Arc(object):
             det = 1/det
             center[0] = (bc*(b[1]-c[1])-cd*(a[1]-b[1]))*det
             center[1] = ((a[0]-b[0])*cd-(b[0]-c[0])*bc)*det
-
         r = math.sqrt((b[0]-center[0])*(b[0]-center[0])+(b[1]-center[1])*(b[1]-center[1]))
 
+        #large arc flag
+        if math.pi/2 > angle:
+            laf = '1'
+        else:
+            laf = '0'
 
-        laf = '0'
         #sweep flag
         if ((b[0] - a[0])*(c[1] - a[1]) - (b[1] - a[1])*(c[0] - a[0])) < 0:
             saf = '1'
