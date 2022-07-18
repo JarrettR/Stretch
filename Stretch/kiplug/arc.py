@@ -113,11 +113,8 @@ class Arc(object):
         # m 486.60713,151.00183 a 9.5535717,9.5535717 0 0 1 -9.55357,9.55357
         # (rx ry x-axis-rotation large-arc-flag sweep-flag x y)
         
-        #What KiCad calls 'start' is actually the arc centre,
-        #'end' is actually arc/svg start
-        #SVG end is actual end, we need to calculate centre instead
         start = [(float(self.start[0]) * pxToMM), (float(self.start[1]) * pxToMM)]
-        mid = [(float(self.mid[0]) * pxToMM), (float(self.start[1]) * pxToMM)]
+        mid = [(float(self.mid[0]) * pxToMM), (float(self.mid[1]) * pxToMM)]
         end = [(float(self.end[0]) * pxToMM), (float(self.end[1]) * pxToMM)]
 
         a = self.calcCirclePath(start, end, mid)
@@ -176,29 +173,27 @@ class Arc(object):
         if tag.has_attr('tstamp') == True:
             self.tstamp = tag['tstamp']
 
-    # Thx Adam Pearce https://stackoverflow.com/a/43825818
     def calcCirclePath(self, a, b, c):
-        def dist(a, b):
-            return math.sqrt(math.pow(a[0] - b[0], 2) + math.pow(a[1] - b[1], 2))
 
+        center = [0,0]
+        
+        temp = b[0]*b[0]+b[1]*b[1]
+        bc = (a[0]*a[0] + a[1]*a[1] - temp)/2.0
+        cd = (temp - c[0]*c[0] - c[1]*c[1])/2.0
+        det = (a[0]-b[0])*(b[1]-c[1])-(b[0]-c[0])*(a[1]-b[1])
 
-        A = dist(b, c)
-        B = dist(c, a)
-        C = dist(a, b)
-
-        angle = math.acos((A*A + B*B - C*C)/(2*A*B))
-
-        #calc radius of circle
-        K = 0.5*A*B*math.sin(angle)
-        r = A*B*C/4/K
-        # r = math.round(r*1000)/1000
-
-        #large arc flag
-        if math.pi/2 > angle:
-            laf = '1'
+        if (abs(det) < 1.0e-6):
+            center[0] = 1.0
+            center[1] = 1.0
         else:
-            laf = '0'
+            det = 1/det
+            center[0] = (bc*(b[1]-c[1])-cd*(a[1]-b[1]))*det
+            center[1] = ((a[0]-b[0])*cd-(b[0]-c[0])*bc)*det
 
+        r = math.sqrt((b[0]-center[0])*(b[0]-center[0])+(b[1]-center[1])*(b[1]-center[1]))
+
+
+        laf = '0'
         #sweep flag
         if ((b[0] - a[0])*(c[1] - a[1]) - (b[1] - a[1])*(c[0] - a[0])) < 0:
             saf = '1'
