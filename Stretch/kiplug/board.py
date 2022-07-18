@@ -313,12 +313,15 @@ class Board(object):
                         module = Module()
                         module.From_SVG(moduletag)
                         self.module.append(module)
-                
-                elif tag['type'] == "layerzone":
-                    for zonetag in tag.find_all('g'):
-                        zone = Zone()
-                        zone.From_SVG(zonetag)
-                        self.zone.append(zone)
+                        
+                # Pass on solving this here
+                # elif tag['type'] == "layerzone":
+
+                    # for zonetag in tag.find_all('g'):
+                    #     paths = parse_path(zonetag['d'])
+                    #     zone = Zone()
+                    #     zone.From_SVG(zonetag, paths)
+                    #     self.zone.append(zone)
 
         for tag in svg.svg.find_all('text'):
             if tag.has_attr('type') == True:

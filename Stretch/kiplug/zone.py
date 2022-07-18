@@ -108,6 +108,9 @@ class Zone(object):
             elif item[0] == 'net_name':
                 self.net_name = item[1]
 
+            elif item[0] == 'layer':
+                self.layers = item[1]
+
             elif item[0] == 'layers':
                 for layer in item[1:]:
                     self.layers += layer + ' '
