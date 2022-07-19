@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import sys
 import base64
+import math
 from .svgpath import parse_path
 
 from .arc import Arc
@@ -477,20 +478,38 @@ class Module(object):
 
         
     def From_SVG(self, tag):
-        # print(tag)
-        transform = tag['transform']
+        transform = tag['transform'].strip()
         
-        translate = transform[transform.find('translate(') + 10:]
-        translate = translate[0:translate.find(')')]
-        x = translate[0:translate.find(',')]
-        y = translate[len(x) + 1:]
-        x = float(x) / pxToMM
-        y = float(y) / pxToMM
+        x = 0.0
+        y = 0.0
+        if 'translate(' in transform:
+            translate = transform[transform.find('translate(') + 10:-1]
+            translate = translate[0:translate.find(')')]
+            x, y = translate.split(',')
+            x = float(x) / pxToMM
+            y = float(y) / pxToMM
 
-        rotate = 0
+        rotate = 0.0
         if 'rotate(' in transform:
-            rotate = transform[transform.find('rotate(') + 7:]
-            rotate = float(rotate[0:-1]) * -1
+            rotate = transform[transform.find('rotate(') + 7:-1]
+            if ',' in rotate:
+                rotate, x_zero, y_zero = rotate.split(',')
+                rotate = float(rotate)
+                x_zero = float(x_zero) / pxToMM
+                y_zero = float(y_zero) / pxToMM
+                #Rotate along nonzero rotation axis
+                hyp = math.sqrt(x_zero*x_zero + y_zero*y_zero)
+                angle = -1.0 * math.atan2(-1.0 * y_zero, -1.0 * x_zero)
+
+                angle -= math.radians(rotate)
+                y_offset = math.sin(angle) * hyp
+                x_offset = math.cos(angle) * hyp
+
+                x = x_zero + x_offset
+                y = y_zero - y_offset
+                
+            rotate = float(rotate) * -1
+
 
         self.symbol = tag['name']
                 
