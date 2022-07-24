@@ -33,17 +33,19 @@ CONSTRUCTOR_TAKES_STRICT = major == 3 and minor == 2 and release >= 3
 CONSTRUCTOR_STRICT_IS_DEPRECATED = major == 3 and minor == 3
 CONSTRUCTOR_TAKES_CONVERT_CHARREFS = major == 3 and minor >= 4
 
-
-from bs4.element import (
+# bspy3
+from ..element import (
     CData,
     Comment,
     Declaration,
     Doctype,
     ProcessingInstruction,
     )
-from bs4.dammit import EntitySubstitution, UnicodeDammit
+# bspy3
+from ..dammit import EntitySubstitution, UnicodeDammit
 
-from bs4.builder import (
+# bspy3
+from ..builder import (
     HTML,
     HTMLTreeBuilder,
     STRICT,
