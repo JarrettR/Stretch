@@ -1,5 +1,5 @@
 import io, os
-from bs4 import BeautifulSoup
+from ..bspy3 import BeautifulSoup
 import json
 import re
 

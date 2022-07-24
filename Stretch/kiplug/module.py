@@ -1,4 +1,4 @@
-from bs4 import BeautifulSoup
+from ..bspy3 import BeautifulSoup
 import sys
 import base64
 import math

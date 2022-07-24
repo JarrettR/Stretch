@@ -1,4 +1,4 @@
-from bs4 import BeautifulSoup
+from ..bspy3 import BeautifulSoup
 import json
 import sys
 from .svgpath import parse_path
@@ -241,7 +241,25 @@ class Board(object):
         for item in self.module:
             tag = item.To_SVG(hiddenLayers = hiddenLayers)
             # layer = item.layer
-            base.svg.find('g', {'inkscape:label': 'Modules'}, recursive=False).append(tag)
+            # print(base.svg)
+            # print('---')
+            # print(base.svg.find('g', {'inkscape:label': 'Modules'}, recursive=False))
+            if base.svg.find('g', {'inkscape:label': 'Modules'}, recursive=False):
+                base.svg.find('g', {'inkscape:label': 'Modules'}, recursive=False).append(tag)
+            else:
+                print(base.svg)
+                print('---')
+                print(base.svg.find('g', {'inkscape:label': 'Modules'}, recursive=False))
+                print(base.svg.find('g', {'inkscape:label': 'Modules'}, recursive=True))
+                print('--->')
+
+            # try:
+            #     base.svg.find('g', {'inkscape:label': 'Modules'}, recursive=False).append(tag)
+            # except:
+            #     print(base.svg)
+            #     print('---')
+            #     print(base.svg.find('g', {'inkscape:label': 'Modules'}, recursive=False))
+
             
         for item in self.gr_poly:
             tag = BeautifulSoup(item.To_SVG(), 'html.parser')
