@@ -1,6 +1,11 @@
-from ..bspy3 import BeautifulSoup
-import json
 import sys
+
+if sys.version_info[0] == 3:
+    from ..bspy3 import BeautifulSoup
+else:
+    from ..bspy2 import BeautifulSoup
+    
+import json
 from .svgpath import parse_path
 
 from .arc import Arc
