@@ -16,7 +16,7 @@ except ImportError, e:
         'The soupsieve package is not installed. CSS selectors cannot be used.'
     )
 
-from bs4.formatter import (
+from ..bspy2.formatter import (
     Formatter,
     HTMLFormatter,
     XMLFormatter,
@@ -380,7 +380,7 @@ class PageElement(object):
             and not isinstance(new_child, NavigableString)):
             new_child = NavigableString(new_child)
 
-        from bs4 import BeautifulSoup
+        from ..bspy2 import BeautifulSoup
         if isinstance(new_child, BeautifulSoup):
             # We don't want to end up with a situation where one BeautifulSoup
             # object contains another. Insert the children one at a time.
