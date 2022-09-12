@@ -236,7 +236,15 @@ class Board(object):
         for item in self.segment:
             tag = BeautifulSoup(item.To_SVG(), 'html.parser')
             layer = item.layer
-            base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
+            
+            if base.svg.find('g', {'inkscape:label': layer}, recursive=False):
+                base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
+            else:
+                print(base.svg)
+                print('---')
+                print(base.svg.find('g', {'inkscape:label': layer}, recursive=False))
+                print(base.svg.find('g', {'inkscape:label': layer}, recursive=True))
+                print('--->')
                         
         for item in self.arc:
             tag = BeautifulSoup(item.To_SVG(), 'html.parser')
