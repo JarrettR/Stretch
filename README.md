@@ -48,6 +48,7 @@ The workflow is intended to be seamless and painless to go back and forth.
 - Install dependencies:
     - On Windows using `D:\Programs\KiCad\bin\python.exe -m pip install bs4` as administrator (but substituting your own KiCad\bin path)
     - On Linux using `sudo python3 -m pip install bs4`
+    - On macOS using `/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/3.8/bin/python3 -m pip install bs4` (change version to 2.7 for KiCad 5)
 - Open up a PCB and then in Pcbnew, got to `Tools->External Plugins...->Refresh Plugins`
 - This has been tested on KiCad 6. For a KiCad 5 legacy version, check the releases.
 
