@@ -1,6 +1,11 @@
-from bs4 import BeautifulSoup
-import json
 import sys
+
+if sys.version_info[0] == 3:
+    from ..bspy3 import BeautifulSoup
+else:
+    from ..bspy2 import BeautifulSoup
+    
+import json
 from .svgpath import parse_path
 
 from .arc import Arc
@@ -231,7 +236,15 @@ class Board(object):
         for item in self.segment:
             tag = BeautifulSoup(item.To_SVG(), 'html.parser')
             layer = item.layer
-            base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
+            
+            if base.svg.find('g', {'inkscape:label': layer}, recursive=False):
+                base.svg.find('g', {'inkscape:label': layer}, recursive=False).append(tag)
+            else:
+                print(base.svg)
+                print('---')
+                print(base.svg.find('g', {'inkscape:label': layer}, recursive=False))
+                print(base.svg.find('g', {'inkscape:label': layer}, recursive=True))
+                print('--->')
                         
         for item in self.arc:
             tag = BeautifulSoup(item.To_SVG(), 'html.parser')
@@ -241,7 +254,25 @@ class Board(object):
         for item in self.module:
             tag = item.To_SVG(hiddenLayers = hiddenLayers)
             # layer = item.layer
-            base.svg.find('g', {'inkscape:label': 'Modules'}, recursive=False).append(tag)
+            # print(base.svg)
+            # print('---')
+            # print(base.svg.find('g', {'inkscape:label': 'Modules'}, recursive=False))
+            if base.svg.find('g', {'inkscape:label': 'Modules'}, recursive=False):
+                base.svg.find('g', {'inkscape:label': 'Modules'}, recursive=False).append(tag)
+            else:
+                print(base.svg)
+                print('---')
+                print(base.svg.find('g', {'inkscape:label': 'Modules'}, recursive=False))
+                print(base.svg.find('g', {'inkscape:label': 'Modules'}, recursive=True))
+                print('--->')
+
+            # try:
+            #     base.svg.find('g', {'inkscape:label': 'Modules'}, recursive=False).append(tag)
+            # except:
+            #     print(base.svg)
+            #     print('---')
+            #     print(base.svg.find('g', {'inkscape:label': 'Modules'}, recursive=False))
+
             
         for item in self.gr_poly:
             tag = BeautifulSoup(item.To_SVG(), 'html.parser')

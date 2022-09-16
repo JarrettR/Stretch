@@ -33,12 +33,14 @@ class Stretch(pcbnew.ActionPlugin, object):
         sys.stdout = open(os.path.join(os.path.dirname(pcb_filename), "out.log"), 'w')
         print('Begin Stretch debug')
 
-        #If BS4 not installed:
-        try:
-            import bs4
-        except ImportError:
-            pcbnew._pcbnew.ProcessExecute('pip install bs4')
-        #todo: test!
+        # from bs4 import BeautifulSoup
+        print('Import BS4')
+
+        if sys.version_info[0] == 3:
+            from ..bspy3 import BeautifulSoup
+        else:
+            from ..bspy2 import BeautifulSoup
+
 
         if self.tool == "to_svg":
             from .svg_writer import SvgWrite

@@ -1,5 +1,12 @@
 import io, os
-from bs4 import BeautifulSoup
+import sys
+
+if sys.version_info[0] == 3:
+    from ..bspy3 import BeautifulSoup
+else:
+    from ..bspy2 import BeautifulSoup
+
+
 import json
 import re
 

@@ -1,4 +1,5 @@
-from bs4.dammit import EntitySubstitution
+# bspy3
+from .dammit import EntitySubstitution
 
 class Formatter(EntitySubstitution):
     """Describes a strategy to use when outputting a parse tree to a string.
@@ -83,7 +84,7 @@ class Formatter(EntitySubstitution):
         """
         if not self.entity_substitution:
             return ns
-        from element import NavigableString
+        from .element import NavigableString
         if (isinstance(ns, NavigableString)
             and ns.parent is not None
             and ns.parent.name in self.cdata_containing_tags):

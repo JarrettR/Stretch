@@ -7,13 +7,15 @@ __all__ = [
 
 import warnings
 import re
-from bs4.builder import (
+# bspy3
+from ..builder import (
     PERMISSIVE,
     HTML,
     HTML_5,
     HTMLTreeBuilder,
     )
-from bs4.element import (
+# bspy3
+from ..element import (
     NamespacedAttribute,
     nonwhitespace_re,
 )
@@ -22,7 +24,8 @@ from html5lib.constants import (
     namespaces,
     prefixes,
     )
-from bs4.element import (
+# bspy3
+from ..element import (
     Comment,
     Doctype,
     NavigableString,
@@ -33,7 +36,7 @@ try:
     # Pre-0.99999999
     from html5lib.treebuilders import _base as treebuilder_base
     new_html5lib = False
-except ImportError, e:
+except ImportError as e:
     # 0.99999999 and up
     from html5lib.treebuilders import base as treebuilder_base
     new_html5lib = True
@@ -79,7 +82,7 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
         parser = html5lib.HTMLParser(tree=self.create_treebuilder)
         self.underlying_builder.parser = parser
         extra_kwargs = dict()
-        if not isinstance(markup, unicode):
+        if not isinstance(markup, str):
             if new_html5lib:
                 extra_kwargs['override_encoding'] = self.user_specified_encoding
             else:
@@ -87,13 +90,13 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
         doc = parser.parse(markup, **extra_kwargs)
         
         # Set the character encoding detected by the tokenizer.
-        if isinstance(markup, unicode):
+        if isinstance(markup, str):
             # We need to special-case this because html5lib sets
             # charEncoding to UTF-8 if it gets Unicode input.
             doc.original_encoding = None
         else:
             original_encoding = parser.tokenizer.stream.charEncoding[0]
-            if not isinstance(original_encoding, basestring):
+            if not isinstance(original_encoding, str):
                 # In 0.99999999 and up, the encoding is an html5lib
                 # Encoding object. We want to use a string for compatibility
                 # with other tree builders.
@@ -110,7 +113,7 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
 
     def test_fragment_to_document(self, fragment):
         """See `TreeBuilder`."""
-        return u'<html><head></head><body>%s</body></html>' % fragment
+        return '<html><head></head><body>%s</body></html>' % fragment
 
 
 class TreeBuilderForHtml5lib(treebuilder_base.TreeBuilder):
@@ -120,7 +123,7 @@ class TreeBuilderForHtml5lib(treebuilder_base.TreeBuilder):
         if soup:
             self.soup = soup
         else:
-            from bs4 import BeautifulSoup
+            from .. import BeautifulSoup
             # TODO: Why is the parser 'html.parser' here? To avoid an
             # infinite loop?
             self.soup = BeautifulSoup(
@@ -166,7 +169,7 @@ class TreeBuilderForHtml5lib(treebuilder_base.TreeBuilder):
         return TextNode(Comment(data), self.soup)
 
     def fragmentClass(self):
-        from bs4 import BeautifulSoup
+        from .. import BeautifulSoup
         # TODO: Why is the parser 'html.parser' here? To avoid an
         # infinite loop?
         self.soup = BeautifulSoup("", "html.parser")
@@ -184,7 +187,7 @@ class TreeBuilderForHtml5lib(treebuilder_base.TreeBuilder):
         return treebuilder_base.TreeBuilder.getFragment(self).element
 
     def testSerializer(self, element):
-        from bs4 import BeautifulSoup
+        from .. import BeautifulSoup
         rv = []
         doctype_re = re.compile(r'^(.*?)(?: PUBLIC "(.*?)"(?: "(.*?)")?| SYSTEM "(.*?)")?$')
 
@@ -217,7 +220,7 @@ class TreeBuilderForHtml5lib(treebuilder_base.TreeBuilder):
                 rv.append("|%s<%s>" % (' ' * indent, name))
                 if element.attrs:
                     attributes = []
-                    for name, value in element.attrs.items():
+                    for name, value in list(element.attrs.items()):
                         if isinstance(name, NamespacedAttribute):
                             name = "%s %s" % (prefixes[name.namespace], name.name)
                         if isinstance(value, list):
@@ -272,7 +275,7 @@ class Element(treebuilder_base.Node):
 
     def appendChild(self, node):
         string_child = child = None
-        if isinstance(node, basestring):
+        if isinstance(node, str):
             # Some other piece of code decided to pass in a string
             # instead of creating a TextElement object to contain the
             # string.
@@ -289,7 +292,7 @@ class Element(treebuilder_base.Node):
             child = node.element
             node.parent = self
 
-        if not isinstance(child, basestring) and child.parent is not None:
+        if not isinstance(child, str) and child.parent is not None:
             node.element.extract()
 
         if (string_child is not None and self.element.contents
@@ -302,7 +305,7 @@ class Element(treebuilder_base.Node):
             old_element.replace_with(new_element)
             self.soup._most_recent_element = new_element
         else:
-            if isinstance(node, basestring):
+            if isinstance(node, str):
                 # Create a brand new NavigableString from this string.
                 child = self.soup.new_string(node)
 
@@ -340,7 +343,7 @@ class Element(treebuilder_base.Node):
 
             self.soup.builder._replace_cdata_list_attribute_values(
                 self.name, attributes)
-            for name, value in attributes.items():
+            for name, value in list(attributes.items()):
                 self.element[name] = value
 
             # The attributes may contain variables that need substitution.

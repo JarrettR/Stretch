@@ -4,11 +4,11 @@
 __license__ = "MIT"
 
 import cProfile
-from StringIO import StringIO
-from HTMLParser import HTMLParser
-import bs4
-from bs4 import BeautifulSoup, __version__
-from bs4.builder import builder_registry
+from io import StringIO
+from html.parser import HTMLParser
+import bspy3
+from bspy3 import BeautifulSoup, __version__
+from bspy3.builder import builder_registry
 
 import os
 import pstats
@@ -25,8 +25,8 @@ def diagnose(data):
     :param data: A string containing markup that needs to be explained.
     :return: None; diagnostics are printed to standard output.
     """
-    print("Diagnostic running on Beautiful Soup %s" % __version__)
-    print("Python version %s" % sys.version)
+    print(("Diagnostic running on Beautiful Soup %s" % __version__))
+    print(("Python version %s" % sys.version))
 
     basic_parsers = ["html.parser", "html5lib", "lxml"]
     for name in basic_parsers:
@@ -35,16 +35,16 @@ def diagnose(data):
                 break
         else:
             basic_parsers.remove(name)
-            print(
+            print((
                 "I noticed that %s is not installed. Installing it may help." %
-                name)
+                name))
 
     if 'lxml' in basic_parsers:
         basic_parsers.append("lxml-xml")
         try:
             from lxml import etree
-            print("Found lxml version %s" % ".".join(map(str,etree.LXML_VERSION)))
-        except ImportError, e:
+            print(("Found lxml version %s" % ".".join(map(str,etree.LXML_VERSION))))
+        except ImportError as e:
             print(
                 "lxml is not installed or couldn't be imported.")
 
@@ -52,21 +52,21 @@ def diagnose(data):
     if 'html5lib' in basic_parsers:
         try:
             import html5lib
-            print("Found html5lib version %s" % html5lib.__version__)
-        except ImportError, e:
+            print(("Found html5lib version %s" % html5lib.__version__))
+        except ImportError as e:
             print(
                 "html5lib is not installed or couldn't be imported.")
 
     if hasattr(data, 'read'):
         data = data.read()
     elif data.startswith("http:") or data.startswith("https:"):
-        print('"%s" looks like a URL. Beautiful Soup is not an HTTP client.' % data)
+        print(('"%s" looks like a URL. Beautiful Soup is not an HTTP client.' % data))
         print("You need to use some other library to get the document behind the URL, and feed that document to Beautiful Soup.")
         return
     else:
         try:
             if os.path.exists(data):
-                print('"%s" looks like a filename. Reading data from the file.' % data)
+                print(('"%s" looks like a filename. Reading data from the file.' % data))
                 with open(data) as fp:
                     data = fp.read()
         except ValueError:
@@ -76,19 +76,19 @@ def diagnose(data):
         print("")
 
     for parser in basic_parsers:
-        print("Trying to parse your markup with %s" % parser)
+        print(("Trying to parse your markup with %s" % parser))
         success = False
         try:
             soup = BeautifulSoup(data, features=parser)
             success = True
-        except Exception, e:
-            print("%s could not parse the markup." % parser)
+        except Exception as e:
+            print(("%s could not parse the markup." % parser))
             traceback.print_exc()
         if success:
-            print("Here's what %s did with the markup:" % parser)
-            print(soup.prettify())
+            print(("Here's what %s did with the markup:" % parser))
+            print((soup.prettify()))
 
-        print("-" * 80)
+        print(("-" * 80))
 
 def lxml_trace(data, html=True, **kwargs):
     """Print out the lxml events that occur during parsing.
@@ -104,7 +104,7 @@ def lxml_trace(data, html=True, **kwargs):
     """
     from lxml import etree
     for event, element in etree.iterparse(StringIO(data), html=html, **kwargs):
-        print("%s, %4s, %s" % (event, element.tag, element.text))
+        print(("%s, %4s, %s" % (event, element.tag, element.text)))
 
 class AnnouncingParser(HTMLParser):
     """Subclass of HTMLParser that announces parse events, without doing
@@ -193,9 +193,9 @@ def rdoc(num_elements=1000):
 
 def benchmark_parsers(num_elements=100000):
     """Very basic head-to-head performance benchmark."""
-    print("Comparative parser benchmark on Beautiful Soup %s" % __version__)
+    print(("Comparative parser benchmark on Beautiful Soup %s" % __version__))
     data = rdoc(num_elements)
-    print("Generated a large invalid HTML document (%d bytes)." % len(data))
+    print(("Generated a large invalid HTML document (%d bytes)." % len(data)))
     
     for parser in ["lxml", ["lxml", "html"], "html5lib", "html.parser"]:
         success = False
@@ -204,24 +204,24 @@ def benchmark_parsers(num_elements=100000):
             soup = BeautifulSoup(data, parser)
             b = time.time()
             success = True
-        except Exception, e:
-            print("%s could not parse the markup." % parser)
+        except Exception as e:
+            print(("%s could not parse the markup." % parser))
             traceback.print_exc()
         if success:
-            print("BS4+%s parsed the markup in %.2fs." % (parser, b-a))
+            print(("BS4+%s parsed the markup in %.2fs." % (parser, b-a)))
 
     from lxml import etree
     a = time.time()
     etree.HTML(data)
     b = time.time()
-    print("Raw lxml parsed the markup in %.2fs." % (b-a))
+    print(("Raw lxml parsed the markup in %.2fs." % (b-a)))
 
     import html5lib
     parser = html5lib.HTMLParser()
     a = time.time()
     parser.parse(data)
     b = time.time()
-    print("Raw html5lib parsed the markup in %.2fs." % (b-a))
+    print(("Raw html5lib parsed the markup in %.2fs." % (b-a)))
 
 def profile(num_elements=100000, parser="lxml"):
     """Use Python's profiler on a randomly generated document."""

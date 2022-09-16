@@ -33,22 +33,18 @@ This was written to address some frustrations with other "artistic" PCB workflow
 KiCad and other traditional ECAD software has poor support for curved lines, importing and processing of images/drawings, and many other features that can be expected in proper vector software.
 
 
-Tools intended to bridge the gap are also lacking. [PCBmodE](https://github.com/boldport/pcbmode) is the probably the best tool out there from a pure PCB art standpoint, but there is no schematic tool, and with that, no ability to handle extremely complex, functional PCBs.
+Tools intended to bridge the gap are also lacking. [PCBmodE](https://github.com/boldport/pcbmode) is the probably the best tool out there from a pure PCB art standpoint, and it is excellent, but there is no schematic tool. And with that, no ability to handle extremely complex, functional PCBs.
 
 KiCad has a tool to export to SVG. SVG-To-Shenzen is a tool to convert SVG files into KiCad files. Both of these are single-direction tools.
 
 Stretch goes both ways. Much as the ideal schematic->PCB capture workflow does not exist, the PCB layout aspect must go hand-in-hand with the art aspect.
 
-Users can start by laying out a PCB, then bring it into Inkscape to arrange a thousand LEDs into a flower arrangement, then bring it back into KiCad to lay out traces, back into Inkscape to curve the traces, back into KiCad to change their microcontroller and few pin assignments, back into Inkscape to draw out some silkscreem patterns, back into KiCad to run DRC, and so on.
+Users can start by drawing a schematic and laying out a PCB, then bring it into Inkscape to arrange a thousand LEDs into a flower arrangement, then bring it back into KiCad to lay out traces, back into Inkscape to curve the traces, back into KiCad to change their microcontroller and few pin assignments, back into Inkscape to draw out some silkscreem patterns, back into KiCad to run DRC, and so on.
 The workflow is intended to be seamless and painless to go back and forth.
 
 ## Installation
 
-- Copy the Stretch folder into your KiCad plugin folder
-- Install dependencies:
-    - On Windows using `D:\Programs\KiCad\bin\python.exe -m pip install bs4` as administrator (but substituting your own KiCad\bin path)
-    - On Linux using `sudo python3 -m pip install bs4`
-    - On macOS using `/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/3.8/bin/python3 -m pip install bs4` (change version to 2.7 for KiCad 5)
+- Copy this main Stretch folder into your KiCad plugin folder at `Tools->External Plugins...->Open Plugin Directory`
 - Open up a PCB and then in Pcbnew, got to `Tools->External Plugins...->Refresh Plugins`
 - This has been tested on KiCad 6. For a KiCad 5 legacy version, check the releases.
 
@@ -75,11 +71,11 @@ Fonts will look different in your vector software than in KiCad. This includes p
 
 Closing the PCB window and opening it again is annoying - There is no way to programmatically reload it from disk, as of KiCad 5. Perhaps rebuilding the existing PCB from file using the API is possible, or KiCad 6 has added some other method.
 
-Metadata that doesn't need to be processed, or do not yet have processors written are still stored. They are unchanged and hidden in the SVG so they can be imported properly back into the PCB.
+Metadata that doesn't need to be processed, or do not yet have processors written are still stored. They are unchanged and stored in the SVG so they can be imported properly back into the PCB.
 
 Most data is processed properly! Diffs on some mildly complicated 4-layer boards are coming back clean.
 
-This is still kind of a hack. Obviously, save and backup everything before using this, and **check check check** your gerbers before purchasing anything.
+This is still kind of a hack. Obviously, save and backup everything before using this, and **check check check** your gerbers before purchasing anything. One common failure mode is that *(Stretch down to PCB)* will generate a corrupt/invalid PCB, and then you won't be able to open it in KiCad. When you can't open it, you can't click that down arrow. After fixing the issue (in either Stretch or your SVG), the current workaround is just to replace the PCB file with literally any one that works in your OS file manager so you can open it and hit that arrow.
 
 
-I am happy to accept issues, or pull requests, and example PCBs that break the software. I may be slow to fix issues on myself, so feel free to dive in yourself!
+I am happy to accept issues, or pull requests, and example PCBs that break the software. I may be slow to fix issues by myself, so feel free to dive in yourself!

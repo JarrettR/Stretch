@@ -134,7 +134,9 @@ class Zone(object):
                 self.filled_areas_thickness = item[1]
 
             elif item[0] == 'fill':
-                self.fill = item[1]
+                for x in item[1:]:
+                    if type(x) == str:
+                        self.fill = x
 
             elif item[0] == 'keepout':
                 self.keepout = item[1]
