@@ -1,4 +1,4 @@
-import os
+import os, shutil
 from datetime import datetime
 
 import pcbnew
@@ -26,6 +26,37 @@ class Stretch(pcbnew.ActionPlugin, object):
 
         self.svg_file_name = 'out.svg'
 
+    def Backup(self, filename):
+        # Backups are for when the plugin or the person does an oopsie
+        # Running Stretch-from-SVG on a main file will act normally
+        # but also create a filename.stretch_bkup.kicad_pcb copy beforehand.
+        # Running Stretch-from-SVG on a backup will leave the backup untouched
+        # and overwrite the main file with the new SVG->PCB data
+
+        head, tail = os.path.split(filename)
+        extension_name = ".kicad_pcb"
+        backup_name = ".stretch_bkup"
+
+        base_filename, ext = os.path.splitext(tail)
+        if ext == extension_name:
+            base_filename, bckup = os.path.splitext(base_filename)
+            if bckup == backup_name:
+                # this is already a backup, return filename without backup suffix
+                return os.path.join(head, base_filename + extension_name)
+            else:
+                # copy file to backup, then return original filename unchanged
+                dst_file = os.path.join(head, base_filename + backup_name + extension_name)
+
+                if os.path.exists(dst_file):
+                    os.remove(dst_file)
+                shutil.move(filename, dst_file)
+
+                return filename
+        else:
+            #This is an error condition
+            print('Unrecognised extension: ', filename, tail, base_filename, ext)
+            return filename
+
     def Run(self):
         b = pcbnew.GetBoard()
         pcb_filename = b.GetFileName()
@@ -49,6 +80,7 @@ class Stretch(pcbnew.ActionPlugin, object):
         elif self.tool == "to_pcb":
             from .pcb_writer import PcbWrite
             a = PcbWrite()
+            pcb_filename = self.Backup(pcb_filename)
             a.Run_Plugin(pcb_filename, self.svg_file_name)
             pcbnew.Refresh()
         sys.stdout.close()
