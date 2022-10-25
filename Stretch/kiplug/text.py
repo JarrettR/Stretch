@@ -82,26 +82,26 @@ class Text(object):
             if type(item) == str:
                 if item == 'hide':
                     self.hide = True
+            else:
+                if item[0] == 'at':
+                    self.at = item[1:]
+                    
+                if item[0] == 'layer':
+                    self.layer = item[1]
+                    
+                if item[0] == 'tstamp':
+                    self.tstamp = item[1]
 
-            if item[0] == 'at':
-                self.at = item[1:]
-                
-            if item[0] == 'layer':
-                self.layer = item[1]
-                
-            if item[0] == 'tstamp':
-                self.tstamp = item[1]
-
-            if item[0] == 'effects':
-                for effect in item[1:]:
-                    if effect[0] == 'font':
-                        for param in effect[1:]:
-                            if param[0] == 'size':
-                                self.size = [param[1], param[2]]
-                            if param[0] == 'thickness':
-                                self.thickness = param[1]
-                    elif effect[0] == 'justify':
-                        self.justify = effect[1] 
+                if item[0] == 'effects':
+                    for effect in item[1:]:
+                        if effect[0] == 'font':
+                            for param in effect[1:]:
+                                if param[0] == 'size':
+                                    self.size = [param[1], param[2]]
+                                if param[0] == 'thickness':
+                                    self.thickness = param[1]
+                        elif effect[0] == 'justify':
+                            self.justify = effect[1] 
 
 
     def To_PCB(self):
