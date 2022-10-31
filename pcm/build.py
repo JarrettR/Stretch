@@ -6,13 +6,13 @@ import os
 from os import path
 import shutil
 
-src_path = path.join(path.dirname(__file__),'..','Stretch')
+src_path = path.join(os.path.abspath(path.dirname(__file__)),'..','Stretch')
 
-metadata_template = path.join(path.dirname(__file__),'metadata_template.json')
-resources_path = path.join(path.dirname(__file__),'resources')
-#print(src_path)
+metadata_template = path.join(os.path.abspath(path.dirname(__file__)),'metadata_template.json')
+resources_path = path.join(os.path.abspath(path.dirname(__file__)),'resources')
+print(src_path)
 
-build_path = path.join('build')
+build_path = os.path.abspath(path.join('build'))
 
 try:
     shutil.rmtree(build_path)
@@ -22,7 +22,7 @@ os.mkdir(build_path)
 os.mkdir(path.join(build_path,'plugin'))
 os.chdir(build_path)
 
-shutil.copytree(src_path, path.join('plugin','plugins'))
+shutil.copytree(src_path, path.join(os.path.abspath('plugin'),'plugins'))
 
 # clean out any __pycache__ or .pyc files (https://stackoverflow.com/a/41386937)
 import pathlib
