@@ -302,9 +302,14 @@ class Pad(object):
             y = str(float(tag['cy']) / pxToMM)
 
         elif self.shape == 'oval':
-            rx = str((float(tag['rx']) * 2) / pxToMM)
-            ry = str((float(tag['ry']) * 2) / pxToMM)
-            self.size = [rx, ry]
+            if tag.has_attr('rx'):
+                rx = str((float(tag['rx']) * 2) / pxToMM)
+                ry = str((float(tag['ry']) * 2) / pxToMM)
+                self.size = [rx, ry]
+            elif tag.has_attr('r'):
+                r = str((float(tag['r']) * 2) / pxToMM)
+                self.size = [r, r]
+                
             x = str(float(tag['cx']) / pxToMM)
             y = str(float(tag['cy']) / pxToMM)
         else:
