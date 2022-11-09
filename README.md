@@ -1,3 +1,6 @@
+
+![logo](docs/logo.png)
+
 # Stretch
 
 Allow your PCBs to _stretch_!
