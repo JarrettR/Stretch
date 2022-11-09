@@ -78,7 +78,7 @@ Metadata that doesn't need to be processed, or do not yet have processors writte
 
 Most data is processed properly! Diffs on some mildly complicated 4-layer boards are coming back clean.
 
-This is still kind of a hack. Obviously, save and backup everything before using this, and **check check check** your gerbers before purchasing anything. One common failure mode is that *(Stretch down to PCB)* will generate a corrupt/invalid PCB, and then you won't be able to open it in KiCad. When you can't open it, you can't click that down arrow. After fixing the issue (in either Stretch or your SVG), the current workaround is just to replace the PCB file with literally any one that works in your OS file manager so you can open it and hit that arrow.
+This is still kind of a hack. Obviously, save and backup everything before using this, and **check your gerbers carefully** before purchasing anything. One common failure mode is that *(Stretch down to PCB)* will generate a corrupt/invalid PCB. In that case, fix the error (and report the issue), and open the backup. Clicking *(Stretch down to PCB)* will leave the backup untouched, and you can open the main file again.
 
 
 I am happy to accept issues, or pull requests, and example PCBs that break the software. I may be slow to fix issues by myself, so feel free to dive in yourself!

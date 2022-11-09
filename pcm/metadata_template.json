@@ -2,7 +2,7 @@
     "$schema": "https://go.kicad.org/pcm/schemas/v1",
     "name": "Stretch",
     "description": "KiCad to SVG and then back again",
-    "description_full": "Seamless artistic workflow for KiCad and Inkscape.\n\nUsers can start by drawing a schematic and laying out a PCB, then bring it into Inkscape to arrange a thousand LEDs into a flower arrangement, then bring it back into KiCad to lay out traces, back into Inkscape to curve the traces, back into KiCad to change their microcontroller and few pin assignments, back into Inkscape to draw out some silkscreem patterns, back into KiCad to run DRC, and so on. The workflow is intended to be seamless and painless to go back and forth.",
+    "description_full": "Seamless artistic workflow for KiCad and Inkscape.\n\nUsers can start by drawing a schematic and laying out a PCB, then bring it into Inkscape to arrange a thousand LEDs into a flower arrangement, then bring it back into KiCad to lay out traces, back into Inkscape to curve the traces, back into KiCad to change their microcontroller and few pin assignments, back into Inkscape to draw out some silkscreem patterns, back into KiCad to run DRC, and so on. The workflow is intended to be seamless and painless to go back and forth.\n\nClick the homepage link - https://github.com/JarrettR/Stretch - for how it works.",
     "identifier": "com.github.jarrettr.stretch",
     "type": "plugin",
     "author": {        "name": "Jarrett Rainier",
