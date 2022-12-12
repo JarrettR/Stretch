@@ -44,6 +44,13 @@ from .colour import Colour
 
 pxToMM = 96 / 25.4
 
+def is_float_try(str):
+    try:
+        float(str)
+        return True
+    except ValueError:
+        return False
+        
 class Text(object):
 
     def __init__(self):
@@ -225,7 +232,6 @@ class Text(object):
         if tag.has_attr('italic'):
             self.italic = True
        
-                
 
     def To_SVG(self, angle = 0, hiddenLayers = []):
         # transform = 'scale(-1) '
@@ -234,7 +240,8 @@ class Text(object):
 
         transform += "translate(" + str(float(self.at[0]) * pxToMM) + "," + str(float(self.at[1]) * pxToMM)  + ")"
         if len(self.at) > 2:
-            angle += float(self.at[2])
+            if is_float_try(self.at[2]):
+                angle += float(self.at[2])
         if angle != 0:
             transform += ' rotate(' + str(angle)+ ')'
         #    self.tstamp = 'tstamp="' + item[1] + '" '
