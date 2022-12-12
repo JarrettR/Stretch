@@ -59,7 +59,7 @@ The workflow is intended to be seamless and painless to go back and forth.
 - In Inkscape: There is now a file in your PCB directory called "out.svg". Open it in Inkscape, or your preferred vector software
 - Make your modifications. Bend some lines, draw some pictures, rotate some footprints
 - Save your SVG
-- In KiCad/Pcbnew: Hit the "DOWN" arrrow ![stretch-to-pcb](Stretch/icons/to_pcb.png) *(Stretch down to PCB)*
+- In KiCad/Pcbnew: Hit the "DOWN" arrow ![stretch-to-pcb](Stretch/icons/to_pcb.png) *(Stretch down to PCB)*
 - Close Pcbnew and then re-open the PCB in the main KiCad window
 - Continue tweaking. Change some nets, add more components
 - Hit the "UP" arrow again to go right back to SVG
