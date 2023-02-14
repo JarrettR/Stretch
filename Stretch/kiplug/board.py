@@ -242,6 +242,8 @@ class Board(object):
             else:
                 print(base.svg)
                 print('---')
+                print(layer)
+                print('---')
                 print(base.svg.find('g', {'inkscape:label': layer}, recursive=False))
                 print(base.svg.find('g', {'inkscape:label': layer}, recursive=True))
                 print('--->')
