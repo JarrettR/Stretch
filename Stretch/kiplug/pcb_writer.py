@@ -6,7 +6,7 @@ import sys
 # parentdir = os.path.dirname(currentdir)
 # sys.path.insert(0, parentdir) 
 
-# from kibs4 import BeautifulSoup
+from ..kibs4 import BeautifulSoup
 
 import json
 import re
@@ -14,12 +14,12 @@ import math
 import cmath
 
 # #Running KiCad Linux vs. standalone requires different imports
-# try:
-    # # from .stretch import Board
-    # from .sexpressions_writer import SexpressionWriter
-# except:
-    # # from stretch import Board
-    # from sexpressions_writer import SexpressionWriter
+try:
+    # from .stretch import Board
+    from .sexpressions_writer import SexpressionWriter
+except:
+    # from stretch import Board
+    from sexpressions_writer import SexpressionWriter
 
 pxToMM = 3.779528
 
