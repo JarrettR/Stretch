@@ -67,10 +67,7 @@ class Stretch(pcbnew.ActionPlugin, object):
         # from bs4 import BeautifulSoup
         print('Import BS4')
 
-        if sys.version_info[0] == 3:
-            from ..bspy3 import BeautifulSoup
-        else:
-            from ..bspy2 import BeautifulSoup
+        # from ..kibs4 import BeautifulSoup
 
 
         if self.tool == "to_svg":

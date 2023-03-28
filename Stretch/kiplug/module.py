@@ -1,9 +1,7 @@
 import sys
 
-if sys.version_info[0] == 3:
-    from ..bspy3 import BeautifulSoup
-else:
-    from ..bspy2 import BeautifulSoup
+
+from ..kibs4 import BeautifulSoup
 
 import base64
 import math
