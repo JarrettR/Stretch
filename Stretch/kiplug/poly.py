@@ -99,7 +99,7 @@ class Poly(object):
         parameters = '<path style="stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1'
         parameters += ';fill:#' + Colour().Assign(self.layer)
         parameters += ';stroke:#' + Colour().Assign(self.layer)
-        parameters += ';stroke-width:' + self.width + 'mm'
+        parameters += ';stroke-width:' +  str(self.width) + 'mm'
         parameters += '" '
         parameters += 'd="M ' + xy_text + ' Z" '
         parameters += 'layer="' + self.layer + '" '
