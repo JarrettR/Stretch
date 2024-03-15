@@ -64,15 +64,25 @@ class Stretch(pcbnew.ActionPlugin, object):
         sys.stdout = open(os.path.join(os.path.dirname(pcb_filename), "out.log"), 'w')
         print('Begin Stretch debug')
 
-        # from bs4 import BeautifulSoup
         print('Import BS4')
 
-        if sys.version_info[0] == 3:
-            from ..bspy3 import BeautifulSoup
-        else:
-            from ..bspy2 import BeautifulSoup
+        try:
+            from bs4 import BeautifulSoup
+        except ModuleNotFoundError:
+            python_path = os.path.join(os.path.dirname(os.path.dirname(os.__file__)), "python")
+            if os.name == "nt":
+                python_path += ".exe"
+            bs4_install = '''\n
+********************************************************
+**You must install the Python BeautifulSoup package!**
+********************************************************\n
+Type the following (or something similar) on your system terminal to install it:\n\n''' \
+                + python_path + ' -m pip install beautifulsoup4'
+            raise ModuleNotFoundError(bs4_install) from None
+            
 
-
+        print('Success')
+        
         if self.tool == "to_svg":
             from .svg_writer import SvgWrite
             a = SvgWrite()
