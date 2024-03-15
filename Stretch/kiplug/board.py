@@ -321,7 +321,6 @@ class Board(object):
         else:
             svg = base.encode()
         
-        print(self.metadata)
         return svg
         
         

@@ -44,9 +44,16 @@ class Via(object):
 
 
     def From_SVG(self, tag):
-        x = tag['x']
-        y = tag['y']
-        self.at = [str(float(x) / pxToMM), str(float(y) / pxToMM)]
+        x = float(tag['x'])
+        y = float(tag['y'])
+        if tag.has_attr('transform'):
+            transform = tag['transform']
+            translate = transform[transform.find('translate(') + 10:-1]
+            translate = translate[0:translate.find(')')]
+            xt, yt = translate.split(',')
+            x = (float(xt) + x)
+            y = (float(yt) + y)
+        self.at = [str(x / pxToMM), str(y / pxToMM)]
 
         self.size = str(float(tag['size']) / pxToMM)
         self.drill = str(float(tag['drill']) / pxToMM)
