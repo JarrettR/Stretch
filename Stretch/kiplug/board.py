@@ -83,9 +83,6 @@ class Board(object):
     def From_PCB(self, pcb):
     
         for item in pcb:
-            if sys.version_info[0] != 3:
-                if type(item) == unicode:
-                    item = str(item)
             if type(item) is str:
                 print(item)
             else:
@@ -161,6 +158,9 @@ class Board(object):
                     self.via.append(via)
                     
                 else:
+                    # Numeric non-integer has to be tricked
+                    if item[0] == 'generator_version':
+                        item[1] = str(item[1]) + ' '
                     self.metadata.append(item)
 
                    
@@ -321,6 +321,7 @@ class Board(object):
         else:
             svg = base.encode()
         
+        print(self.metadata)
         return svg
         
         
