@@ -230,14 +230,22 @@ class Module(object):
                 self.pad.append(pad)
 
             if item[0] == 'model':
+                hide = ''
                 model = item[1] + ';'
+                i = 2
+                if item[i][0] == 'hide':
+                    if item[i][1] == 'yes':
+                        hide = "hide;"
+                    i += 1
                 #offset
-                model += item[2][1][1] + ',' + item[2][1][2] + ',' + item[2][1][3] + ';'
+                model += item[i][1][1] + ',' + item[i][1][2] + ',' + item[i][1][3] + ';'
                 #scale
-                model += item[3][1][1] + ',' + item[3][1][2] + ',' + item[3][1][3] + ';'
+                i += 1
+                model += item[i][1][1] + ',' + item[i][1][2] + ',' + item[3][1][3] + ';'
                 #rotate
-                model += item[4][1][1] + ',' + item[4][1][2] + ',' + item[4][1][3] + ';'
-                self.model = model
+                i += 1
+                model += item[i][1][1] + ',' + item[i][1][2] + ',' + item[i][1][3] + ';'
+                self.model = model + hide
 
             # if item[0] == 'zone':
             # if item[0] == 'group':
