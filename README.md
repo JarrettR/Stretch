@@ -65,6 +65,8 @@ print(sys.base_exec_prefix)
 ```
 This will print out a path (e.g. `/usr` or `/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current`). You should be able to add `/bin/pip` (or `pip3`) to this path and run e.g. `/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/pip3 install bs4` to install BeautifulSoup in the Python installation that KiCad is using.
 
+After installing BeautifulSoup, use `Tools->External Plugins->Refresh Plugins` or restart KiCad to attempt re-loading Stretch. If all went well, you should have the up/down buttons on your toolbar.
+
 If there is an error message other than missing `bs4`, try searching with the error message, and if that is inconclusive, open an issue in this repository and copy/paste the error message here.
 
 ## Workflow
