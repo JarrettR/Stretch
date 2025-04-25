@@ -48,9 +48,24 @@ The workflow is intended to be seamless and painless to go back and forth.
 ## Installation
 
 - Copy this main Stretch folder into your KiCad plugin folder at `Tools->External Plugins...->Open Plugin Directory`
+- Ensure the BeautifulSoup4 library is installed (e.g. run `pip install bs4` in a system command line, see Troubleshooting below for details)
 - Open up a PCB and then in Pcbnew, got to `Tools->External Plugins...->Refresh Plugins`
-- This has been tested on KiCad 6. For a KiCad 5 legacy version, check the releases.
+- This has been tested on KiCad 6 and later. For a KiCad 5 legacy version, check the releases.
 
+### Troubleshooting
+
+If the buttons do not show up on the toolbar, the plugin may be installed but not loading successfully. The most common cause is a missing `bs4` library, which is required to run Stretch. Firstly, check to see if there are any error messages by opening up the Scripting Console from `Tools->Scripting Console` and in the "Shell" section at the top, at the `>>>` prompt, type `from com_github_jarrettr_stretch import Stretch`. If you just get the `>>>` prompt again without any other text, the plugin is loading correctly. Otherwise, there will be an error message: pay attention to the last line.
+
+If it says `No module named 'bs4'`, BeatifulSoup is not installed. If you have installed it but are still getting this error, try using `pip3` instead of `pip`, or install the library with your package manager (e.g. `apt install python3-bs4`).
+
+It's also possible to have multiple installations of Python, in which case you need to run the `pip` command from the correct installation, which can be difficult to determine. This is often the case on MacOS, where KiCad uses its own installation of Python than the system installation. To find out where the Python that KiCad is using is, go back to the `>>>` prompt above and type:
+```
+import sys
+print(sys.base_exec_prefix)
+```
+This will print out a path (e.g. `/usr` or `/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current`). You should be able to add `/bin/pip` (or `pip3`) to this path and run e.g. `/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/pip3 install bs4` to install BeautifulSoup in the Python installation that KiCad is using.
+
+If there is an error message other than missing `bs4`, try searching with the error message, and if that is inconclusive, open an issue in this repository and copy/paste the error message here.
 
 ## Workflow
 
