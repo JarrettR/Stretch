@@ -54,7 +54,7 @@ The workflow is intended to be seamless and painless to go back and forth.
 
 ### Troubleshooting
 
-If the buttons do not show up on the toolbar, the plugin may be installed but not loading successfully. The most common cause is a missing `bs4` library, which is required to run Stretch. Firstly, check to see if there are any error messages by opening up the Scripting Console from `Tools->Scripting Console` and in the "Shell" section at the top, at the `>>>` prompt, type `from com_github_jarrettr_stretch import Stretch`. If you just get the `>>>` prompt again without any other text, the plugin is loading correctly. Otherwise, there will be an error message: pay attention to the last line.
+If the buttons do not show up on the toolbar, the plugin may be installed but not loading successfully. The most common cause is a missing `bs4` library, which is required to run Stretch. Firstly, check to see if there are any error messages by opening up the Scripting Console from `Tools->Scripting Console` and in the "Shell" section at the top, click after the `>>>` prompt (you may have to scroll down) and type `from com_github_jarrettr_stretch import Stretch`. If you get the `>>>` prompt again without any other text, the plugin is loading correctly. Otherwise, there will be an error message: pay attention to the last line.
 
 If it says `No module named 'bs4'`, BeatifulSoup is not installed. If you have installed it but are still getting this error, try using `pip3` instead of `pip`, or install the library with your package manager (e.g. `apt install python3-bs4`).
 
