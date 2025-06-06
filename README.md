@@ -1,3 +1,5 @@
+Note: Due to the constantly moving target of the KiCad file format, and also more importantly, the [new IPC plugin system](https://dev-docs.kicad.org/en/apis-and-binding/ipc-api/), this plugin hasn't been fully tested in 9, and support will be extremely limited. Some people have seen success in version 9, and I'm still happy to accept PRs, but I'm unlikely to be diving into it myself.
+
 
 ![logo](docs/logo.png)
 
